@@ -287,3 +287,4 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 CodeCakeBuilder/Tools/
+Tests/GlobalLogs.Tests/Logs/
