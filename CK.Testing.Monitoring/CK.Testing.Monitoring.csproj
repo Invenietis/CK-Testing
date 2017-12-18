@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common\Shared.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
+    <PackageReference Include="CK.Monitoring" Version="8.3.0" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="9.0.1" />
+  </ItemGroup>
+</Project>

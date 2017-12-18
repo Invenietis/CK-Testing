@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common\Shared.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Contains test helpers.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CK.Core" Version="9.1.0" />
+    <PackageReference Include="CK.Reflection" Version="6.0.1" />
+    <PackageReference Include="CK.WeakAssemblyNameResolver" Version="0.3.0" />
+    <PackageReference Include="FluentAssertions" Version="4.19.4" />
+  </ItemGroup>
+  
+</Project>
