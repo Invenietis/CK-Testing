@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using CK.Core;
 using CK.Text;
 
@@ -22,6 +23,7 @@ namespace CK.Testing
         NormalizedPath _repositoryFolder;
         NormalizedPath _solutionFolder;
         NormalizedPath _logFolder;
+        event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
         bool _isTestHost;
 
         string IBasicTestHelper.BuildConfiguration => Initalize( ref _buildConfiguration );
@@ -39,6 +41,34 @@ namespace CK.Testing
         NormalizedPath IBasicTestHelper.TestProjectFolder => Initalize( ref _testProjectFolder );
 
         NormalizedPath IBasicTestHelper.BinFolder => Initalize( ref _binFolder );
+
+        void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
+        {
+            int tryCount = 0;
+            for(; ; )
+            {
+                try
+                {
+                    if( Directory.Exists( folder ) ) Directory.Delete( folder, true );
+                    Directory.CreateDirectory( folder );
+                    File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
+                    File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
+                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder ) );
+                    return;
+                }
+                catch( Exception )
+                {
+                    if( ++tryCount > maxRetryCount ) throw;
+                    Thread.Sleep( 100 );
+                }
+            }
+        }
+
+        event EventHandler<CleanupFolderEventArgs> IBasicTestHelper.OnCleanupFolder
+        {
+            add => _onCleanupFolder += value;
+            remove => _onCleanupFolder -= value;
+        }
 
         T Initalize<T>( ref T varString )
         {

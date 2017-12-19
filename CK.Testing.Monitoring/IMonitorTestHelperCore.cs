@@ -1,7 +1,7 @@
 using CK.Core;
 using System;
 
-namespace CK.Testing
+namespace CK.Testing.Monitoring
 {
     /// <summary>
     /// Provides a monitor and console control.

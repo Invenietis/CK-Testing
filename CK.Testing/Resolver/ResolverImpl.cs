@@ -73,8 +73,15 @@ namespace CK.Testing
                 Type found = SimpleTypeFinder.WeakResolver( fullName, false );
                 if( found == null && cName.EndsWith( "Core" ) )
                 {
-                    fullName = $"{t.Namespace}.{cName.Remove( cName.Length - 4 )}, {t.Assembly.FullName}";
-                    found = SimpleTypeFinder.WeakResolver( fullName, false );
+                    var nameNoCore = cName.Remove( cName.Length - 4 );
+                    var ns = t.Namespace.Split( '.' ).ToList();
+                    while( ns.Count > 0 )
+                    {
+                        fullName = $"{String.Join(".", ns)}.{nameNoCore}, {t.Assembly.FullName}";
+                        found = SimpleTypeFinder.WeakResolver( fullName, false );
+                        if( found != null ) break;
+                        ns.RemoveAt( ns.Count - 1 );
+                    }
                 }
                 if( found != null && t.IsAssignableFrom( found ) )
                 {
