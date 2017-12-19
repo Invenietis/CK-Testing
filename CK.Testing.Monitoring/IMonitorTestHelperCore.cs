@@ -30,5 +30,11 @@ namespace CK.Testing.Monitoring
         /// Configurable by "Monitor/GlobalTextFiles" = "true", otherwise defaults to false.
         /// </summary>
         bool GlobalTextFiles { get; }
+
+        /// <summary>
+        /// Ensures that the console monitor is on until the returned IDisposable is disposed.
+        /// </summary>
+        /// <returns>The disposable.</returns>
+        IDisposable TemporaryEnsureConsoleMonitor();
     }
 }

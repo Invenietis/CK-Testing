@@ -22,18 +22,21 @@ namespace CK.Testing
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
         readonly ITestHelperConfiguration _config;
+        static bool _globalCKMonFiles;
+        static bool _globalTextFiles;
 
         public MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
-            GlobalCKMonFiles = _config.GetBoolean( "Monitor/GlobalCKMonFiles" ) ?? false;
-            GlobalTextFiles = _config.GetBoolean( "Monitor/GlobalTextFiles" ) ?? false;
 
             basic.OnlyOnce( () =>
             {
+                _globalCKMonFiles = _config.GetBoolean( "Monitor/GlobalCKMonFiles" ) ?? false;
+                _globalTextFiles = _config.GetBoolean( "Monitor/GlobalTextFiles" ) ?? false;
+
                 LogFile.RootLogPath = basic.LogFolder;
                 var conf = new GrandOutputConfiguration();
-                if( GlobalCKMonFiles )
+                if( _globalCKMonFiles )
                 {
                     var binConf = new BinaryFileConfiguration
                     {
@@ -41,7 +44,7 @@ namespace CK.Testing
                     };
                     conf.AddHandler( binConf );
                 }
-                if( GlobalTextFiles )
+                if( _globalTextFiles )
                 {
                     var txtConf = new TextFileConfiguration
                     {
@@ -62,11 +65,11 @@ namespace CK.Testing
             _monitor.Info( $"Folder '{e.Folder}' has been cleaned up." );
         }
 
-        public IActivityMonitor Monitor => _monitor;
+        IActivityMonitor Monitoring.IMonitorTestHelperCore.Monitor => _monitor;
 
-        public bool LogToConsole
-       {
-            get { return _monitor.Output.Clients.Contains( _console ); }
+        bool LogToConsole
+        {
+            get => _monitor.Output.Clients.Contains( _console );
             set
             {
                 if( _monitor.Output.Clients.Contains( _console ) != value )
@@ -85,9 +88,22 @@ namespace CK.Testing
             }
         }
 
-        public bool GlobalCKMonFiles { get; }
+        bool Monitoring.IMonitorTestHelperCore.LogToConsole
+        {
+            get => LogToConsole;
+            set => LogToConsole = value;
+        }
 
-        public bool GlobalTextFiles { get; }
+        bool Monitoring.IMonitorTestHelperCore.GlobalCKMonFiles { get; }
+
+        bool Monitoring.IMonitorTestHelperCore.GlobalTextFiles { get; }
+
+        IDisposable Monitoring.IMonitorTestHelperCore.TemporaryEnsureConsoleMonitor()
+        {
+            bool prev = LogToConsole;
+            LogToConsole = true;
+            return Util.CreateDisposableAction( () => LogToConsole = prev );
+        }
 
         /// <summary>
         /// Gets the <see cref="IMonitorTestHelper"/> mixin.
