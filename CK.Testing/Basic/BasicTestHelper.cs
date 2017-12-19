@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -68,6 +69,17 @@ namespace CK.Testing
         {
             add => _onCleanupFolder += value;
             remove => _onCleanupFolder -= value;
+        }
+
+        static HashSet<string> _onlyOnce = new HashSet<string>();
+
+        void IBasicTestHelper.OnlyOnce( Action a, string s, int l )
+        {
+            var key = s + l.ToString();
+            lock( _onlyOnce )
+            {
+                if( _onlyOnce.Add( key ) ) a();
+            }
         }
 
         T Initalize<T>( ref T varString )

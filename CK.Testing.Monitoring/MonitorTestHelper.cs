@@ -22,7 +22,6 @@ namespace CK.Testing
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
         readonly ITestHelperConfiguration _config;
-        static int _onlyOnce;
 
         public MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
         {
@@ -30,7 +29,7 @@ namespace CK.Testing
             GlobalCKMonFiles = _config.GetBoolean( "Monitor/GlobalCKMonFiles" ) ?? false;
             GlobalTextFiles = _config.GetBoolean( "Monitor/GlobalTextFiles" ) ?? false;
 
-            if( Interlocked.Increment( ref _onlyOnce ) == 1 )
+            basic.OnlyOnce( () =>
             {
                 LogFile.RootLogPath = basic.LogFolder;
                 var conf = new GrandOutputConfiguration();
@@ -51,7 +50,7 @@ namespace CK.Testing
                     conf.AddHandler( txtConf );
                 }
                 GrandOutput.EnsureActiveDefault( conf );
-            }
+            } );
             _monitor = new ActivityMonitor();
             _console = new ActivityMonitorConsoleClient();
             LogToConsole = _config.GetBoolean( "Monitor/LogToConsole" ) ?? false;
