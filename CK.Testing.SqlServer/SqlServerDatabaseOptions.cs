@@ -1,0 +1,48 @@
+using CK.Core;
+using CK.Testing.SqlServer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CK.Testing
+{
+    /// <summary>
+    /// Encapsulates database options.
+    /// </summary>
+    public class SqlServerDatabaseOptions : ISqlServerDatabaseOptions
+    {
+        public SqlServerDatabaseOptions()
+        {
+            Collation = "Latin1_General_100_BIN2";
+        }
+
+        /// <summary>
+        /// Gets or sets the database name.
+        /// </summary>
+        public string DatabaseName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the database collation.
+        /// Defaults to 'Latin1_General_100_BIN2'.
+        /// Use 'Random' while creating a database to use another random collation.
+        /// </summary>
+        public string Collation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the compatibility level.
+        /// Defaults to 0: the maximal compatibility level is used. 
+        /// </summary>
+        public int CompatibilityLevel { get; set; }
+
+        public override string ToString()
+        {
+            if( CompatibilityLevel != 0 )
+            {
+                return $"Database:{DatabaseName}, Collation:{Collation}, CompatibilityLevel:{CompatibilityLevel}";
+            }
+            return $"Database:{DatabaseName}, Collation:{Collation}";
+        }
+    }
+}
