@@ -106,30 +106,27 @@ namespace CodeCake
                 .IsDependentOn( "Build" )
                 .Does( () =>
                 {
-                    var testDlls = projects.Where( p => p.Name.EndsWith( ".Tests" ) ).Select( p =>
-                                 new
-                                 {
-                                     ProjectPath = p.Path.GetDirectory(),
-                                     NetCoreAppDll = p.Path.GetDirectory().CombineWithFilePath( "bin/" + configuration + "/netcoreapp2.0/" + p.Name + ".dll" ),
-                                     Net461Dll = p.Path.GetDirectory().CombineWithFilePath( "bin/" + configuration + "/net461/" + p.Name + ".dll" ),
-                                 } );
+                    string target = $"Tests/GlobalLogs.Tests/bin/{configuration}/net461/GlobalLogs.Tests.dll";
+                    Cake.Information( target );
+                    Cake.NUnit( target, new NUnitSettings() { Framework = "v4.5" } );
 
-                    foreach( var test in testDlls )
+                    target = $"Tests/GlobalLogs.Tests/bin/{configuration}/netcoreapp2.0/GlobalLogs.Tests.dll";
+                    Cake.Information( target );
+                    Cake.DotNetCoreExecute( target );
+
+                    target = $"Tests/SqlHelperTests/bin/{configuration}/net461/SqlHelperTests.dll";
+                    Cake.Information( target );
+                    Cake.NUnit( target, new NUnitSettings() { Framework = "v4.5" } );
+
+                    target = $"Tests/SqlHelperTests/SqlHelperTests.csproj";
+                    Cake.Information( target );
+                    Cake.DotNetCoreTest( target, new DotNetCoreTestSettings()
                     {
-                        if( System.IO.File.Exists( test.Net461Dll.FullPath ) )
-                        {
-                            Cake.Information( "Testing: {0}", test.Net461Dll );
-                            Cake.NUnit( test.Net461Dll.FullPath, new NUnitSettings()
-                            {
-                                Framework = "v4.5"
-                            } );
-                        }
-                        if( System.IO.File.Exists( test.NetCoreAppDll.FullPath ) )
-                        {
-                            Cake.Information( "Testing: {0}", test.NetCoreAppDll );
-                            Cake.DotNetCoreExecute( test.NetCoreAppDll );
-                        }
-                    }
+                        Configuration = configuration,
+                        Framework = "netcoreapp2.0",
+                        NoBuild = true
+                    } );
+
                 } );
 
             Task( "Create-NuGet-Packages" )
