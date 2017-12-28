@@ -2,6 +2,7 @@
 version: build{build}
 image: Visual Studio 2017
 clone_folder: C:\CK-World\CK-Core-Projects\CK-Testing
+services: mssql2016
 branches:
   only:
   - master
@@ -13,6 +14,8 @@ environment:
     secure: CfEqNYjhrGX9DyalZ4jcadzJ/x8q25GulMCbZQDRRs+XetfHn2AEP79OJXE1wSJ8
   MYGET_CI_API_KEY:
     secure: jhHWme6+MulQTwEN1kkwygP2kEf47L8SyndWGQWEvPn6dRwZh9ZQXXGz4e1Xk7q0
+  SqlServer/MasterConnectionString
+    Server=(local)\SQL2016;Database=master;User ID=sa;Password=Password12!
 install:
   - ps: CodeCakeBuilder\Bootstrap.ps1
 build_script:
