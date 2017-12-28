@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CK.Testing.SqlServer\CK.Testing.SqlServer.csproj" />
+    <ProjectReference Include="..\..\CK.Testing.SqlServer\CK.Testing.SqlServer.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

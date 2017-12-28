@@ -33,7 +33,12 @@ namespace CK.Testing
             {
                 _globalCKMonFiles = _config.GetBoolean( "Monitor/GlobalCKMonFiles" ) ?? false;
                 _globalTextFiles = _config.GetBoolean( "Monitor/GlobalTextFiles" ) ?? false;
-
+                string logLevel = _config.Get( "Monitor/LogLevel" );
+                if( logLevel != null )
+                {
+                    var lf = LogFilter.Parse( logLevel );
+                    ActivityMonitor.DefaultFilter = lf;
+                }
                 LogFile.RootLogPath = basic.LogFolder;
                 var conf = new GrandOutputConfiguration();
                 if( _globalCKMonFiles )
@@ -52,7 +57,10 @@ namespace CK.Testing
                     };
                     conf.AddHandler( txtConf );
                 }
-                GrandOutput.EnsureActiveDefault( conf );
+                if( conf.Handlers.Count > 0 )
+                {
+                    GrandOutput.EnsureActiveDefault( conf );
+                }
             } );
             _monitor = new ActivityMonitor();
             _console = new ActivityMonitorConsoleClient();

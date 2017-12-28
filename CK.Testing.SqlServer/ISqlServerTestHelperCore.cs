@@ -68,29 +68,30 @@ namespace CK.Testing.SqlServer
         /// Creates an opened connection to a database.
         /// It must be disposed by the caller.
         /// </summary>
-        /// <param name="databaseName">Database name to target. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
         /// <returns>An opened connection.</returns>
         Task<SqlConnection> CreateOpenedConnectionAsync( string databaseName = null );
 
         /// <summary>
         /// Executes scripts that may contain 'GO' separators (that must be alone in their line).
         /// </summary>
-        /// <param name="script">Scripts to execute.</param>
+        /// <param name="scripts">Scripts to execute.</param>
+        /// <param name="databaseName">Database name to target. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
         /// <remarks>
         /// The 'GO' may be lowercase but must always be alone on its line.
         /// </remarks>
         /// <returns>True on success, false if an error occurred.</returns>
-        bool ExecuteScripts( string databaseName, IEnumerable<string> scripts );
+        bool ExecuteScripts( IEnumerable<string> scripts, string databaseName = null );
 
         /// <summary>
         /// Executes scripts that may contain 'GO' separators (that must be alone in their line).
         /// </summary>
-        /// <param name="script">Scripts to execute.</param>
+        /// <param name="scripts">Scripts to execute.</param>
+        /// <param name="databaseName">Database name to target. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
         /// <remarks>
         /// The 'GO' may be lowercase but must always be alone on its line.
         /// </remarks>
         /// <returns>True on success, false if an error occurred.</returns>
-        bool ExecuteScripts( string databaseName, params string[] scripts );
+        bool ExecuteScripts( string scripts, string databaseName = null );
 
     }
 }

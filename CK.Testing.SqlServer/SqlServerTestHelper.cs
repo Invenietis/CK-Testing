@@ -41,17 +41,17 @@ namespace CK.Testing
 
         string ISqlServerTestHelperCore.GetConnectionString( string databaseName ) => DoGetConnectionString( databaseName );
 
-        bool ISqlServerTestHelperCore.ExecuteScripts( string databaseName, params string[] scripts ) => DoExecuteScripts( databaseName, scripts );
+        bool ISqlServerTestHelperCore.ExecuteScripts( IEnumerable<string> scripts, string databaseName ) => DoExecuteScripts( scripts, databaseName );
 
-        bool ISqlServerTestHelperCore.ExecuteScripts( string databaseName, IEnumerable<string> scripts ) => DoExecuteScripts( databaseName, scripts );
+        bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string databaseName ) => DoExecuteScripts( new[] { scripts }, databaseName );
 
         void ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions o, bool reset )
         {
+            if( o == null ) o = DoGetDefaultDatabaseOptions();
             using( _monitor.Monitor.OpenInfo( $"Ensuring database '{o.ToString()}'." ) )
             {
                 try
                 {
-                    if( o == null ) o = DoGetDefaultDatabaseOptions();
                     int normalizedLevel = o.CompatibilityLevel;
                     if( normalizedLevel == _maxCompatibilityLevel ) normalizedLevel = 0;
                     var current = DoGetDatabaseOptions( o.DatabaseName );
@@ -72,6 +72,7 @@ namespace CK.Testing
                     using( var oCon = new SqlConnection( EnsureMasterConnection().ToString() ) )
                     using( var cmd = new SqlCommand( create, oCon ) )
                     {
+                        oCon.Open();
                         cmd.ExecuteNonQuery();
                     }
                     _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( DoGetDatabaseOptions( o.DatabaseName ), false ) );
@@ -133,13 +134,14 @@ namespace CK.Testing
                     {
                         _serverVersion = Version.Parse( (string)cmdV.ExecuteScalar() );
                         _maxCompatibilityLevel = _serverVersion.Major * 10;
+                        _monitor.Monitor.Info( $"Sql Server Version: {_serverVersion}, MaxCompatibilityLevel: {_maxCompatibilityLevel}." );
                     }
                 } );
                 cmd.Parameters.AddWithValue( "@N", dbName );
                 using( var r = cmd.ExecuteReader() )
                 {
                     if( !r.Read() ) return null;
-                    int level = r.GetInt32( 0 );
+                    int level = r.GetByte( 0 );
                     if( level == _maxCompatibilityLevel ) level = 0;
                     return new SqlServerDatabaseOptions()
                     {
@@ -188,7 +190,7 @@ namespace CK.Testing
                     {
                         oCon.Open();
                         cmd.ExecuteNonQuery();
-                        cmd.CommandText = $"drop database {dbName}:";
+                        cmd.CommandText = $"use master; drop database {dbName};";
                         cmd.ExecuteNonQuery();
                     }
                     return c;
@@ -202,12 +204,12 @@ namespace CK.Testing
         }
 
         #region Execute scripts
-        static readonly Regex _rGo = new Regex( @"^\w+GO(?:\s|$)+", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled );
+        static readonly Regex _rGo = new Regex( @"^\s*GO(?:\s|$)+", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled );
 
-        bool DoExecuteScripts( string databaseName, IEnumerable<string> scripts )
+        bool DoExecuteScripts( IEnumerable<string> scripts, string databaseName )
         {
-            using( _monitor.Monitor.OpenInfo( $"Executing scripts on '{databaseName}'." ) )
             using( var oCon = DoCreateOpenedConnection( databaseName ) )
+            using( _monitor.Monitor.OpenInfo( $"Executing scripts on '{oCon.Database}'." ) )
             using( var cmd = new SqlCommand() )
             {
                 try
@@ -215,10 +217,14 @@ namespace CK.Testing
                     cmd.Connection = oCon;
                     foreach( var g in scripts )
                     {
-                        foreach( var s in SplitGoSeparator( g ) )
+                        if( !String.IsNullOrWhiteSpace( g ) )
                         {
-                            _monitor.Monitor.Debug( s );
-                            cmd.ExecuteNonQuery();
+                            foreach( var s in SplitGoSeparator( g ) )
+                            {
+                                _monitor.Monitor.Debug( s );
+                                cmd.CommandText = s;
+                                cmd.ExecuteNonQuery();
+                            }
                         }
                     }
                     return true;
