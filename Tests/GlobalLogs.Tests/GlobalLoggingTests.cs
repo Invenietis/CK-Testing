@@ -26,6 +26,10 @@ namespace GlobalLogs.Tests
                         .Select( f => File.ReadAllText( f ) )
                         .Count( text => text.Contains( secret ) )
                         .Should().Be( 1 );
+
+            //
+            TestHelper.WithWeakAssemblyResolver( () => TestHelper.Monitor.Info( "From WeakAssemblyResolver." ) );
+            TestHelper.Monitor.Info( $"From WeakAssemblyResolver: {TestHelper.WithWeakAssemblyResolver( () => 3 )}" );
         }
     }
 }

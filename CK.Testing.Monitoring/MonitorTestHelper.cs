@@ -8,6 +8,7 @@ using System.Threading;
 using CK.Core;
 using CK.Monitoring;
 using CK.Monitoring.Handlers;
+using CK.Testing.Monitoring;
 using CK.Text;
 
 namespace CK.Testing
@@ -111,6 +112,43 @@ namespace CK.Testing
             bool prev = LogToConsole;
             LogToConsole = true;
             return Util.CreateDisposableAction( () => LogToConsole = prev );
+        }
+
+        void Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
+
+        void DoWithWeakAssemblyResolver( Action action )
+        {
+            IReadOnlyList<AssemblyLoadConflict> conflicts = null;
+            try
+            {
+                using( WeakAssemblyNameResolver.TemporaryInstall( c => conflicts = c ) )
+                {
+                    action();
+                }
+            }
+            catch( Exception ex )
+            {
+                _monitor.Error( ex );
+                throw;
+            }
+            finally
+            {
+                if( conflicts.Count == 0 ) _monitor.Info( "No assembly load conflicts." );
+                else using( _monitor.OpenWarn( $"{conflicts.Count} assembly load conflicts:" ) )
+                    {
+                        foreach( var c in conflicts )
+                        {
+                            _monitor.Warn( c.ToString() );
+                        }
+                    }
+            }
+        }
+
+        T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
+        {
+            T result = default(T);
+            DoWithWeakAssemblyResolver( () => result = action() );
+            return result;
         }
 
         /// <summary>
