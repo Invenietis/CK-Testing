@@ -103,7 +103,7 @@ namespace CK.Testing
         object Create( ISimpleServiceContainer container, Type t, bool throwOnError )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
-            var longestCtor = t.GetConstructors()
+            var longestCtor = t.GetConstructors( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic )
                                 .Select( x => Tuple.Create( x, x.GetParameters() ) )
                                 .OrderByDescending( x => x.Item2.Length )
                                 .Select( x => new

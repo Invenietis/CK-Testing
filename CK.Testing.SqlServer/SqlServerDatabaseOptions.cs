@@ -39,6 +39,10 @@ namespace CK.Testing
         /// </summary>
         public int CompatibilityLevel { get; set; }
 
+        /// <summary>
+        /// Overridden to return the Database name, collation and compatibility level.
+        /// </summary>
+        /// <returns>A readable string.</returns>
         public override string ToString()
         {
             if( CompatibilityLevel != 0 )
