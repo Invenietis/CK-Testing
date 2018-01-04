@@ -3,8 +3,8 @@
   <Import Project="..\Common\Shared.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Contains test helpers.</Description>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <Description>Contains Test Helpers mixin infrastructure.</Description>
   </PropertyGroup>
 
   <ItemGroup>
