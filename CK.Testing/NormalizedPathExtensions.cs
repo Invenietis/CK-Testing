@@ -6,6 +6,9 @@ using System.Text;
 
 namespace CK.Text
 {
+    /// <summary>
+    /// Adds methods to <see cref="NormalizedPath"/>.
+    /// </summary>
     public static class NormalizedPathExtensions
     {
         /// <summary>

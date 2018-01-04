@@ -25,30 +25,16 @@
 
 
   <!-- Xml documentation is generated in Release or during Cake builds (except for tests projects). -->
-  <!--
   <PropertyGroup Condition=" '$(IsInTestsFolder)' != 'true' And ('$(CakeBuild)' == 'true' Or '$(Configuration)' == 'Release') ">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup
-  >-->
-  <!-- TEMPORARY: Enable Xml documentation only for .Model assemblies. -->
-  <PropertyGroup Condition=" '$(IsInTestsFolder)' != 'true' And ('$(CakeBuild)' == 'true' Or '$(Configuration)' == 'Release') And $(MSBuildProjectName.EndsWith('.Model'))">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
     <CKCoreVersion>9.1.0</CKCoreVersion>
     <CKActivityMonitorVersion>9.0.1</CKActivityMonitorVersion>
-    <CKAspNetVersion>1.3.2</CKAspNetVersion>
     <CKMonitoringVersion>8.3.0</CKMonitoringVersion>
-    <CKSetupDependencyVersion>6.0.3</CKSetupDependencyVersion>
-    <CKSqlServerParserVersion>7.0.0</CKSqlServerParserVersion>
-    <CKSqlServerParserModelVersion>5.0.0</CKSqlServerParserModelVersion>
     <CKReflectionVersion>6.0.1</CKReflectionVersion>
-    <CKCodeGenVersion>0.1.0</CKCodeGenVersion>
-    <YodiiScriptVersion>0.5.2</YodiiScriptVersion>
-    <CSemVerVersion>1.1.0</CSemVerVersion>
-    <MonoCecilVersion>0.10.0-beta7</MonoCecilVersion>
     <FluentAssertionsVersion>4.19.4</FluentAssertionsVersion>
   </PropertyGroup>
 

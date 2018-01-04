@@ -13,6 +13,9 @@ namespace CK.Testing
     /// </summary>
     public class SqlServerDatabaseOptions : ISqlServerDatabaseOptions
     {
+        /// <summary>
+        /// Initializes a new <see cref="SqlServerDatabaseOptions"/>.
+        /// </summary>
         public SqlServerDatabaseOptions()
         {
             Collation = "Latin1_General_100_BIN2";

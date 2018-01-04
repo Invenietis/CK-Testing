@@ -27,7 +27,7 @@ namespace CK.Testing
         static SqlConnectionStringBuilder _masterConnectionString;
         event EventHandler<SqlServerDatabaseEventArgs> _onEvent;
 
-        public SqlServerTestHelper( ITestHelperConfiguration config, IMonitorTestHelper monitor )
+        internal SqlServerTestHelper( ITestHelperConfiguration config, IMonitorTestHelper monitor )
         {
             _config = config;
             _monitor = monitor;

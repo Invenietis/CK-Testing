@@ -21,7 +21,7 @@ namespace CK.Testing
         bool IsTestHost { get; }
 
         /// <summary>
-        /// Gets the name of the running test project that must be the name of the <see cref="Assembly.GetEntryAssembly()"/>
+        /// Gets the name of the running test project that must be the name of the <see cref="System.Reflection.Assembly.GetEntryAssembly()"/>
         /// (except if this is the assembly "testhost" that is running) otherwise an exception is thrown.
         /// </summary>
         string TestProjectName { get; }

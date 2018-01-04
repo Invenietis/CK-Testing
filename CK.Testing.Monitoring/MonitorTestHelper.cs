@@ -26,7 +26,7 @@ namespace CK.Testing
         static bool _globalCKMonFiles;
         static bool _globalTextFiles;
 
-        public MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
+        internal MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
 

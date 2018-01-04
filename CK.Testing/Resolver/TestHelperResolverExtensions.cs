@@ -5,6 +5,9 @@ using System.Text;
 
 namespace CK.Testing
 {
+    /// <summary>
+    /// Adds methods to <see cref="ITestHelperResolver"/>.
+    /// </summary>
     public static class TestHelperResolverExtensions
     {
         /// <summary>
