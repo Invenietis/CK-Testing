@@ -14,7 +14,7 @@ namespace CK.Testing.SqlServer
     {
         /// <summary>
         /// Gets the connection string to the master database from "SqlServer/MasterConnectionString" configuration.
-        /// Defaults to "Server=.;Database=master;Integrated Security=SSPI".
+        /// Defaults to "Server=.;Database=master;Integrated Security=true".
         /// </summary>
         string MasterConnectionString { get; }
 

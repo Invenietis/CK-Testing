@@ -1,3 +1,4 @@
+using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,17 @@ namespace SqlHelperTests
         {
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
+        }
+
+        [Test]
+        public void connection_string()
+        {
+            var c = TestHelper.MasterConnectionString;
+            c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
+            var c2 = TestHelper.GetConnectionString( "Toto" );
+            c2.Should().Contain( "Toto" ).And.Contain( "Integrated Security" );
+            c = TestHelper.MasterConnectionString;
+            c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
         }
     }
 }

@@ -33,7 +33,7 @@ namespace CK.Testing
             _monitor = monitor;
         }
 
-        string ISqlServerTestHelperCore.MasterConnectionString => EnsureMasterConnection().InitialCatalog;
+        string ISqlServerTestHelperCore.MasterConnectionString => EnsureMasterConnection().ToString();
 
         ISqlServerDatabaseOptions ISqlServerTestHelperCore.DefaultDatabaseOptions => DoGetDefaultDatabaseOptions();
 

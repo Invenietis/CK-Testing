@@ -27,6 +27,8 @@ namespace CK.Testing
         event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
         bool _isTestHost;
 
+        static HashSet<string> _onlyOnce = new HashSet<string>();
+
         string IBasicTestHelper.BuildConfiguration => Initalize( ref _buildConfiguration );
 
         string IBasicTestHelper.TestProjectName => Initalize( ref _testProjectName );
@@ -71,15 +73,15 @@ namespace CK.Testing
             remove => _onCleanupFolder -= value;
         }
 
-        static HashSet<string> _onlyOnce = new HashSet<string>();
-
         void IBasicTestHelper.OnlyOnce( Action a, string s, int l )
         {
             var key = s + l.ToString();
+            bool shouldRun;
             lock( _onlyOnce )
             {
-                if( _onlyOnce.Add( key ) ) a();
+                shouldRun = _onlyOnce.Add( key );
             }
+            if( shouldRun ) a();
         }
 
         T Initalize<T>( ref T varString )
