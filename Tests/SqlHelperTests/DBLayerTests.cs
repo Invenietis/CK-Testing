@@ -18,6 +18,7 @@ namespace SqlHelperTests
         {
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
         [Test]

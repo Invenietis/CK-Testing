@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
@@ -13,24 +14,50 @@ namespace CK.Testing
     {
         readonly ITestHelperConfiguration _config;
         readonly SimpleServiceContainer _container;
+        readonly IReadOnlyList<Type> _preLoadedTypes;
 
         public ResolverImpl( ITestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
             _container.Add( config );
             _config = config;
-            TransientMode = config.GetBoolean( "Resolver/TransientMode" ) ?? false;
+            TransientMode = config.GetBoolean( "TestHelper/TransientMode" ) ?? false;
+            string[] assemblies = config.Get( "TestHelper/PreLoadedAssemblies", String.Empty ).Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries );
+            if( assemblies.Length > 0 )
+            {
+                using( WeakAssemblyNameResolver.TemporaryInstall() )
+                {
+                    var types = new List<Type>();
+                    foreach( var n in assemblies )
+                    {
+                        var a = Assembly.Load( n );
+                        types.AddRange( a.GetExportedTypes().Where( t => t.IsInterface && typeof( IMixinTestHelper ).IsAssignableFrom( t ) ) );
+                    }
+                    _preLoadedTypes = types;
+                    if( !TransientMode )
+                    {
+                        foreach( var preLoad in _preLoadedTypes ) Resolve( _container, preLoad, true );
+                    }
+                }
+            }
+            else _preLoadedTypes = Type.EmptyTypes;
         }
 
         public bool TransientMode { get; }
+
+        public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
         public object Resolve( Type t )
         {
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                var container = TransientMode
-                                ? new SimpleServiceContainer( _container )
-                                : _container;
+                SimpleServiceContainer container;
+                if( TransientMode )
+                {
+                    container = new SimpleServiceContainer( _container );
+                    foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true );
+                }
+                else container = _container;
                 return Resolve( container, t, true );
             }
         }

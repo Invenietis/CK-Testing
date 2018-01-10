@@ -13,9 +13,15 @@ namespace CK.Testing
         /// <summary>
         /// Gets whether the test helper services must be resolved as transient ones.
         /// Defaults to false: the services are by default singletons.
-        /// To activate transient mode, the configuration "Resolver/TransientMode" must be "true".
+        /// To activate transient mode, the configuration "TestHelper/TransientMode" must be "true".
         /// </summary>
         bool TransientMode { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IMixinTestHelper"/> that are pre loaded from "TestHelper/PreLoadedAssemblies"
+        /// configuration.
+        /// </summary>
+        IReadOnlyList<Type> PreLoadedTypes { get; }
 
         /// <summary>
         /// Resolves an instance, either a singleton or a transient one depending on <see cref="TransientMode"/>.

@@ -55,7 +55,9 @@ namespace CK.Testing
                         null,
                         allInterfaces );
 
-                var interfaces = allInterfaces.Where( i => i.GetMembers().Length > 0 ).ToArray();
+                // Actual interfaces have at least a member or end with "Core": this saves
+                // pure hook interfaces like the IStupidTestHelperCore (that has no members).
+                var interfaces = allInterfaces.Where( i => i.GetMembers().Length > 0 || i.Name.EndsWith("Core") ).ToArray();
                 var fields = interfaces
                         .Select( ( i, num ) => tB.DefineField( $"_impl{num}", i, FieldAttributes.Private | FieldAttributes.InitOnly ) )
                         .ToArray();
