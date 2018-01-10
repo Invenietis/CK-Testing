@@ -7,7 +7,7 @@ namespace CK.Testing
     {
         readonly ISqlServerTestHelper _sql;
 
-        public static string LastDatabaseCreatedOrDroppedName { get; private set; }
+        public static string LastDatabaseCreatedOrDroppedName { get; set; }
 
         internal StupidTestHelper( ISqlServerTestHelper sql )
         {

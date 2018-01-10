@@ -14,16 +14,13 @@ namespace SqlHelperTests
     public class DBLayerTests
     {
         [Test]
-        public void Destroy_Database()
-        {
-            TestHelper.DropDatabase();
-        }
-
-        [Test]
-        public void Execute_create_script_on_Database()
+        public void Execute_create_script_on_Database_and_Drop()
         {
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            TestHelper.DropDatabase();
             CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
