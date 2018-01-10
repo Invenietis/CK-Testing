@@ -47,7 +47,9 @@ namespace CK.Testing
 
         void ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions o, bool reset )
         {
-            if( o == null ) o = DoGetDefaultDatabaseOptions();
+            // Calls DoGetDefaultDatabaseOptions to update _maxCompatibilityLevel.
+            var def = DoGetDefaultDatabaseOptions();
+            if( o == null ) o = def;
             using( _monitor.Monitor.OpenInfo( $"Ensuring database '{o.ToString()}'." ) )
             {
                 try
@@ -91,10 +93,10 @@ namespace CK.Testing
 
         void ISqlServerTestHelperCore.DropDatabase( string databaseName )
         {
-            var o = DoGetDatabaseOptions( databaseName );
+            var o = databaseName == null ? DoGetDefaultDatabaseOptions() : DoGetDatabaseOptions( databaseName );
             if( o != null )
             {
-                DoDrop( databaseName );
+                DoDrop( o.DatabaseName );
                 _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( o, true ) );
             }
         }
@@ -123,21 +125,13 @@ namespace CK.Testing
 
         SqlServerDatabaseOptions DoGetDatabaseOptions( string dbName )
         {
+            if( dbName == null ) return new SqlServerDatabaseOptions( DoGetDefaultDatabaseOptions() );
             const string info = "select compatibility_level, collation_name from sys.databases where name=@N;"; 
             using( var oCon = new SqlConnection( EnsureMasterConnection().ToString() ) )
             using( var cmd = new SqlCommand( info, oCon ) )
             {
                 oCon.Open();
-                _monitor.OnlyOnce( () =>
-                {
-                    using( var cmdV = new SqlCommand( "select SERVERPROPERTY('ProductVersion')", oCon ) )
-                    {
-                        _serverVersion = Version.Parse( (string)cmdV.ExecuteScalar() );
-                        _maxCompatibilityLevel = _serverVersion.Major * 10;
-                        _monitor.Monitor.Info( $"Sql Server Version: {_serverVersion}, MaxCompatibilityLevel: {_maxCompatibilityLevel}." );
-                    }
-                } );
-                cmd.Parameters.AddWithValue( "@N", dbName );
+               cmd.Parameters.AddWithValue( "@N", dbName );
                 using( var r = cmd.ExecuteReader() )
                 {
                     if( !r.Read() ) return null;

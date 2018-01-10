@@ -14,7 +14,13 @@ namespace SqlHelperTests
     public class DBLayerTests
     {
         [Test]
-        public void Reset_Database()
+        public void Destroy_Database()
+        {
+            TestHelper.DropDatabase();
+        }
+
+        [Test]
+        public void Execute_create_script_on_Database()
         {
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );

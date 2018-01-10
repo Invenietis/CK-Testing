@@ -15,10 +15,23 @@ namespace CK.Testing
     {
         /// <summary>
         /// Initializes a new <see cref="SqlServerDatabaseOptions"/>.
+        /// <see cref="DatabaseName"/> is null and <see cref="CompatibilityLevel"/> is 0 (maximal).
         /// </summary>
         public SqlServerDatabaseOptions()
         {
             Collation = "Latin1_General_100_BIN2";
+        }
+
+        /// <summary>
+        /// Copy contructor.
+        /// </summary>
+        /// <param name="o">Read only options.</param>
+        public SqlServerDatabaseOptions( ISqlServerDatabaseOptions o )
+        {
+            if( o == null ) throw new ArgumentNullException( nameof( o ) );
+            DatabaseName = o.DatabaseName;
+            Collation = o.Collation;
+            CompatibilityLevel = o.CompatibilityLevel;
         }
 
         /// <summary>
