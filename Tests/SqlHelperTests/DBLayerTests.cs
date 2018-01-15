@@ -13,13 +13,27 @@ namespace SqlHelperTests
     [TestFixture]
     public class DBLayerTests
     {
+
+        [Test]
+        public void dropping_database_multiple_times()
+        {
+            TestHelper.EnsureDatabase( reset: false );
+            TestHelper.DropDatabase();
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            TestHelper.DropDatabase();
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+        }
+
         [Test]
         public void Execute_create_script_on_Database_and_Drop()
         {
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
             CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
             CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            TestHelper.DropDatabase();
+            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
             TestHelper.DropDatabase();
             CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }

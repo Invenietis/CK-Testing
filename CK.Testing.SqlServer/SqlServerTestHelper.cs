@@ -63,7 +63,13 @@ namespace CK.Testing
                         {
                             reset = current.Collation != o.Collation || current.CompatibilityLevel != normalizedLevel;
                         }
-                        if( reset ) DoDrop( current.DatabaseName );
+                        if( !reset )
+                        {
+                            _monitor.Monitor.CloseGroup( "Database already exists, collation and compatiblity level match." );
+                            return;
+                        }
+                        _monitor.Monitor.Info( $"Current is {o.ToString()}. Must be recreated." );
+                        DoDrop( current.DatabaseName );
                     }
                     string create = $@"create database {o.DatabaseName} collate {o.Collation};";
                     if( normalizedLevel != 0 )
@@ -109,16 +115,14 @@ namespace CK.Testing
 
         SqlConnection DoCreateOpenedConnection( string databaseName )
         {
-            var c = DoGetConnectionString( databaseName );
-            var oCon = new SqlConnection( c );
+            var oCon = new SqlConnection( DoGetConnectionString( databaseName ) );
             oCon.Open();
             return oCon;
         }
 
         async Task<SqlConnection> DoCreateOpenedConnectionAsync( string databaseName )
         {
-            var c = DoGetConnectionString( databaseName );
-            var oCon = new SqlConnection( c );
+            var oCon = new SqlConnection( DoGetConnectionString( databaseName ) );
             await oCon.OpenAsync();
             return oCon;
         }
@@ -131,7 +135,7 @@ namespace CK.Testing
             using( var cmd = new SqlCommand( info, oCon ) )
             {
                 oCon.Open();
-               cmd.Parameters.AddWithValue( "@N", dbName );
+                cmd.Parameters.AddWithValue( "@N", dbName );
                 using( var r = cmd.ExecuteReader() )
                 {
                     if( !r.Read() ) return null;
@@ -171,23 +175,26 @@ namespace CK.Testing
             return _defaultDatabaseOptions;
         }
 
-        string DoDrop( string dbName )
+        void DoDrop( string dbName )
         {
             using( _monitor.Monitor.OpenInfo( $"Dropping database '{dbName}'." ) )
             {
+                SqlConnection.ClearAllPools();
                 try
                 {
-                    string delBackup = $"exec msdb.dbo.sp_delete_database_backuphistory @database_name = N'{dbName}';";
-                    string c = DoGetConnectionString( dbName );
-                    using( var oCon = new SqlConnection( c ) )
-                    using( var cmd = new SqlCommand( delBackup, oCon ) )
+                    using( var oCon = new SqlConnection( EnsureMasterConnection().ToString() ) )
+                    using( var cmd = new SqlCommand() )
                     {
+                        cmd.Connection = oCon;
                         oCon.Open();
-                        cmd.ExecuteNonQuery();
-                        cmd.CommandText = $"use master; drop database {dbName};";
-                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = $"if db_id('{dbName}') is not null begin drop database {dbName}; select 1; end else begin select 0; end";
+                        if( (int)cmd.ExecuteScalar() == 0 ) _monitor.Monitor.CloseGroup("Database does not exist.");
+                        else
+                        {
+                            cmd.CommandText = $"exec msdb.dbo.sp_delete_database_backuphistory @database_name = N'{dbName}';";
+                            cmd.ExecuteNonQuery();
+                        }
                     }
-                    return c;
                 }
                 catch( Exception ex )
                 {
@@ -221,7 +228,6 @@ namespace CK.Testing
                             }
                         }
                     }
-                    return true;
                 }
                 catch( Exception ex )
                 {
@@ -229,6 +235,7 @@ namespace CK.Testing
                     return false;
                 }
             }
+            return true;
         }
 
         static IEnumerable<string> SplitGoSeparator( string script )
