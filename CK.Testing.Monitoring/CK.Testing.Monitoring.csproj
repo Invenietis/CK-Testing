@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
-    <PackageReference Include="CK.Monitoring" Version="8.3.1" />
+    <PackageReference Include="CK.Monitoring" Version="8.3.2" />
     <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="9.0.3" />
   </ItemGroup>
 </Project>

@@ -42,7 +42,7 @@ namespace CK.Testing
         /// <returns>The configured value or the default value.</returns>
         public string Get( NormalizedPath key, string defaultValue = null )
         {
-            while( key )
+            while( !key.IsEmpty )
             {
                 if( _config.TryGetValue( key, out string result ) ) return result;
                 if( key.Parts.Count == 1 ) break;
