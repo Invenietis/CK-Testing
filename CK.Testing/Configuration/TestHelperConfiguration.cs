@@ -12,7 +12,7 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Simple configuration that reads its content from the first "Test.config" or "App.Config"
+    /// Simple configuration that reads its content from the first "TestHelper.config" "Test.config" or "App.Config"
     /// in current execution path and parent paths and from environment variables that start
     /// with "TestHelper::" prefix.
     /// </summary>
@@ -30,7 +30,7 @@ namespace CK.Testing
             _container = new SimpleServiceContainer();
             _container.Add<ITestHelperConfiguration>( this );
             var root = new NormalizedPath( AppContext.BaseDirectory );
-            SimpleReadFromAppSetting( root.FindClosestFile( "Test.config", "App.config" ) );
+            SimpleReadFromAppSetting( root.FindClosestFile( "TestHelper.config", "Test.config", "App.config" ) );
             SimpleReadFromEnvironment();
         }
 
