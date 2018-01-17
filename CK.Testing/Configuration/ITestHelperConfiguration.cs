@@ -26,6 +26,14 @@ namespace CK.Testing
         TestHelperConfigurationValue? GetConfigValue( NormalizedPath key );
 
         /// <summary>
+        /// Gets the configuration value associated to a key as a file or folder path
+        /// (see <see cref="TestHelperConfigurationValue.GetValueAsPath"/>).
+        /// </summary>
+        /// <param name="key">The path of the key to find.</param>
+        /// <returns>The configured path or null.</returns>
+        NormalizedPath? GetPath( NormalizedPath key );
+
+        /// <summary>
         /// Gets all the configuration values defined.
         /// </summary>
         IEnumerable<TestHelperConfigurationValue> ConfigurationValues { get; }
