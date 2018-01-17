@@ -164,9 +164,16 @@ namespace CK.Testing
                         _serverVersion = Version.Parse( (string)cmd.ExecuteScalar() );
                         _maxCompatibilityLevel = _serverVersion.Major * 10;
                     }
+                    var dbName = _config.Get( "SqlServer/DatabaseName" );
+                    if( dbName == null )
+                    {
+                        var n  = "CKTEST_" + _monitor.TestProjectName.Replace( '.', '_' ).Replace( '-', '_' );
+                        dbName = n.Replace( "_Tests", String.Empty );
+                        if( dbName == n ) dbName = n.Replace( "Tests", String.Empty );
+                    }
                     _defaultDatabaseOptions = new SqlServerDatabaseOptions()
                     {
-                        DatabaseName = _config.Get( "SqlServer/DatabaseName" ) ?? _monitor.TestProjectName.Replace( '.', '_' ),
+                        DatabaseName = dbName,
                         Collation = _config.Get( "SqlServer/Collation" ) ?? "Latin1_General_100_BIN2",
                         CompatibilityLevel = _config.GetInt32( "SqlServer/CompatibilityLevel" ) ?? _maxCompatibilityLevel
                     };

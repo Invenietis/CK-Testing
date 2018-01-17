@@ -17,33 +17,93 @@ namespace CK.Testing
     public class BasicTestHelper : IBasicTestHelper
     {
         static readonly string[] _allowedConfigurations = new[] { "Debug", "Release" };
-        NormalizedPath _binFolder;
-        string _buildConfiguration;
-        NormalizedPath _testProjectFolder;
-        string _testProjectName;
-        NormalizedPath _repositoryFolder;
-        NormalizedPath _solutionFolder;
-        NormalizedPath _logFolder;
+        internal static readonly NormalizedPath _binFolder;
+        internal static readonly string _buildConfiguration;
+        internal static readonly NormalizedPath _testProjectFolder;
+        internal static readonly string _testProjectName;
+        internal static readonly NormalizedPath _repositoryFolder;
+        internal static readonly NormalizedPath _solutionFolder;
+        internal static readonly NormalizedPath _logFolder;
+        internal static readonly bool _isTestHost;
+        internal static readonly HashSet<string> _onlyOnce;
+
+        static BasicTestHelper()
+        {
+            _onlyOnce = new HashSet<string>();
+            string p = _binFolder = AppContext.BaseDirectory;
+            string buildConfDir = null;
+            foreach( var config in _allowedConfigurations )
+            {
+                buildConfDir = FindAbove( p, config );
+                if( buildConfDir != null )
+                {
+                    _buildConfiguration = config;
+                    break;
+                }
+            }
+            if( _buildConfiguration == null )
+            {
+                throw new InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
+            }
+            p = Path.GetDirectoryName( buildConfDir );
+            if( Path.GetFileName( p ) != "bin" )
+            {
+                throw new InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
+            }
+            _testProjectFolder = p = Path.GetDirectoryName( p );
+            _testProjectName = Path.GetFileName( p );
+            Assembly entry = Assembly.GetEntryAssembly();
+            if( entry != null )
+            {
+                string assemblyName = entry.GetName().Name;
+                if( _testProjectName != assemblyName )
+                {
+                    if( assemblyName == "testhost" )
+                    {
+                        _isTestHost = true;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException( $"Initialization error: Current test project assembly is '{assemblyName}' but folder is '{_testProjectName}' (above '{_buildConfiguration}' in '{_binFolder}')." );
+                    }
+                }
+            }
+            p = Path.GetDirectoryName( p );
+
+            string testsFolder = null;
+            bool hasGit = false;
+            while( p != null && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
+            {
+                if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
+                p = Path.GetDirectoryName( p );
+            }
+            if( !hasGit ) throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
+            _repositoryFolder = p;
+            if( testsFolder == null )
+            {
+                throw new InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
+            }
+            _solutionFolder = Path.GetDirectoryName( testsFolder );
+            _logFolder = Path.Combine( _testProjectFolder, "Logs" );
+        }
+
         event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
-        bool _isTestHost;
 
-        static HashSet<string> _onlyOnce = new HashSet<string>();
+        string IBasicTestHelper.BuildConfiguration => _buildConfiguration;
 
-        string IBasicTestHelper.BuildConfiguration => Initalize( ref _buildConfiguration );
+        string IBasicTestHelper.TestProjectName => _testProjectName;
 
-        string IBasicTestHelper.TestProjectName => Initalize( ref _testProjectName );
+        bool IBasicTestHelper.IsTestHost => _isTestHost;
 
-        bool IBasicTestHelper.IsTestHost => Initalize( ref _isTestHost );
+        NormalizedPath IBasicTestHelper.RepositoryFolder => _repositoryFolder;
 
-        NormalizedPath IBasicTestHelper.RepositoryFolder => Initalize( ref _repositoryFolder );
+        NormalizedPath IBasicTestHelper.SolutionFolder => _solutionFolder;
 
-        NormalizedPath IBasicTestHelper.SolutionFolder => Initalize( ref _solutionFolder );
+        NormalizedPath IBasicTestHelper.LogFolder => _logFolder;
 
-        NormalizedPath IBasicTestHelper.LogFolder => Initalize( ref _logFolder );
+        NormalizedPath IBasicTestHelper.TestProjectFolder => _testProjectFolder;
 
-        NormalizedPath IBasicTestHelper.TestProjectFolder => Initalize( ref _testProjectFolder );
-
-        NormalizedPath IBasicTestHelper.BinFolder => Initalize( ref _binFolder );
+        NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
 
         void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
         {
@@ -82,67 +142,6 @@ namespace CK.Testing
                 shouldRun = _onlyOnce.Add( key );
             }
             if( shouldRun ) a();
-        }
-
-        T Initalize<T>( ref T varString )
-        {
-            if( _buildConfiguration != null ) return varString;
-            string p = _binFolder = AppContext.BaseDirectory;
-            string buildConfDir = null;
-            foreach( var config in _allowedConfigurations )
-            {
-                buildConfDir = FindAbove( p, config );
-                if( buildConfDir != null )
-                {
-                    _buildConfiguration = config;
-                    break;
-                }
-            }
-            if( _buildConfiguration == null )
-            {
-                throw new InvalidOperationException( $"Unable to find parent folder named '{_allowedConfigurations.Concatenate("' or '")}' above '{_binFolder}'." );
-            }
-            p = Path.GetDirectoryName( buildConfDir );
-            if( Path.GetFileName( p ) != "bin" )
-            {
-                throw new InvalidOperationException( $"Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
-            }
-            _testProjectFolder = p = Path.GetDirectoryName( p );
-            _testProjectName = Path.GetFileName( p );
-            Assembly entry = Assembly.GetEntryAssembly();
-            if( entry != null )
-            {
-                string assemblyName = entry.GetName().Name;
-                if( _testProjectName != assemblyName )
-                {
-                    if( assemblyName == "testhost" )
-                    {
-                        _isTestHost = true;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException( $"Current test project assembly is '{assemblyName}' but folder is '{_testProjectName}' (above '{_buildConfiguration}' in '{_binFolder}')." );
-                    }
-                }
-            }
-            p = Path.GetDirectoryName( p );
-
-            string testsFolder = null;
-            bool hasGit = false;
-            while( p != null && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
-            {
-                if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
-                p = Path.GetDirectoryName( p );
-            }
-            if( !hasGit ) throw new InvalidOperationException( $"The project must be in a git repository (above '{_binFolder}')." );
-            _repositoryFolder = p;
-            if( testsFolder == null )
-            {
-                throw new InvalidOperationException( $"A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
-            }
-            _solutionFolder = Path.GetDirectoryName( testsFolder );
-            _logFolder = Path.Combine( _testProjectFolder, "Logs" );
-            return varString;
         }
 
         static string FindAbove( string path, string folderName )

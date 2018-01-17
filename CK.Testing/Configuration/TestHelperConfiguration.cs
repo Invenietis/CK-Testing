@@ -29,8 +29,7 @@ namespace CK.Testing
             _config = new Dictionary<NormalizedPath, string>();
             _container = new SimpleServiceContainer();
             _container.Add<ITestHelperConfiguration>( this );
-            var root = new NormalizedPath( AppContext.BaseDirectory );
-            SimpleReadFromAppSetting( root.FindClosestFile( "TestHelper.config", "Test.config", "App.config" ) );
+            ApplyConfig( BasicTestHelper._binFolder );
             SimpleReadFromEnvironment();
         }
 
@@ -51,31 +50,44 @@ namespace CK.Testing
             return defaultValue;
         }
 
-        void Add( string key, string value )
+        void SetEntry( string key, string value )
         {
             _config[key.Replace( "::", FileUtil.DirectorySeparatorString )] = value;
         }
 
+        void ApplyConfig( NormalizedPath folder )
+        {
+            if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count )
+            {
+                ApplyConfig( folder.RemoveLastPart() );
+            }
+            var file = folder.AppendPart( "TestHelper.config" );
+            if( System.IO.File.Exists( file ) )
+            {
+                SimpleReadFromAppSetting( file );
+            }
+        }
+
         void SimpleReadFromAppSetting( NormalizedPath appConfigFile )
         {
-            if( !appConfigFile.IsEmpty )
+            XDocument doc = XDocument.Load( appConfigFile );
+            foreach( var e in doc.Root.Descendants( "appSettings" ).Elements( "add" ) )
             {
-                XDocument doc = XDocument.Load( appConfigFile );
-                foreach( var e in doc.Root.Descendants( "appSettings" ).Elements( "add" ) )
-                {
-                    Add( e.AttributeRequired( "key" ).Value, e.AttributeRequired( "value" ).Value );
-                }
+                SetEntry( e.AttributeRequired( "key" ).Value, e.AttributeRequired( "value" ).Value );
             }
         }
 
         void SimpleReadFromEnvironment()
         {
+            const string prefix = "TestHelper::";
+            Debug.Assert( prefix.Length == 12 );
             var env = Environment.GetEnvironmentVariables()
                         .Cast<DictionaryEntry>()
-                        .Select( e => Tuple.Create((string)e.Key, (string)e.Value) )
-                        .Where( t => t.Item1.StartsWith( "TestHelper::", StringComparison.OrdinalIgnoreCase ) );
+                        .Select( e => Tuple.Create( (string)e.Key, (string)e.Value ) )
+                        .Where( t => t.Item1.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
+                        .Select( t => Tuple.Create( t.Item1.Substring( 12 ), t.Item2 ) );
 
-            foreach( var kv in env ) Add( kv.Item1, kv.Item2 );
+            foreach( var kv in env ) SetEntry( kv.Item1, kv.Item2 );
         }
 
         /// <summary>

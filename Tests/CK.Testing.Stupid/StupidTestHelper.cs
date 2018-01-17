@@ -22,7 +22,7 @@ namespace CK.Testing
 
         /// <summary>
         /// This helper must not be resolved explicitely.
-        /// The SqlServerTests App.config defines this dll in TestHelper/Assemblies so that it is pre loaded.
+        /// The SqlServerTests project's file TestHelper.config defines this dll in TestHelper/Assemblies so that it is pre loaded.
         /// </summary>
         // public static IStupidTestHelper TestHelper => TestHelperResolver.Default.Resolve<IStupidTestHelper>();
 
