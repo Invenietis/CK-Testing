@@ -45,6 +45,7 @@ namespace CK.Testing
             return p.Replace( "{BuildConfiguration}", BasicTestHelper._buildConfiguration )
                     .Replace( "{TestProjectName}", BasicTestHelper._testProjectName );
         }
+
     }
 
 }
