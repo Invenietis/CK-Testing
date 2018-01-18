@@ -149,7 +149,10 @@ namespace CK.Testing
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
             {
                 var p = longestCtor.Parameters[i];
-                longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                // We generated the Type dynamically... but:
+                // https://github.com/dotnet/corefx/issues/17943
+                // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                longestCtor.Values[i] = Resolve( container, p.ParameterType, true );
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }

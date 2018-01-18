@@ -190,6 +190,17 @@ namespace CK.Testing.Tests
         }
     }
 
+    // B is like SqlTransform.
+    public interface INotImplCore
+    {
+        void Do();
+    }
+
+    public interface INotImpl : IMixinTestHelper, IA, INotImplCore
+    {
+    }
+
+
     [TestFixture]
     public class ResolverTests
     {
@@ -206,6 +217,14 @@ namespace CK.Testing.Tests
 
             var a2 = TestHelperResolver.Default.Resolve<IA>();
             a2.Should().BeSameAs( a );
+        }
+
+        [Test]
+        public void when_the_Core_implementation_is_not_found_an_exception_is_raised()
+        {
+            TestHelperResolver.Default.Invoking( sut => sut.Resolve<INotImpl>() )
+                                        .ShouldThrow<Exception>()
+                                        .Where( e => e.Message.StartsWith( "Unable to locate an implementation for " ) );
         }
 
         [TestCase( true )]
