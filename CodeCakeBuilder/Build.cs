@@ -198,7 +198,7 @@ namespace CodeCake
                         Debug.Assert( gitInfo.IsValidCIBuild );
                         PushNuGetPackages( "MYGET_CI_API_KEY",
                                             "https://www.myget.org/F/invenietis-ci/api/v2/package",
-                                                "https://www.myget.org/F/invenietis-ci/symbols/api/v2/package",
+                                            "https://www.myget.org/F/invenietis-ci/symbols/api/v2/package",
                                             nugetPackages );
                     }
                     if( Cake.AppVeyor().IsRunningOnAppVeyor )

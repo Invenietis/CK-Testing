@@ -70,6 +70,7 @@ namespace CK.Testing
                 if( !t.IsClass || t.IsAbstract )
                 {
                     Type tMapped = MapType( t, throwOnError );
+                    if( tMapped == null ) return null;
                     result = Create( container, tMapped, throwOnError );
                     if( result != null && !tMapped.Assembly.IsDynamic ) container.Add( tMapped, result );
                 }
