@@ -219,7 +219,7 @@ namespace CodeCake
             var apiKey = Cake.InteractiveEnvironmentVariable( apiKeyName );
             if( string.IsNullOrEmpty( apiKey ) )
             {
-                Cake.Information( "Could not resolve {0}. Push to {1} is skipped.", apiKeyName, pushUrl );
+                Cake.Information( $"Could not resolve {apiKeyName}. Push to {pushUrl} is skipped." );
             }
             else
             {

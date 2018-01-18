@@ -108,7 +108,7 @@ namespace CK.Testing
         {
             var basePath = appConfigFile.RemoveLastPart();
             XDocument doc = XDocument.Load( appConfigFile );
-            foreach( var e in doc.Root.Elements( "appSettings" ) )
+            foreach( var e in doc.Root.Elements( "appSettings" ).Elements() )
             {
                 if( e.Name.LocalName == "add" )
                 {
