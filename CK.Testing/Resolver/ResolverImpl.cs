@@ -16,7 +16,7 @@ namespace CK.Testing
         readonly SimpleServiceContainer _container;
         readonly IReadOnlyList<Type> _preLoadedTypes;
 
-        public ResolverImpl( ITestHelperConfiguration config )
+        ResolverImpl( ITestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
             _container.Add( config );
@@ -52,12 +52,12 @@ namespace CK.Testing
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
                 SimpleServiceContainer container;
-                if( TransientMode )
+                if( !TransientMode ) container = _container;
+                else
                 {
                     container = new SimpleServiceContainer( _container );
                     foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true );
                 }
-                else container = _container;
                 return Resolve( container, t, true );
             }
         }
@@ -153,6 +153,12 @@ namespace CK.Testing
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
 
-        public static ITestHelperResolver Create() => new ResolverImpl( TestHelperConfiguration.Default );
+        public static ITestHelperResolver Create( ITestHelperConfiguration config = null )
+        {
+            using( WeakAssemblyNameResolver.TemporaryInstall() )
+            {
+                return new ResolverImpl( config ?? TestHelperConfiguration.Default );
+            }
+        }
     }
 }

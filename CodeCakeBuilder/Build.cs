@@ -106,7 +106,15 @@ namespace CodeCake
                 .IsDependentOn( "Build" )
                 .Does( () =>
                 {
-                    string target = $"Tests/GlobalLogs.Tests/bin/{configuration}/net461/GlobalLogs.Tests.dll";
+                    string target = $"Tests/CK.Testing.Tests/bin/{configuration}/net461/CK.Testing.Tests.dll";
+                    Cake.Information( target );
+                    Cake.NUnit( target, new NUnitSettings() { Framework = "v4.5" } );
+
+                    target = $"Tests/CK.Testing.Tests/bin/{configuration}/netcoreapp2.0/CK.Testing.Tests.dll";
+                    Cake.Information( target );
+                    Cake.DotNetCoreExecute( target );
+
+                    target = $"Tests/GlobalLogs.Tests/bin/{configuration}/net461/GlobalLogs.Tests.dll";
                     Cake.Information( target );
                     Cake.NUnit( target, new NUnitSettings() { Framework = "v4.5" } );
 
