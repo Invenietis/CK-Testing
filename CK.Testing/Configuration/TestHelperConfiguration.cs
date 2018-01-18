@@ -30,7 +30,7 @@ namespace CK.Testing
             _config = new Dictionary<NormalizedPath, TestHelperConfigurationValue>();
             _container = new SimpleServiceContainer();
             _container.Add<ITestHelperConfiguration>( this );
-            ApplyConfig( BasicTestHelper._binFolder );
+            ApplyFilesConfig( BasicTestHelper._binFolder );
             SimpleReadFromEnvironment();
         }
 
@@ -77,7 +77,7 @@ namespace CK.Testing
 
         void SetEntry( string key, NormalizedPath basePath, string value )
         {
-            NormalizedPath k = key.Replace( "::", FileUtil.DirectorySeparatorString );
+            NormalizedPath k = NormalizeKey( key );
             if( value == null ) _config.Remove( k );
             else
             {
@@ -86,11 +86,16 @@ namespace CK.Testing
             }
         }
 
-        void ApplyConfig( NormalizedPath folder )
+        static NormalizedPath NormalizeKey( string key )
+        {
+            return key.Replace( "::", FileUtil.DirectorySeparatorString );
+        }
+
+        void ApplyFilesConfig( NormalizedPath folder )
         {
             if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count )
             {
-                ApplyConfig( folder.RemoveLastPart() );
+                ApplyFilesConfig( folder.RemoveLastPart() );
             }
             var file = folder.AppendPart( "TestHelper.config" );
             if( File.Exists( file ) )
@@ -103,9 +108,26 @@ namespace CK.Testing
         {
             var basePath = appConfigFile.RemoveLastPart();
             XDocument doc = XDocument.Load( appConfigFile );
-            foreach( var e in doc.Root.Descendants( "appSettings" ).Elements( "add" ) )
+            foreach( var e in doc.Root.Elements( "appSettings" ) )
             {
-                SetEntry( e.AttributeRequired( "key" ).Value, basePath, e.AttributeRequired( "value" ).Value );
+                if( e.Name.LocalName == "add" )
+                {
+                    SetEntry( e.AttributeRequired( "key" ).Value, basePath, e.AttributeRequired( "value" ).Value );
+                }
+                else if( e.Name.LocalName == "remove" )
+                {
+                    var k = NormalizeKey( e.AttributeRequired( "key" ).Value );
+                    while( !k.IsEmpty )
+                    {
+                        _config.Remove( k );
+                        k = k.RemoveFirstPart();
+                    }
+                }
+                else if( e.Name.LocalName == "clear" )
+                {
+                    _config.Clear();
+                }
+                else throw new Exception( $"Only add, remove and clear child elements of appSettings are supported in {appConfigFile}." );
             }
         }
 
