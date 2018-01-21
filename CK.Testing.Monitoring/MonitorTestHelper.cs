@@ -26,6 +26,7 @@ namespace CK.Testing
         readonly IBasicTestHelper _basic;
         static readonly CKTrait _assemblyLoadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
         static int _assemblyLoadConflictCount = 0;
+        static int _assemblyLoadConflictCountConsole = 0;
         static bool _globalCKMonFiles;
         static bool _globalTextFiles;
 
@@ -120,18 +121,27 @@ namespace CK.Testing
 
         void Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
 
-        static void DrainAssemblyLoadConflicts( IActivityMonitor m )
+        static void DrainAssemblyLoadConflicts( IActivityMonitor m, bool withConsole )
         {
             AssemblyLoadConflict[] currents = WeakAssemblyNameResolver.GetAssemblyConflicts();
+            if( !withConsole || DumpAssemblyLoadConflicts( m, ref _assemblyLoadConflictCountConsole, currents, ActivityMonitor.Tags.Empty ) > 0 )
+            {
+                DumpAssemblyLoadConflicts( m, ref _assemblyLoadConflictCount, currents, _assemblyLoadConflictTag );
+            }
+        }
+
+        static int DumpAssemblyLoadConflicts( IActivityMonitor m, ref int count, AssemblyLoadConflict[] currents, CKTrait tags )
+        {
             int prev = Interlocked.Exchange( ref _assemblyLoadConflictCount, currents.Length );
             int delta = currents.Length - prev;
             if( delta > 0 )
             {
                 using( m.OpenWarn( $"{delta} assembly load conflicts occurred:" ) )
                 {
-                    while( prev < currents.Length ) m.Warn( currents[prev++].ToString(), _assemblyLoadConflictTag );
+                    while( prev < currents.Length ) m.Warn( currents[prev++].ToString(), tags );
                 }
             }
+            return delta;
         }
 
         void DoWithWeakAssemblyResolver( Action action )
@@ -150,7 +160,7 @@ namespace CK.Testing
             }
             finally
             {
-                DrainAssemblyLoadConflicts( _monitor );
+                DrainAssemblyLoadConflicts( _monitor, LogToConsole );
             }
         }
 
@@ -163,7 +173,7 @@ namespace CK.Testing
 
         void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
         {
-            DrainAssemblyLoadConflicts( _monitor );
+            DrainAssemblyLoadConflicts( _monitor, LogToConsole );
         }
 
         /// <summary>
