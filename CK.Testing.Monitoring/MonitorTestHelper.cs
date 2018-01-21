@@ -23,12 +23,16 @@ namespace CK.Testing
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
         readonly ITestHelperConfiguration _config;
+        readonly IBasicTestHelper _basic;
+        static readonly CKTrait _assemblyLoadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
+        static int _assemblyLoadConflictCount = 0;
         static bool _globalCKMonFiles;
         static bool _globalTextFiles;
 
         internal MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
+            _basic = basic;
 
             basic.OnlyOnce( () =>
             {
@@ -116,12 +120,25 @@ namespace CK.Testing
 
         void Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
 
+        static void DrainAssemblyLoadConflicts( IActivityMonitor m )
+        {
+            AssemblyLoadConflict[] currents = WeakAssemblyNameResolver.GetAssemblyConflicts();
+            int prev = Interlocked.Exchange( ref _assemblyLoadConflictCount, currents.Length );
+            int delta = currents.Length - prev;
+            if( delta > 0 )
+            {
+                using( m.OpenWarn( $"{delta} assembly load conflicts occurred:" ) )
+                {
+                    while( prev < currents.Length ) m.Warn( currents[prev++].ToString(), _assemblyLoadConflictTag );
+                }
+            }
+        }
+
         void DoWithWeakAssemblyResolver( Action action )
         {
-            IReadOnlyList<AssemblyLoadConflict> conflicts = null;
             try
             {
-                using( WeakAssemblyNameResolver.TemporaryInstall( c => conflicts = c ) )
+                using( WeakAssemblyNameResolver.TemporaryInstall() )
                 {
                     action();
                 }
@@ -133,14 +150,7 @@ namespace CK.Testing
             }
             finally
             {
-                if( conflicts.Count == 0 ) _monitor.Info( "No assembly load conflicts." );
-                else using( _monitor.OpenWarn( $"{conflicts.Count} assembly load conflicts:" ) )
-                    {
-                        foreach( var c in conflicts )
-                        {
-                            _monitor.Warn( c.ToString() );
-                        }
-                    }
+                DrainAssemblyLoadConflicts( _monitor );
             }
         }
 
@@ -149,6 +159,11 @@ namespace CK.Testing
             T result = default(T);
             DoWithWeakAssemblyResolver( () => result = action() );
             return result;
+        }
+
+        void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
+        {
+            DrainAssemblyLoadConflicts( _monitor );
         }
 
         /// <summary>

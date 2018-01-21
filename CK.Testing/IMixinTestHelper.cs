@@ -8,7 +8,7 @@ namespace CK.Testing
     /// Marker interface for mixin test helpers.
     /// Interfaces that extends this interface can not be explicitely implemented.
     /// </summary>
-    public interface IMixinTestHelper : ITestHelper
+    public interface IMixinTestHelper
     {
     }
 }

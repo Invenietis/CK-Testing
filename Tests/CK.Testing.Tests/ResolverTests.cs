@@ -5,15 +5,16 @@ using System;
 namespace CK.Testing.Tests
 {
     // A is like Monitor.
-    public interface IACore
+    public interface IACore : ITestHelperResolvedCallback
     {
+        bool ResolvedCallbackCalled { get; }
         IBasicTestHelper AToBasicRef { get; }
         int CallACount { get; }
         void DoA();
         event EventHandler ADone;
     }
 
-    public interface IA : IMixinTestHelper, ITestHelper, IBasicTestHelper, IACore
+    public interface IA : IMixinTestHelper, IBasicTestHelper, IACore
     {
     }
 
@@ -21,7 +22,7 @@ namespace CK.Testing.Tests
     {
         readonly IBasicTestHelper _basic;
         int _callCount;
-
+        bool _cbCalled;
 
         event EventHandler _aDone;
 
@@ -34,12 +35,20 @@ namespace CK.Testing.Tests
 
         IBasicTestHelper IACore.AToBasicRef => _basic;
 
+        public bool ResolvedCallbackCalled => _cbCalled;
+
         void IACore.DoA()
         {
             _basic.BuildConfiguration.Should().Match( s => s == "Debug" || s == "Release" );
             _basic.TestProjectName.Should().Be( "CK.Testing.Tests" );
             ++_callCount;
             _aDone?.Invoke( this, EventArgs.Empty );
+        }
+
+        void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
+        {
+            _cbCalled.Should().BeFalse();
+            _cbCalled = true;
         }
 
         event EventHandler IACore.ADone
@@ -210,6 +219,7 @@ namespace CK.Testing.Tests
             int eventCount = 0;
             var a = TestHelperResolver.Default.Resolve<IA>();
             a.ADone += ( e, arg ) => ++eventCount;
+            a.ResolvedCallbackCalled.Should().BeTrue();
 
             int originalCount = a.CallACount;
             a.DoA();
@@ -260,6 +270,7 @@ namespace CK.Testing.Tests
                 e = r.Resolve<IE>();
                 f = r.Resolve<IF>();
             }
+            a.ResolvedCallbackCalled.Should().BeTrue();
             a.AToBasicRef.Should().BeSameAs( basic );
             b.BToARef.Should().BeSameAs( a );
             c.CToARef.Should().BeSameAs( a );

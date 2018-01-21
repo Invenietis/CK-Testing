@@ -6,7 +6,7 @@ namespace CK.Testing.Monitoring
     /// <summary>
     /// Provides a monitor and console control.
     /// </summary>
-    public interface IMonitorTestHelperCore
+    public interface IMonitorTestHelperCore : ITestHelperResolvedCallback
     {
         /// <summary>
         /// Gets the monitor.

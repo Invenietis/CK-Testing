@@ -36,7 +36,12 @@ namespace CK.Testing
                     _preLoadedTypes = types;
                     if( !TransientMode )
                     {
-                        foreach( var preLoad in _preLoadedTypes ) Resolve( _container, preLoad, true );
+                        List<ITestHelperResolvedCallback> created = null;
+                        foreach( var preLoad in _preLoadedTypes ) Resolve( _container, preLoad, true, ref created );
+                        if( created != null )
+                        {
+                            foreach( var c in created ) c.OnTestHelperGraphResolved();
+                        }
                     }
                 }
             }
@@ -52,37 +57,51 @@ namespace CK.Testing
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
                 SimpleServiceContainer container;
+                List<ITestHelperResolvedCallback> created = null; 
                 if( !TransientMode ) container = _container;
                 else
                 {
                     container = new SimpleServiceContainer( _container );
-                    foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true );
+                    foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true, ref created );
                 }
-                return Resolve( container, t, true );
+                object result = Resolve( container, t, true, ref created );
+                if( created != null )
+                {
+                    foreach( var c in created ) c.OnTestHelperGraphResolved();
+                }
+                return result;
             }
         }
 
-        object Resolve( ISimpleServiceContainer container, Type t, bool throwOnError )
+        object Resolve( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
         {
             object result = container.GetService( t );
-            if( result == null && t != typeof(ITestHelper) && t != typeof(IMixinTestHelper) )
+            if( result == null && t != typeof(ITestHelperResolvedCallback) && t != typeof(IMixinTestHelper) )
             {
                 if( !t.IsClass || t.IsAbstract )
                 {
                     Type tMapped = MapType( t, throwOnError );
                     if( tMapped == null ) return null;
-                    result = Create( container, tMapped, throwOnError );
+                    result = Create( container, tMapped, throwOnError, ref created );
                     if( result != null && !tMapped.Assembly.IsDynamic ) container.Add( tMapped, result );
                 }
-                else result = Create( container, t, throwOnError );
-                if( result != null ) container.Add( t, result );
+                else result = Create( container, t, throwOnError, ref created );
+                if( result != null )
+                {
+                    container.Add( t, result );
+                    if( !result.GetType().Assembly.IsDynamic && result is ITestHelperResolvedCallback cb )
+                    {
+                        if( created == null ) created = new List<ITestHelperResolvedCallback>();
+                        created.Add( cb );
+                    }
+                }
             }
             return result;
         }
 
         Type MapType( Type t, bool throwOnError )
         {
-            Debug.Assert( t != typeof( ITestHelper ) && t != typeof( IMixinTestHelper ) );
+            Debug.Assert( t != typeof( ITestHelperResolvedCallback ) && t != typeof( IMixinTestHelper ) );
             string typeName = _config.Get( "TestHelper/" + t.FullName );
             if( typeName != null )
             {
@@ -128,7 +147,7 @@ namespace CK.Testing
             throw new Exception( $"Unable to locate an implementation for {t.AssemblyQualifiedName}." );
         }
 
-        object Create( ISimpleServiceContainer container, Type t, bool throwOnError )
+        object Create( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
             var longestCtor = t.GetConstructors( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic )
@@ -152,7 +171,7 @@ namespace CK.Testing
                 // We generated the Type dynamically... but:
                 // https://github.com/dotnet/corefx/issues/17943
                 // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
-                longestCtor.Values[i] = Resolve( container, p.ParameterType, true );
+                longestCtor.Values[i] = Resolve( container, p.ParameterType, true, ref created );
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }

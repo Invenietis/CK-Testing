@@ -8,7 +8,7 @@ namespace CK.Testing
     /// <summary>
     /// Provides basic tests information.
     /// </summary>
-    public interface IBasicTestHelper : ITestHelper
+    public interface IBasicTestHelper 
     {
         /// <summary>
         /// Gets the build configuration ("Debug" or "Release").
