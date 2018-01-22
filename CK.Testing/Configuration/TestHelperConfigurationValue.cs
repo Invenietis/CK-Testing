@@ -45,9 +45,12 @@ namespace CK.Testing
         {
             Debug.Assert( Value != null && !BasePath.IsEmpty );
             NormalizedPath raw;
-            if( Value.StartsWith( "{BinFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._binFolder;
-            else if( Value.StartsWith( "{SolutionFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._solutionFolder;
-            else if( Value.StartsWith( "{RepositoryFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._repositoryFolder;
+            Debug.Assert( "{BinFolder}".Length == 11 );
+            Debug.Assert( "{SolutionFolder}".Length == 16 );
+            Debug.Assert( "{RepositoryFolder}".Length == 18 );
+            if( Value.StartsWith( "{BinFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._binFolder.Combine( Value.Substring( 11 ) );
+            else if( Value.StartsWith( "{SolutionFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._solutionFolder.Combine( Value.Substring( 16 ) );
+            else if( Value.StartsWith( "{RepositoryFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._repositoryFolder.Combine( Value.Substring( 18 ) );
             if( raw.IsEmpty )
             {
                 if( Path.IsPathRooted( Value ) ) raw = Path.GetFullPath( Value );

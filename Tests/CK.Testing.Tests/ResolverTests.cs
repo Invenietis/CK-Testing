@@ -1,6 +1,9 @@
+using CK.Text;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.IO;
+using System.Linq;
 
 namespace CK.Testing.Tests
 {
@@ -213,6 +216,19 @@ namespace CK.Testing.Tests
     [TestFixture]
     public class ResolverTests
     {
+        [Test]
+        public void configuration_value_as_paths()
+        {
+            var b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+            var config = new TestHelperConfiguration();
+            var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
+            paths.Should().HaveCount( 4 );
+            paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{{SolutionFolder}}.." );
+            paths[1].Should().Be( b.RepositoryFolder.AppendPart( b.BuildConfiguration ), "{{RepositoryFolder}}/../CK-Testing/{{BuildConfiguration}}" );
+            paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{{TestProjectName}}" );
+            paths[3].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+        }
+
         [Test]
         public void resolving_one_simple_mixin_as_singleton()
         {
