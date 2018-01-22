@@ -73,7 +73,7 @@ namespace CK.Testing
         /// <summary>
         /// Gets all the configuration values defined.
         /// </summary>
-        public IEnumerable<TestHelperConfigurationValue> ConfigurationValues => _config.Values;
+        public IEnumerable<KeyValuePair<NormalizedPath, TestHelperConfigurationValue>> ConfigurationValues => _config;
 
         void SetEntry( string key, NormalizedPath basePath, string value )
         {

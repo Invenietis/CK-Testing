@@ -34,9 +34,9 @@ namespace CK.Testing
         NormalizedPath? GetPath( NormalizedPath key );
 
         /// <summary>
-        /// Gets all the configuration values defined.
+        /// Gets all the configuration key/value pairs defined.
         /// </summary>
-        IEnumerable<TestHelperConfigurationValue> ConfigurationValues { get; }
+        IEnumerable<KeyValuePair<NormalizedPath,TestHelperConfigurationValue>> ConfigurationValues { get; }
 
     }
 }
