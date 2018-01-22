@@ -45,7 +45,7 @@ namespace CK.Testing
 
         bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string databaseName ) => DoExecuteScripts( new[] { scripts }, databaseName );
 
-        void ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions o, bool reset )
+        bool ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions o, bool reset )
         {
             // Calls DoGetDefaultDatabaseOptions to update _maxCompatibilityLevel.
             var def = DoGetDefaultDatabaseOptions();
@@ -66,7 +66,7 @@ namespace CK.Testing
                         if( !reset )
                         {
                             _monitor.Monitor.CloseGroup( "Database already exists, collation and compatiblity level match." );
-                            return;
+                            return false;
                         }
                         _monitor.Monitor.Info( $"Current is {o.ToString()}. Must be recreated." );
                         DoDrop( current.DatabaseName );
@@ -84,6 +84,7 @@ namespace CK.Testing
                         cmd.ExecuteNonQuery();
                     }
                     _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( DoGetDatabaseOptions( o.DatabaseName ), false ) );
+                    return true;
                 }
                 catch( Exception ex )
                 {

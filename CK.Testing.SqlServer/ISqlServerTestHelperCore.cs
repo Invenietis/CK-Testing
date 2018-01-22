@@ -38,12 +38,13 @@ namespace CK.Testing.SqlServer
         SqlServerDatabaseOptions GetDatabaseOptions( string databaseName );
 
         /// <summary>
-        /// Checks that the database exists and has the correct options.
-        /// Drops and recreates it if needed.
+        /// Checks that the database exists and has the correct options and returns false in such case.
+        /// Drops and recreates it if needed (and returns true).
         /// </summary>
         /// <param name="o">Database options to use. Defaults to <see cref="DefaultDatabaseOptions"/>.</param>
         /// <param name="reset">True to drop and recreate the database.</param>
-        void EnsureDatabase( ISqlServerDatabaseOptions o = null, bool reset = false );
+        /// <returns>True if the database has been reset. False if the database already exists and options are the same.</returns>
+        bool EnsureDatabase( ISqlServerDatabaseOptions o = null, bool reset = false );
 
         /// <summary>
         /// Drops the database.
