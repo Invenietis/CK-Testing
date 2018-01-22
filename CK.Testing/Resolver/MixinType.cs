@@ -79,17 +79,32 @@ namespace CK.Testing
                 }
                 for( int i = 0; i < interfaces.Length; ++i )
                 {
+                    var mDone = new Dictionary<MethodInfo,MethodBuilder>();
+                    foreach( PropertyInfo p in interfaces[i].GetProperties() )
+                    {
+                        GenerateProperty( tB, p, fields[i], mDone );
+                    }
                     foreach( MethodInfo m in interfaces[i].GetMethods() )
                     {
-                        GenerateMethod( tB, m, fields[i] );
+                        GenerateMethod( tB, m, fields[i], mDone  );
                     }
                 }
                 return tB.CreateTypeInfo().AsType();
             }
         }
 
-        static void GenerateMethod( TypeBuilder tB, MethodInfo m, FieldBuilder impl )
+        static void GenerateProperty( TypeBuilder tB, PropertyInfo p, FieldBuilder fB, Dictionary<MethodInfo, MethodBuilder> mDone )
         {
+            var pB = tB.DefineProperty( p.Name, p.Attributes, p.PropertyType, p.GetIndexParameters().Select( x => x.ParameterType ).ToArray() );
+            var getter = p.GetGetMethod();
+            if( getter != null ) pB.SetGetMethod( GenerateMethod( tB, getter, fB, mDone ) );
+            var setter = p.GetSetMethod();
+            if( setter != null ) pB.SetSetMethod( GenerateMethod( tB, setter, fB, mDone ) );
+        }
+
+        static MethodBuilder GenerateMethod( TypeBuilder tB, MethodInfo m, FieldBuilder impl, Dictionary<MethodInfo, MethodBuilder> mDone )
+        {
+            if( mDone.TryGetValue( m, out var already ) ) return already;
             Type[] parameters;
             MethodBuilder mB = CreateInterfaceMethodBuilder( tB, m, out parameters );
             var g = mB.GetILGenerator();
@@ -100,6 +115,8 @@ namespace CK.Testing
             g.RepushActualParameters( false, parameters.Length );
             g.EmitCall( OpCodes.Callvirt, m, null );
             g.Emit( OpCodes.Ret );
+            mDone.Add( m, mB );
+            return mB;
         }
 
         static MethodBuilder CreateInterfaceMethodBuilder( TypeBuilder typeBuilder, MethodInfo m, out Type[] parameters )

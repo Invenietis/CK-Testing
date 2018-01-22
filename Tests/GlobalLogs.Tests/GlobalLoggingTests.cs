@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 
 using static CK.Testing.MonitorTestHelper;
+using CK.Testing;
 
 namespace GlobalLogs.Tests
 {
@@ -31,5 +32,48 @@ namespace GlobalLogs.Tests
             TestHelper.WithWeakAssemblyResolver( () => TestHelper.Monitor.Info( "From WeakAssemblyResolver." ) );
             TestHelper.Monitor.Info( $"From WeakAssemblyResolver: {TestHelper.WithWeakAssemblyResolver( () => 3 )}" );
         }
+
+        [Test]
+        public void TestHelper_properties_are_available()
+        {
+            var w = new StringWriter();
+            DumpProperties( w, "> ", TestHelper );
+            var text = w.ToString();
+            text.Should().Contain( "GlobalCKMonFiles = True" );
+            TestHelper.Monitor.Info( text );
+        }
+
+        void DumpProperties( TextWriter w, string prefix, object o )
+        {
+            foreach( var p in o.GetType().GetProperties() )
+            {
+                if( p.PropertyType.IsValueType || p.PropertyType == typeof( string ) )
+                {
+                    w.WriteLine( $"{prefix}{p.Name} = {p.GetValue( o ) ?? "<null>"}" );
+                }
+                else if( typeof( System.Collections.IEnumerable ).IsAssignableFrom( p.PropertyType ) )
+                {
+                    w.Write( $"{prefix}{p.Name} = " );
+                    var items = p.GetValue( o ) as System.Collections.IEnumerable;
+                    if( items == null ) w.WriteLine( "<null>" );
+                    else
+                    {
+                        var wPrefix = new String( ' ', prefix.Length + p.Name.Length + 3 );
+                        w.WriteLine( $"[" );
+                        foreach( var item in items )
+                        {
+                            Type t = item.GetType();
+                            if( t.IsValueType || t == typeof( string ) )
+                            {
+                                w.Write( wPrefix );
+                                w.WriteLine( item );
+                            }
+                        }
+                        w.WriteLine( $"{wPrefix}]" );
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -78,7 +78,7 @@ namespace CK.Testing
             _monitor.Info( $"Folder '{e.Folder}' has been cleaned up." );
         }
 
-        IActivityMonitor Monitoring.IMonitorTestHelperCore.Monitor => _monitor;
+        IActivityMonitor IMonitorTestHelperCore.Monitor => _monitor;
 
         bool LogToConsole
         {
@@ -101,24 +101,24 @@ namespace CK.Testing
             }
         }
 
-        bool Monitoring.IMonitorTestHelperCore.LogToConsole
+        bool IMonitorTestHelperCore.LogToConsole
         {
             get => LogToConsole;
             set => LogToConsole = value;
         }
 
-        bool Monitoring.IMonitorTestHelperCore.GlobalCKMonFiles { get; }
+        bool IMonitorTestHelperCore.GlobalCKMonFiles => _globalCKMonFiles;
 
-        bool Monitoring.IMonitorTestHelperCore.GlobalTextFiles { get; }
+        bool IMonitorTestHelperCore.GlobalTextFiles => _globalTextFiles;
 
-        IDisposable Monitoring.IMonitorTestHelperCore.TemporaryEnsureConsoleMonitor()
+        IDisposable IMonitorTestHelperCore.TemporaryEnsureConsoleMonitor()
         {
             bool prev = LogToConsole;
             LogToConsole = true;
             return Util.CreateDisposableAction( () => LogToConsole = prev );
         }
 
-        void Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
+        void IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
 
         static void DrainAssemblyLoadConflicts( IActivityMonitor m )
         {
