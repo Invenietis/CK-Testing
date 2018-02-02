@@ -31,10 +31,10 @@
 
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKCoreVersion>9.1.0</CKCoreVersion>
-    <CKActivityMonitorVersion>9.0.1</CKActivityMonitorVersion>
-    <CKMonitoringVersion>8.3.0</CKMonitoringVersion>
-    <CKReflectionVersion>6.0.1</CKReflectionVersion>
+    <CKCoreVersion>9.1.2</CKCoreVersion>
+    <CKActivityMonitorVersion>9.0.4</CKActivityMonitorVersion>
+    <CKMonitoringVersion>8.3.3</CKMonitoringVersion>
+    <CKReflectionVersion>6.0.2</CKReflectionVersion>
     <FluentAssertionsVersion>4.19.4</FluentAssertionsVersion>
   </PropertyGroup>
 
