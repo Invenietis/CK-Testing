@@ -1,6 +1,7 @@
 using CK.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CK.Testing
@@ -33,5 +34,24 @@ namespace CK.Testing
             var s = @this.Get( key );
             return s == null ? (int?)null : Int32.Parse( s );
         }
+
+        /// <summary>
+        /// Gets the configuration value from semi colon (;) separated paths as a set of paths
+        /// (see <see cref="TestHelperConfigurationValue.GetValueAsPath"/>).
+        /// </summary>
+        /// <param name="this">This configuration.</param>
+        /// <param name="key">The configuration entry key.</param>
+        /// <returns>The values as paths.</returns>
+        public static IEnumerable<NormalizedPath> GetMultiPaths( this ITestHelperConfiguration @this, NormalizedPath key )
+        {
+            var p = @this.GetConfigValue( key );
+            if( !p.HasValue || p.Value.Value.Length == 0 ) return Array.Empty<NormalizedPath>();
+            return p.Value.Value.Split( ';' )
+                                .Select( x => new TestHelperConfigurationValue( p.Value.BasePath, x.Trim() ) )
+                                .Where( x => x.Value.Length > 0 )
+                                .Select( x => x.GetValueAsPath() )
+                                .Select( x => new NormalizedPath( x ) );
+        }
     }
 }
+

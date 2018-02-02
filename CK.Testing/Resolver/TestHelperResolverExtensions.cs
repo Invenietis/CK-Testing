@@ -5,6 +5,9 @@ using System.Text;
 
 namespace CK.Testing
 {
+    /// <summary>
+    /// Adds methods to <see cref="ITestHelperResolver"/>.
+    /// </summary>
     public static class TestHelperResolverExtensions
     {
         /// <summary>
@@ -12,7 +15,8 @@ namespace CK.Testing
         /// This method throw exceptions on failure and this is intended: test framework must be fully operational
         /// and any error are considered developper errors.
         /// </summary>
-        /// <param name="t">The type to resolve.</param>
+        /// <typeparam name="T">The type to resolve.</typeparam>
+        /// <param name="this">This resolver.</param>
         /// <returns>The resolved instance.</returns>
         public static T Resolve<T>( this ITestHelperResolver @this ) => (T)@this.Resolve( typeof( T ) );
     }

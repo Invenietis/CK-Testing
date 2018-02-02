@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -12,13 +13,13 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Simple configuration that reads its content from the first "Test.config" or "App.Config"
+    /// Simple configuration that reads its content from the first "TestHelper.config" "Test.config" or "App.Config"
     /// in current execution path and parent paths and from environment variables that start
     /// with "TestHelper::" prefix.
     /// </summary>
     public class TestHelperConfiguration : ITestHelperConfiguration
     {
-        readonly Dictionary<NormalizedPath, string> _config;
+        readonly Dictionary<NormalizedPath, TestHelperConfigurationValue> _config;
         readonly SimpleServiceContainer _container;
 
         /// <summary>
@@ -26,12 +27,27 @@ namespace CK.Testing
         /// </summary>
         public TestHelperConfiguration()
         {
-            _config = new Dictionary<NormalizedPath, string>();
+            _config = new Dictionary<NormalizedPath, TestHelperConfigurationValue>();
             _container = new SimpleServiceContainer();
             _container.Add<ITestHelperConfiguration>( this );
-            var root = new NormalizedPath( AppContext.BaseDirectory );
-            SimpleReadFromAppSetting( root.FindClosestFile( "Test.config", "App.config" ) );
+            ApplyFilesConfig( BasicTestHelper._binFolder );
             SimpleReadFromEnvironment();
+        }
+
+        /// <summary>
+        /// Gets the configuration value associated to a key with a lookup up to the root of the configuration.
+        /// </summary>
+        /// <param name="key">The path of the key to find.</param>
+        /// <returns>The configured value.</returns>
+        public TestHelperConfigurationValue? GetConfigValue( NormalizedPath key )
+        {
+            while( !key.IsEmpty )
+            {
+                if( _config.TryGetValue( key, out var result ) ) return result;
+                if( key.Parts.Count == 1 ) break;
+                key = key.RemovePart( key.Parts.Count - 2 );
+            }
+            return null;
         }
 
         /// <summary>
@@ -40,42 +56,92 @@ namespace CK.Testing
         /// <param name="key">The path of the key to find.</param>
         /// <param name="defaultValue">The default value when not found.</param>
         /// <returns>The configured value or the default value.</returns>
-        public string Get( NormalizedPath key, string defaultValue = null )
+        public string Get( NormalizedPath key, string defaultValue = null ) => GetConfigValue( key )?.Value ?? defaultValue;
+
+        /// <summary>
+        /// Gets the configuration value associated to a key as a file or folder path
+        /// (see <see cref="TestHelperConfigurationValue.GetValueAsPath"/>).
+        /// </summary>
+        /// <param name="key">The path of the key to find.</param>
+        /// <returns>The configured path or null.</returns>
+        public NormalizedPath? GetPath( NormalizedPath key )
         {
-            while( key )
-            {
-                if( _config.TryGetValue( key, out string result ) ) return result;
-                if( key.Parts.Count == 1 ) break;
-                key = key.RemovePart( key.Parts.Count - 2 );
-            }
-            return defaultValue;
+            var v = GetConfigValue( key );
+            return v.HasValue ? v.Value.GetValueAsPath() : null;
         }
 
-        void Add( string key, string value )
+        /// <summary>
+        /// Gets all the configuration values defined.
+        /// </summary>
+        public IEnumerable<KeyValuePair<NormalizedPath, TestHelperConfigurationValue>> ConfigurationValues => _config;
+
+        void SetEntry( string key, NormalizedPath basePath, string value )
         {
-            _config[key.Replace( "::", FileUtil.DirectorySeparatorString )] = value;
+            NormalizedPath k = NormalizeKey( key );
+            if( value == null ) _config.Remove( k );
+            else
+            {
+                if( basePath.IsEmpty ) basePath = BasicTestHelper._testProjectFolder;
+                _config[k] = new TestHelperConfigurationValue( basePath, value );
+            }
+        }
+
+        static NormalizedPath NormalizeKey( string key )
+        {
+            return key.Replace( "::", FileUtil.DirectorySeparatorString );
+        }
+
+        void ApplyFilesConfig( NormalizedPath folder )
+        {
+            if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count )
+            {
+                ApplyFilesConfig( folder.RemoveLastPart() );
+            }
+            var file = folder.AppendPart( "TestHelper.config" );
+            if( File.Exists( file ) )
+            {
+                SimpleReadFromAppSetting( file );
+            }
         }
 
         void SimpleReadFromAppSetting( NormalizedPath appConfigFile )
         {
-            if( !appConfigFile.IsEmpty )
+            var basePath = appConfigFile.RemoveLastPart();
+            XDocument doc = XDocument.Load( appConfigFile );
+            foreach( var e in doc.Root.Elements( "appSettings" ).Elements() )
             {
-                XDocument doc = XDocument.Load( appConfigFile );
-                foreach( var e in doc.Root.Descendants( "appSettings" ).Elements( "add" ) )
+                if( e.Name.LocalName == "add" )
                 {
-                    Add( e.AttributeRequired( "key" ).Value, e.AttributeRequired( "value" ).Value );
+                    SetEntry( e.AttributeRequired( "key" ).Value, basePath, e.AttributeRequired( "value" ).Value );
                 }
+                else if( e.Name.LocalName == "remove" )
+                {
+                    var k = NormalizeKey( e.AttributeRequired( "key" ).Value );
+                    while( !k.IsEmpty )
+                    {
+                        _config.Remove( k );
+                        k = k.RemoveFirstPart();
+                    }
+                }
+                else if( e.Name.LocalName == "clear" )
+                {
+                    _config.Clear();
+                }
+                else throw new Exception( $"Only add, remove and clear child elements of appSettings are supported in {appConfigFile}." );
             }
         }
 
         void SimpleReadFromEnvironment()
         {
+            const string prefix = "TestHelper::";
+            Debug.Assert( prefix.Length == 12 );
             var env = Environment.GetEnvironmentVariables()
                         .Cast<DictionaryEntry>()
-                        .Select( e => Tuple.Create((string)e.Key, (string)e.Value) )
-                        .Where( t => t.Item1.StartsWith( "TestHelper::", StringComparison.OrdinalIgnoreCase ) );
+                        .Select( e => Tuple.Create( (string)e.Key, (string)e.Value ) )
+                        .Where( t => t.Item1.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
+                        .Select( t => Tuple.Create( t.Item1.Substring( 12 ), t.Item2 ) );
 
-            foreach( var kv in env ) Add( kv.Item1, kv.Item2 );
+            foreach( var kv in env ) SetEntry( kv.Item1, BasicTestHelper._testProjectFolder, kv.Item2 );
         }
 
         /// <summary>

@@ -1,12 +1,12 @@
 using CK.Core;
 using System;
 
-namespace CK.Testing
+namespace CK.Testing.Monitoring
 {
     /// <summary>
     /// Provides a monitor and console control.
     /// </summary>
-    public interface IMonitorTestHelperCore
+    public interface IMonitorTestHelperCore : ITestHelperResolvedCallback
     {
         /// <summary>
         /// Gets the monitor.
@@ -30,5 +30,25 @@ namespace CK.Testing
         /// Configurable by "Monitor/GlobalTextFiles" = "true", otherwise defaults to false.
         /// </summary>
         bool GlobalTextFiles { get; }
+
+        /// <summary>
+        /// Ensures that the console monitor is on (ie <see cref="LogToConsole"/> is true) until the
+        /// returned IDisposable is disposed.
+        /// </summary>
+        /// <returns>The disposable.</returns>
+        IDisposable TemporaryEnsureConsoleMonitor();
+
+        /// <summary>
+        /// Runs code inside a standard "weak assembly resolver" and dumps the eventual conflicts.
+        /// </summary>
+        /// <param name="action">The action. Must not be null.</param>
+        void WithWeakAssemblyResolver( Action action );
+
+        /// <summary>
+        /// Runs code inside a standard "weak assembly resolver" and dumps the eventual conflicts.
+        /// </summary>
+        /// <param name="action">The action. Must not be null.</param>
+        /// <returns>The result.</returns>
+        T WithWeakAssemblyResolver<T>( Func<T> action );
     }
 }

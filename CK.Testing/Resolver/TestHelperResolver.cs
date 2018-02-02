@@ -9,11 +9,18 @@ using System.Xml.Linq;
 
 namespace CK.Testing
 {
+    /// <summary>
+    /// Entry point: this exposes the <see cref="Default"/> resolver.
+    /// </summary>
     public static class TestHelperResolver
     {
         static object _lock = new object();
         static ITestHelperResolver _resolver;
 
+        /// <summary>
+        /// Gets the default <see cref="ITestHelperResolver"/> to use.
+        /// This resolver is bound to <see cref="TestHelperConfiguration.Default"/>.
+        /// </summary>
         public static ITestHelperResolver Default
         {
             get
@@ -22,14 +29,18 @@ namespace CK.Testing
                 {
                     lock( _lock )
                     {
-                        using( WeakAssemblyNameResolver.TemporaryInstall() )
-                        {
-                            _resolver = ResolverImpl.Create();
-                        }
+                        _resolver = ResolverImpl.Create();
                     }
                 }
                 return _resolver;
             }
         }
+
+        /// <summary>
+        /// Creates a new <see cref="ITestHelperResolver"/> bound to a specific configuration.
+        /// </summary>
+        /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
+        /// <returns>A new resolver.</returns>
+        public static ITestHelperResolver Create( ITestHelperConfiguration config = null ) => ResolverImpl.Create( config );
     }
 }

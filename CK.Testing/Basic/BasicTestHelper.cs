@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using CK.Core;
 using CK.Text;
 
@@ -15,34 +17,19 @@ namespace CK.Testing
     public class BasicTestHelper : IBasicTestHelper
     {
         static readonly string[] _allowedConfigurations = new[] { "Debug", "Release" };
-        NormalizedPath _binFolder;
-        string _buildConfiguration;
-        NormalizedPath _testProjectFolder;
-        string _testProjectName;
-        NormalizedPath _repositoryFolder;
-        NormalizedPath _solutionFolder;
-        NormalizedPath _logFolder;
-        bool _isTestHost;
+        internal static readonly NormalizedPath _binFolder;
+        internal static readonly string _buildConfiguration;
+        internal static readonly NormalizedPath _testProjectFolder;
+        internal static readonly string _testProjectName;
+        internal static readonly NormalizedPath _repositoryFolder;
+        internal static readonly NormalizedPath _solutionFolder;
+        internal static readonly NormalizedPath _logFolder;
+        internal static readonly bool _isTestHost;
+        internal static readonly HashSet<string> _onlyOnce;
 
-        string IBasicTestHelper.BuildConfiguration => Initalize( ref _buildConfiguration );
-
-        string IBasicTestHelper.TestProjectName => Initalize( ref _testProjectName );
-
-        bool IBasicTestHelper.IsTestHost => Initalize( ref _isTestHost );
-
-        NormalizedPath IBasicTestHelper.RepositoryFolder => Initalize( ref _repositoryFolder );
-
-        NormalizedPath IBasicTestHelper.SolutionFolder => Initalize( ref _solutionFolder );
-
-        NormalizedPath IBasicTestHelper.LogFolder => Initalize( ref _logFolder );
-
-        NormalizedPath IBasicTestHelper.TestProjectFolder => Initalize( ref _testProjectFolder );
-
-        NormalizedPath IBasicTestHelper.BinFolder => Initalize( ref _binFolder );
-
-        T Initalize<T>( ref T varString )
+        static BasicTestHelper()
         {
-            if( _buildConfiguration != null ) return varString;
+            _onlyOnce = new HashSet<string>();
             string p = _binFolder = AppContext.BaseDirectory;
             string buildConfDir = null;
             foreach( var config in _allowedConfigurations )
@@ -56,12 +43,12 @@ namespace CK.Testing
             }
             if( _buildConfiguration == null )
             {
-                throw new InvalidOperationException( $"Unable to find parent folder named '{_allowedConfigurations.Concatenate("' or '")}' above '{_binFolder}'." );
+                throw new InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
             }
             p = Path.GetDirectoryName( buildConfDir );
             if( Path.GetFileName( p ) != "bin" )
             {
-                throw new InvalidOperationException( $"Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
+                throw new InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
             }
             _testProjectFolder = p = Path.GetDirectoryName( p );
             _testProjectName = Path.GetFileName( p );
@@ -77,7 +64,7 @@ namespace CK.Testing
                     }
                     else
                     {
-                        throw new InvalidOperationException( $"Current test project assembly is '{assemblyName}' but folder is '{_testProjectName}' (above '{_buildConfiguration}' in '{_binFolder}')." );
+                        throw new InvalidOperationException( $"Initialization error: Current test project assembly is '{assemblyName}' but folder is '{_testProjectName}' (above '{_buildConfiguration}' in '{_binFolder}')." );
                     }
                 }
             }
@@ -90,15 +77,71 @@ namespace CK.Testing
                 if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
                 p = Path.GetDirectoryName( p );
             }
-            if( !hasGit ) throw new InvalidOperationException( $"The project must be in a git repository (above '{_binFolder}')." );
+            if( !hasGit ) throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
             _repositoryFolder = p;
             if( testsFolder == null )
             {
-                throw new InvalidOperationException( $"A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
+                throw new InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
             }
             _solutionFolder = Path.GetDirectoryName( testsFolder );
             _logFolder = Path.Combine( _testProjectFolder, "Logs" );
-            return varString;
+        }
+
+        event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
+
+        string IBasicTestHelper.BuildConfiguration => _buildConfiguration;
+
+        string IBasicTestHelper.TestProjectName => _testProjectName;
+
+        bool IBasicTestHelper.IsTestHost => _isTestHost;
+
+        NormalizedPath IBasicTestHelper.RepositoryFolder => _repositoryFolder;
+
+        NormalizedPath IBasicTestHelper.SolutionFolder => _solutionFolder;
+
+        NormalizedPath IBasicTestHelper.LogFolder => _logFolder;
+
+        NormalizedPath IBasicTestHelper.TestProjectFolder => _testProjectFolder;
+
+        NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
+
+        void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
+        {
+            int tryCount = 0;
+            for(; ; )
+            {
+                try
+                {
+                    if( Directory.Exists( folder ) ) Directory.Delete( folder, true );
+                    Directory.CreateDirectory( folder );
+                    File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
+                    File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
+                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder ) );
+                    return;
+                }
+                catch( Exception )
+                {
+                    if( ++tryCount > maxRetryCount ) throw;
+                    Thread.Sleep( 100 );
+                }
+            }
+        }
+
+        event EventHandler<CleanupFolderEventArgs> IBasicTestHelper.OnCleanupFolder
+        {
+            add => _onCleanupFolder += value;
+            remove => _onCleanupFolder -= value;
+        }
+
+        void IBasicTestHelper.OnlyOnce( Action a, string s, int l )
+        {
+            var key = s + l.ToString();
+            bool shouldRun;
+            lock( _onlyOnce )
+            {
+                shouldRun = _onlyOnce.Add( key );
+            }
+            if( shouldRun ) a();
         }
 
         static string FindAbove( string path, string folderName )

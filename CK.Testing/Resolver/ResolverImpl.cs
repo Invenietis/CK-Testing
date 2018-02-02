@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
@@ -13,48 +14,94 @@ namespace CK.Testing
     {
         readonly ITestHelperConfiguration _config;
         readonly SimpleServiceContainer _container;
+        readonly IReadOnlyList<Type> _preLoadedTypes;
 
-        public ResolverImpl( ITestHelperConfiguration config )
+        ResolverImpl( ITestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
             _container.Add( config );
             _config = config;
-            TransientMode = config.GetBoolean( "Resolver/TransientMode" ) ?? false;
+            TransientMode = config.GetBoolean( "TestHelper/TransientMode" ) ?? false;
+            string[] assemblies = config.Get( "TestHelper/PreLoadedAssemblies", String.Empty ).Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries );
+            if( assemblies.Length > 0 )
+            {
+                using( WeakAssemblyNameResolver.TemporaryInstall() )
+                {
+                    var types = new List<Type>();
+                    foreach( var n in assemblies )
+                    {
+                        var a = Assembly.Load( n );
+                        types.AddRange( a.GetExportedTypes().Where( t => t.IsInterface && typeof( IMixinTestHelper ).IsAssignableFrom( t ) ) );
+                    }
+                    _preLoadedTypes = types;
+                    if( !TransientMode )
+                    {
+                        List<ITestHelperResolvedCallback> created = null;
+                        foreach( var preLoad in _preLoadedTypes ) Resolve( _container, preLoad, true, ref created );
+                        if( created != null )
+                        {
+                            foreach( var c in created ) c.OnTestHelperGraphResolved();
+                        }
+                    }
+                }
+            }
+            else _preLoadedTypes = Type.EmptyTypes;
         }
 
         public bool TransientMode { get; }
+
+        public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
         public object Resolve( Type t )
         {
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                var container = TransientMode
-                                ? new SimpleServiceContainer( _container )
-                                : _container;
-                return Resolve( container, t, true );
+                SimpleServiceContainer container;
+                List<ITestHelperResolvedCallback> created = null; 
+                if( !TransientMode ) container = _container;
+                else
+                {
+                    container = new SimpleServiceContainer( _container );
+                    foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true, ref created );
+                }
+                object result = Resolve( container, t, true, ref created );
+                if( created != null )
+                {
+                    foreach( var c in created ) c.OnTestHelperGraphResolved();
+                }
+                return result;
             }
         }
 
-        object Resolve( ISimpleServiceContainer container, Type t, bool throwOnError )
+        object Resolve( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
         {
             object result = container.GetService( t );
-            if( result == null && t != typeof(ITestHelper) && t != typeof(IMixinTestHelper) )
+            if( result == null && t != typeof(ITestHelperResolvedCallback) && t != typeof(IMixinTestHelper) )
             {
                 if( !t.IsClass || t.IsAbstract )
                 {
                     Type tMapped = MapType( t, throwOnError );
-                    result = Create( container, tMapped, throwOnError );
+                    if( tMapped == null ) return null;
+                    result = Create( container, tMapped, throwOnError, ref created );
                     if( result != null && !tMapped.Assembly.IsDynamic ) container.Add( tMapped, result );
                 }
-                else result = Create( container, t, throwOnError );
-                if( result != null ) container.Add( t, result );
+                else result = Create( container, t, throwOnError, ref created );
+                if( result != null )
+                {
+                    container.Add( t, result );
+                    if( !result.GetType().Assembly.IsDynamic && result is ITestHelperResolvedCallback cb )
+                    {
+                        if( created == null ) created = new List<ITestHelperResolvedCallback>();
+                        created.Add( cb );
+                    }
+                }
             }
             return result;
         }
 
         Type MapType( Type t, bool throwOnError )
         {
-            Debug.Assert( t != typeof( ITestHelper ) && t != typeof( IMixinTestHelper ) );
+            Debug.Assert( t != typeof( ITestHelperResolvedCallback ) && t != typeof( IMixinTestHelper ) );
             string typeName = _config.Get( "TestHelper/" + t.FullName );
             if( typeName != null )
             {
@@ -73,8 +120,15 @@ namespace CK.Testing
                 Type found = SimpleTypeFinder.WeakResolver( fullName, false );
                 if( found == null && cName.EndsWith( "Core" ) )
                 {
-                    fullName = $"{t.Namespace}.{cName.Remove( cName.Length - 4 )}, {t.Assembly.FullName}";
-                    found = SimpleTypeFinder.WeakResolver( fullName, false );
+                    var nameNoCore = cName.Remove( cName.Length - 4 );
+                    var ns = t.Namespace.Split( '.' ).ToList();
+                    while( ns.Count > 0 )
+                    {
+                        fullName = $"{String.Join(".", ns)}.{nameNoCore}, {t.Assembly.FullName}";
+                        found = SimpleTypeFinder.WeakResolver( fullName, false );
+                        if( found != null ) break;
+                        ns.RemoveAt( ns.Count - 1 );
+                    }
                 }
                 if( found != null && t.IsAssignableFrom( found ) )
                 {
@@ -93,10 +147,10 @@ namespace CK.Testing
             throw new Exception( $"Unable to locate an implementation for {t.AssemblyQualifiedName}." );
         }
 
-        object Create( ISimpleServiceContainer container, Type t, bool throwOnError )
+        object Create( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
-            var longestCtor = t.GetConstructors()
+            var longestCtor = t.GetConstructors( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic )
                                 .Select( x => Tuple.Create( x, x.GetParameters() ) )
                                 .OrderByDescending( x => x.Item2.Length )
                                 .Select( x => new
@@ -114,11 +168,20 @@ namespace CK.Testing
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
             {
                 var p = longestCtor.Parameters[i];
-                longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                // We generated the Type dynamically... but:
+                // https://github.com/dotnet/corefx/issues/17943
+                // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                longestCtor.Values[i] = Resolve( container, p.ParameterType, true, ref created );
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
 
-        public static ITestHelperResolver Create() => new ResolverImpl( TestHelperConfiguration.Default );
+        public static ITestHelperResolver Create( ITestHelperConfiguration config = null )
+        {
+            using( WeakAssemblyNameResolver.TemporaryInstall() )
+            {
+                return new ResolverImpl( config ?? TestHelperConfiguration.Default );
+            }
+        }
     }
 }
