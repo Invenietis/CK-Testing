@@ -31,6 +31,7 @@
 
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
+    <CKWeakAssemblyNameResolverVersion>0.4.0</CKWeakAssemblyNameResolverVersion>
     <CKCoreVersion>9.1.2</CKCoreVersion>
     <CKActivityMonitorVersion>9.0.4</CKActivityMonitorVersion>
     <CKMonitoringVersion>8.3.3</CKMonitoringVersion>
