@@ -26,8 +26,8 @@ namespace CK.Testing
         readonly IBasicTestHelper _basic;
         static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
         static int _loadConflictCount = 0;
-        static bool _globalCKMonFiles;
-        static bool _globalTextFiles;
+        static bool _logToBinFile;
+        static bool _logToTextFile;
 
         internal MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
         {
@@ -36,8 +36,12 @@ namespace CK.Testing
 
             basic.OnlyOnce( () =>
             {
-                _globalCKMonFiles = _config.GetBoolean( "Monitor/GlobalCKMonFiles" ) ?? false;
-                _globalTextFiles = _config.GetBoolean( "Monitor/GlobalTextFiles" ) ?? false;
+                _logToBinFile = _config.GetBoolean( "Monitor/LogToBinFile" )
+                                        ?? _config.GetBoolean( "Monitor/LogToBinFiles" )
+                                        ?? false;
+                _logToTextFile = _config.GetBoolean( "Monitor/LogToTextFile" )
+                                        ?? _config.GetBoolean( "Monitor/LogToTextFiles" )
+                                        ?? false;
                 string logLevel = _config.Get( "Monitor/LogLevel" );
                 if( logLevel != null )
                 {
@@ -46,7 +50,7 @@ namespace CK.Testing
                 }
                 LogFile.RootLogPath = basic.LogFolder;
                 var conf = new GrandOutputConfiguration();
-                if( _globalCKMonFiles )
+                if( _logToBinFile )
                 {
                     var binConf = new BinaryFileConfiguration
                     {
@@ -54,7 +58,7 @@ namespace CK.Testing
                     };
                     conf.AddHandler( binConf );
                 }
-                if( _globalTextFiles )
+                if( _logToTextFile )
                 {
                     var txtConf = new TextFileConfiguration
                     {
@@ -107,9 +111,9 @@ namespace CK.Testing
             set => LogToConsole = value;
         }
 
-        bool IMonitorTestHelperCore.GlobalCKMonFiles => _globalCKMonFiles;
+        bool IMonitorTestHelperCore.LogToBinFile => _logToBinFile;
 
-        bool IMonitorTestHelperCore.GlobalTextFiles => _globalTextFiles;
+        bool IMonitorTestHelperCore.LogToTextFile => _logToTextFile;
 
         IDisposable IMonitorTestHelperCore.TemporaryEnsureConsoleMonitor()
         {
