@@ -114,11 +114,11 @@ namespace CodeCake
                     Cake.Information( target );
                     Cake.DotNetCoreExecute( target );
 
-                    target = $"Tests/GlobalLogs.Tests/bin/{configuration}/net461/GlobalLogs.Tests.dll";
+                    target = $"Tests/LogToTextAndBinFile.Tests/bin/{configuration}/net461/LogToTextAndBinFile.Tests.dll";
                     Cake.Information( target );
                     Cake.NUnit( target, new NUnitSettings() { Framework = "v4.5" } );
 
-                    target = $"Tests/GlobalLogs.Tests/bin/{configuration}/netcoreapp2.0/GlobalLogs.Tests.dll";
+                    target = $"Tests/LogToTextAndBinFile.Tests/bin/{configuration}/netcoreapp2.0/LogToTextAndBinFile.Tests.dll";
                     Cake.Information( target );
                     Cake.DotNetCoreExecute( target );
 

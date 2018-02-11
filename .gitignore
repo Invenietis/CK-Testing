@@ -287,3 +287,4 @@ __pycache__/
 *.xsd.cs
 CodeCakeBuilder/Tools/
 Tests/GlobalLogs.Tests/Logs/
+Tests/LogToTextAndBinFile.Tests/Logs/

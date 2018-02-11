@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 
 using static CK.Testing.MonitorTestHelper;
-using CK.Testing;
 
 namespace GlobalLogs.Tests
 {
@@ -22,15 +21,35 @@ namespace GlobalLogs.Tests
             var binSecret = Encoding.UTF8.GetBytes( secret );
 
             TestHelper.Monitor.Info( $"This will appear in ckmon, text files and the console: {secret}" );
+            GrandOutput.Default.Should().NotBeNull();
             GrandOutput.Default.Dispose();
             Directory.EnumerateFiles( TestHelper.LogFolder, "*.txt", SearchOption.AllDirectories )
                         .Select( f => File.ReadAllText( f ) )
                         .Count( text => text.Contains( secret ) )
                         .Should().Be( 1 );
+            Directory.EnumerateFiles( TestHelper.LogFolder, "*.ckmon", SearchOption.AllDirectories )
+                        .Where( f => SearchBytes( File.ReadAllBytes( f ), binSecret ) > 0 )
+                        .Should().HaveCount( 1 );
 
             //
             TestHelper.WithWeakAssemblyResolver( () => TestHelper.Monitor.Info( "From WeakAssemblyResolver." ) );
             TestHelper.Monitor.Info( $"From WeakAssemblyResolver: {TestHelper.WithWeakAssemblyResolver( () => 3 )}" );
+        }
+
+        static int SearchBytes( byte[] haystack, byte[] needle )
+        {
+            var len = needle.Length;
+            var limit = haystack.Length - len;
+            for( var i = 0; i <= limit; i++ )
+            {
+                var k = 0;
+                for( ; k < len; k++ )
+                {
+                    if( needle[k] != haystack[i + k] ) break;
+                }
+                if( k == len ) return i;
+            }
+            return -1;
         }
 
         [Test]
@@ -39,7 +58,7 @@ namespace GlobalLogs.Tests
             var w = new StringWriter();
             DumpProperties( w, "> ", TestHelper );
             var text = w.ToString();
-            text.Should().Contain( "GlobalCKMonFiles = True" );
+            text.Should().Contain( "LogToBinFile = True" );
             TestHelper.Monitor.Info( text );
         }
 
