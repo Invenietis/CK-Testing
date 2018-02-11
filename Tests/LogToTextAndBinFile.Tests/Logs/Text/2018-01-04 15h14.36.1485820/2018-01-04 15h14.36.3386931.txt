@@ -1,9 +1,0 @@
-0~~~~                            ~~ Monitor: fdabf4f2-a8b8-457e-8fa1-424987c7b94f
-   2018-01-04 15h14.36.2896593 i Topic: CK.Monitoring.DispatcherSink
-                   +00.0210165   > Initializing BinaryFile handler (MaxCountPerFile = 20000).
-                   +00.0270203   < 
-                   +00.0350265   > Initializing TextFile handler (MaxCountPerFile = 20000).
-                   +00.0350265   < 
-1~~~~                            ~~ Monitor: cfeeb6ac-9aed-4afa-bbe4-2faab9cc334b
-                   +00.0410281 i Switching console log ON.
-                   +00.0460319 i This will appear in ckmon, text files and the console: 76154bf3-5ccf-4855-b4e8-0306ba0717d6
