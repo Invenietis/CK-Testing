@@ -249,7 +249,7 @@ namespace CK.Testing.Tests
         public void when_the_Core_implementation_is_not_found_an_exception_is_raised()
         {
             TestHelperResolver.Default.Invoking( sut => sut.Resolve<INotImpl>() )
-                                        .ShouldThrow<Exception>()
+                                        .Should().Throw<Exception>()
                                         .Where( e => e.Message.StartsWith( "Unable to locate an implementation for " ) );
         }
 
