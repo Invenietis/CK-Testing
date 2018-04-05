@@ -2,6 +2,6 @@
   <StartingVersionForCSemVer>v0.1.0-alpha</StartingVersionForCSemVer>
   <Branches>
     <Branch Name="develop" CIVersionMode="LastReleaseBased" />
-    <Branch Name="blank-dev" VersionName="blank" />
+    <Branch Name="blank-dev" VersionName="blank" CIVersionMode="LastReleaseBased" />
   </Branches>
 </RepositoryInfo>
