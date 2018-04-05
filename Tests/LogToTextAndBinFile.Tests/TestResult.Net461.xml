@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\LogToTextAndBinFile.Tests\bin\Debug\net461\LogToTextAndBinFile.Tests.dll" total="2" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-05" time="19:50:51">
+<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\LogToTextAndBinFile.Tests\bin\Debug\net461\LogToTextAndBinFile.Tests.dll" total="2" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-05" time="22:38:17">
   <environment nunit-version="2.6.4.14350" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Dev\CK-Core-Projects\CK-Testing" machine-name="DESKTOP-5BQ4M95" user="olivi" user-domain="DESKTOP-5BQ4M95" />
   <culture-info current-culture="fr-FR" current-uiculture="fr-FR" />
-  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\LogToTextAndBinFile.Tests\bin\Debug\net461\LogToTextAndBinFile.Tests.dll" executed="True" result="Success" success="True" time="0.994" asserts="0">
+  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\LogToTextAndBinFile.Tests\bin\Debug\net461\LogToTextAndBinFile.Tests.dll" executed="True" result="Success" success="True" time="0.896" asserts="0">
     <results>
-      <test-suite type="Namespace" name="GlobalLogs" executed="True" result="Success" success="True" time="0.982" asserts="0">
+      <test-suite type="Namespace" name="GlobalLogs" executed="True" result="Success" success="True" time="0.886" asserts="0">
         <results>
-          <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.982" asserts="0">
+          <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.886" asserts="0">
             <results>
-              <test-suite type="TestFixture" name="GlobalLoggingTests" executed="True" result="Success" success="True" time="0.980" asserts="0">
+              <test-suite type="TestFixture" name="GlobalLoggingTests" executed="True" result="Success" success="True" time="0.885" asserts="0">
                 <results>
-                  <test-case name="GlobalLogs.Tests.GlobalLoggingTests.ckmon_files_and_text_files_are_produced" executed="True" result="Success" success="True" time="0.953" asserts="0" />
-                  <test-case name="GlobalLogs.Tests.GlobalLoggingTests.TestHelper_properties_are_available" executed="True" result="Success" success="True" time="0.011" asserts="0" />
+                  <test-case name="GlobalLogs.Tests.GlobalLoggingTests.ckmon_files_and_text_files_are_produced" executed="True" result="Success" success="True" time="0.865" asserts="0" />
+                  <test-case name="GlobalLogs.Tests.GlobalLoggingTests.TestHelper_properties_are_available" executed="True" result="Success" success="True" time="0.007" asserts="0" />
                 </results>
               </test-suite>
             </results>
