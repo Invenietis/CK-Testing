@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\CK.Testing.Tests\bin\Debug\net461\CK.Testing.Tests.dll" total="5" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-06" time="00:13:02">
+<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\CK.Testing.Tests\bin\Debug\net461\CK.Testing.Tests.dll" total="5" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-08" time="09:22:57">
   <environment nunit-version="2.6.4.14350" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Dev\CK-Core-Projects\CK-Testing" machine-name="DESKTOP-5BQ4M95" user="olivi" user-domain="DESKTOP-5BQ4M95" />
   <culture-info current-culture="fr-FR" current-uiculture="fr-FR" />
-  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\CK.Testing.Tests\bin\Debug\net461\CK.Testing.Tests.dll" executed="True" result="Success" success="True" time="0.948" asserts="0">
+  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\CK.Testing.Tests\bin\Debug\net461\CK.Testing.Tests.dll" executed="True" result="Success" success="True" time="0.539" asserts="0">
     <results>
-      <test-suite type="Namespace" name="CK" executed="True" result="Success" success="True" time="0.934" asserts="0">
+      <test-suite type="Namespace" name="CK" executed="True" result="Success" success="True" time="0.530" asserts="0">
         <results>
-          <test-suite type="Namespace" name="Testing" executed="True" result="Success" success="True" time="0.934" asserts="0">
+          <test-suite type="Namespace" name="Testing" executed="True" result="Success" success="True" time="0.530" asserts="0">
             <results>
-              <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.934" asserts="0">
+              <test-suite type="Namespace" name="Tests" executed="True" result="Success" success="True" time="0.530" asserts="0">
                 <results>
-                  <test-suite type="TestFixture" name="ResolverTests" executed="True" result="Success" success="True" time="0.932" asserts="0">
+                  <test-suite type="TestFixture" name="ResolverTests" executed="True" result="Success" success="True" time="0.529" asserts="0">
                     <results>
-                      <test-suite type="ParameterizedTest" name="accessing_mixins_as_singleton" executed="True" result="Success" success="True" time="0.629" asserts="0">
+                      <test-suite type="ParameterizedTest" name="accessing_mixins_as_singleton" executed="True" result="Success" success="True" time="0.358" asserts="0">
                         <results>
-                          <test-case name="CK.Testing.Tests.ResolverTests.accessing_mixins_as_singleton(True)" executed="True" result="Success" success="True" time="0.579" asserts="0" />
-                          <test-case name="CK.Testing.Tests.ResolverTests.accessing_mixins_as_singleton(False)" executed="True" result="Success" success="True" time="0.037" asserts="0" />
+                          <test-case name="CK.Testing.Tests.ResolverTests.accessing_mixins_as_singleton(True)" executed="True" result="Success" success="True" time="0.333" asserts="0" />
+                          <test-case name="CK.Testing.Tests.ResolverTests.accessing_mixins_as_singleton(False)" executed="True" result="Success" success="True" time="0.017" asserts="0" />
                         </results>
                       </test-suite>
-                      <test-case name="CK.Testing.Tests.ResolverTests.configuration_value_as_paths" executed="True" result="Success" success="True" time="0.049" asserts="0" />
-                      <test-case name="CK.Testing.Tests.ResolverTests.resolving_one_simple_mixin_as_singleton" executed="True" result="Success" success="True" time="0.192" asserts="0" />
-                      <test-case name="CK.Testing.Tests.ResolverTests.when_the_Core_implementation_is_not_found_an_exception_is_raised" executed="True" result="Success" success="True" time="0.048" asserts="0" />
+                      <test-case name="CK.Testing.Tests.ResolverTests.configuration_value_as_paths" executed="True" result="Success" success="True" time="0.029" asserts="0" />
+                      <test-case name="CK.Testing.Tests.ResolverTests.resolving_one_simple_mixin_as_singleton" executed="True" result="Success" success="True" time="0.111" asserts="0" />
+                      <test-case name="CK.Testing.Tests.ResolverTests.when_the_Core_implementation_is_not_found_an_exception_is_raised" executed="True" result="Success" success="True" time="0.023" asserts="0" />
                     </results>
                   </test-suite>
                 </results>
