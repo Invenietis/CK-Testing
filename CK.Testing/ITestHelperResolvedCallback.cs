@@ -14,6 +14,7 @@ namespace CK.Testing
         /// Called once the whole graph has been resolved, in the order of resolution (dependent parts
         /// are called before the parts that depend on them). 
         /// </summary>
-        void OnTestHelperGraphResolved();
+        /// <param name="finalMixin">The mixin that contains contains this core interface.</param>
+        void OnTestHelperGraphResolved( object finalMixin );
     }
 }

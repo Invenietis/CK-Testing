@@ -36,11 +36,14 @@ namespace CK.Testing
                     _preLoadedTypes = types;
                     if( !TransientMode )
                     {
-                        List<ITestHelperResolvedCallback> created = null;
-                        foreach( var preLoad in _preLoadedTypes ) Resolve( _container, preLoad, true, ref created );
-                        if( created != null )
+                        foreach( var preLoad in _preLoadedTypes )
                         {
-                            foreach( var c in created ) c.OnTestHelperGraphResolved();
+                            List<ITestHelperResolvedCallback> created = null;
+                            object result = Resolve( _container, preLoad, true, ref created );
+                            if( created != null )
+                            {
+                                foreach( var c in created ) c.OnTestHelperGraphResolved( result );
+                            }
                         }
                     }
                 }
@@ -67,7 +70,7 @@ namespace CK.Testing
                 object result = Resolve( container, t, true, ref created );
                 if( created != null )
                 {
-                    foreach( var c in created ) c.OnTestHelperGraphResolved();
+                    foreach( var c in created ) c.OnTestHelperGraphResolved( result );
                 }
                 return result;
             }

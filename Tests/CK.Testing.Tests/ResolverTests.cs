@@ -48,10 +48,11 @@ namespace CK.Testing.Tests
             _aDone?.Invoke( this, EventArgs.Empty );
         }
 
-        void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
+        void ITestHelperResolvedCallback.OnTestHelperGraphResolved( object closestObject )
         {
             _cbCalled.Should().BeFalse();
             _cbCalled = true;
+            closestObject.Should().BeAssignableTo<IA>();
         }
 
         event EventHandler IACore.ADone
