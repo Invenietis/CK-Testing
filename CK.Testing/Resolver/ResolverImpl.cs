@@ -16,6 +16,111 @@ namespace CK.Testing
         readonly SimpleServiceContainer _container;
         readonly IReadOnlyList<Type> _preLoadedTypes;
 
+        class Context
+        {
+            readonly ISimpleServiceContainer _container;
+            List<ITestHelperResolvedCallback> _created;
+            HashSet<Type> _fromTypes;
+            int _depth;
+            Type _initialRequestedType;
+            object _initialRequestedTypeResult;
+
+            public Context( ISimpleServiceContainer c )
+            {
+                _container = c;
+            }
+
+            public bool ThrowOnError => true;
+
+            public int CallDepth => _depth;
+
+            public void Start( ref Type t, ref object result )
+            {
+                Debug.Assert( t != null && t != typeof( IMixinTestHelper ) && t != typeof(ITestHelperResolvedCallback) );
+                Debug.Assert( _depth >= 0 );
+                Debug.Assert( result == null );
+
+                if( _depth++ == 0 )
+                {
+                    _initialRequestedType = t;
+                    Type first = GetResolveTarget( t );
+                    if( first == null ) return;
+                    if( _fromTypes == null ) _fromTypes = new HashSet<Type>();
+                    Type prev = t;
+                    do
+                    {
+                        if( !_fromTypes.Add( prev ) ) throw new Exception( $"ResolveTarget atttribute: cyclic references found between types: {prev.FullName} -> {_fromTypes.Select( x => x.FullName ).Concatenate()}" );
+                        prev = first;
+                        first = GetResolveTarget( first );
+                    }
+                    while( first != null );
+                    result = _container.GetService( prev );
+                    if( result != null )
+                    {
+                        foreach( var o in _fromTypes )
+                        {
+                            if( _container.GetService( prev ) == null ) _container.Add( o, result );
+                        }
+                        _fromTypes.Clear();
+                        --_depth;
+                        return;
+                    }
+                    t = prev;
+                }
+            }
+
+            public Type GetResolveTarget( Type t )
+            {
+                var target = ((ResolveTargetAttribute)t.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
+                if( target != null && !target.IsInterface )
+                {
+                    throw new ArgumentException( $"ResolveTarget attribute on {t.FullName}: must be an interface.", nameof( target ) );
+                }
+                return target;
+            }
+
+            public void AddMapping( Type t, object result )
+            {
+                if( _initialRequestedType == t ) _initialRequestedTypeResult = result;
+                _container.Add( t, result );
+                _fromTypes?.Remove( t );
+            }
+
+            public object GetAlreayResolved( Type t ) => _container.GetService( t );
+
+            public object Stop( Type t, object result, bool mappingWithResolvedTarget )
+            {
+                Debug.Assert( t != null );
+                Debug.Assert( _depth >= 1 );
+                if( result != null )
+                {
+                    if( !mappingWithResolvedTarget ) AddMapping( t, result );
+                    if( !result.GetType().Assembly.IsDynamic && result is ITestHelperResolvedCallback cb )
+                    {
+                        if( _created == null ) _created = new List<ITestHelperResolvedCallback>();
+                        _created.Add( cb );
+                    }
+                    if( _depth == 1 )
+                    {
+                        if( _fromTypes != null ) foreach( var o in _fromTypes ) _container.Add( o, result );
+                        if( _created != null && _created.Count > 0 )
+                        {
+                            foreach( var c in _created ) c.OnTestHelperGraphResolved( result );
+                        }
+                        if( mappingWithResolvedTarget ) _initialRequestedTypeResult = result;
+                    }
+                }
+                if( --_depth == 0 )
+                {
+                    _fromTypes?.Clear();
+                    _created?.Clear();
+                    return _initialRequestedTypeResult;
+                }
+                return result;
+            }
+
+        }
+
         ResolverImpl( ITestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
@@ -36,15 +141,8 @@ namespace CK.Testing
                     _preLoadedTypes = types;
                     if( !TransientMode )
                     {
-                        foreach( var preLoad in _preLoadedTypes )
-                        {
-                            List<ITestHelperResolvedCallback> created = null;
-                            object result = Resolve( _container, preLoad, true, ref created );
-                            if( created != null )
-                            {
-                                foreach( var c in created ) c.OnTestHelperGraphResolved( result );
-                            }
-                        }
+                        var ctx = new Context( _container );
+                        foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
                     }
                 }
             }
@@ -57,47 +155,44 @@ namespace CK.Testing
 
         public object Resolve( Type t )
         {
+            if( t == null ) throw new ArgumentNullException( nameof( t ) );
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                SimpleServiceContainer container;
-                List<ITestHelperResolvedCallback> created = null; 
-                if( !TransientMode ) container = _container;
+                Context ctx = null; 
+                if( !TransientMode ) ctx = new Context( _container );
                 else
                 {
-                    container = new SimpleServiceContainer( _container );
-                    foreach( var preLoad in _preLoadedTypes ) Resolve( container, preLoad, true, ref created );
+                    ctx = new Context( new SimpleServiceContainer( _container ) );
+                    foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
                 }
-                object result = Resolve( container, t, true, ref created );
-                if( created != null )
-                {
-                    foreach( var c in created ) c.OnTestHelperGraphResolved( result );
-                }
-                return result;
+                return Resolve( ctx, t );
             }
         }
 
-        object Resolve( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
+        object Resolve( Context ctx, Type t )
         {
-            object result = container.GetService( t );
+            object result = ctx.GetAlreayResolved( t );
             if( result == null && t != typeof(ITestHelperResolvedCallback) && t != typeof(IMixinTestHelper) )
             {
+                ctx.Start( ref t, ref result );
+                if( result != null ) return result;
+                Type mappingResolvedTarget = null;
                 if( !t.IsClass || t.IsAbstract )
                 {
-                    Type tMapped = MapType( t, throwOnError );
+                    Type tMapped = MapType( t, ctx.ThrowOnError );
                     if( tMapped == null ) return null;
-                    result = Create( container, tMapped, throwOnError, ref created );
-                    if( result != null && !tMapped.Assembly.IsDynamic ) container.Add( tMapped, result );
-                }
-                else result = Create( container, t, throwOnError, ref created );
-                if( result != null )
-                {
-                    container.Add( t, result );
-                    if( !result.GetType().Assembly.IsDynamic && result is ITestHelperResolvedCallback cb )
+                    bool isDynamicType = tMapped.Assembly.IsDynamic;
+                    if( !isDynamicType
+                        && ctx.CallDepth == 1
+                        && (mappingResolvedTarget = ctx.GetResolveTarget( tMapped )) != null )
                     {
-                        if( created == null ) created = new List<ITestHelperResolvedCallback>();
-                        created.Add( cb );
+                        result = Resolve( ctx, mappingResolvedTarget );
                     }
+                    else result = Create( ctx, tMapped );
+                    if( result != null && !isDynamicType && mappingResolvedTarget == null ) ctx.AddMapping( tMapped, result );
                 }
+                else result = Create( ctx, t );
+                return ctx.Stop( t, result, mappingResolvedTarget != null );
             }
             return result;
         }
@@ -150,7 +245,7 @@ namespace CK.Testing
             throw new Exception( $"Unable to locate an implementation for {t.AssemblyQualifiedName}." );
         }
 
-        object Create( ISimpleServiceContainer container, Type t, bool throwOnError, ref List<ITestHelperResolvedCallback> created )
+        object Create( Context ctx, Type t )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
             var longestCtor = t.GetConstructors( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic )
@@ -165,7 +260,7 @@ namespace CK.Testing
                                 .FirstOrDefault();
             if( longestCtor == null )
             {
-                if( throwOnError ) throw new Exception( $"Unable to find a public constructor for '{t.FullName}'." );
+                if( ctx.ThrowOnError ) throw new Exception( $"Unable to find a public constructor for '{t.FullName}'." );
                 return null;
             }
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
@@ -174,7 +269,7 @@ namespace CK.Testing
                 // We generated the Type dynamically... but:
                 // https://github.com/dotnet/corefx/issues/17943
                 // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
-                longestCtor.Values[i] = Resolve( container, p.ParameterType, true, ref created );
+                longestCtor.Values[i] = Resolve( ctx, p.ParameterType );
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
