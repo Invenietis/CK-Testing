@@ -11,6 +11,7 @@ namespace CK.Testing.Tests
     public interface IACore : ITestHelperResolvedCallback
     {
         bool ResolvedCallbackCalled { get; }
+        object ResolvedObject { get; }
         IBasicTestHelper AToBasicRef { get; }
         int CallACount { get; }
         void DoA();
@@ -26,6 +27,7 @@ namespace CK.Testing.Tests
         readonly IBasicTestHelper _basic;
         int _callCount;
         bool _cbCalled;
+        object _resolvedObject;
 
         event EventHandler _aDone;
 
@@ -40,6 +42,8 @@ namespace CK.Testing.Tests
 
         public bool ResolvedCallbackCalled => _cbCalled;
 
+        public object ResolvedObject => _resolvedObject;
+
         void IACore.DoA()
         {
             _basic.BuildConfiguration.Should().Match( s => s == "Debug" || s == "Release" );
@@ -48,10 +52,11 @@ namespace CK.Testing.Tests
             _aDone?.Invoke( this, EventArgs.Empty );
         }
 
-        void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
+        void ITestHelperResolvedCallback.OnTestHelperGraphResolved( object resolvedObject )
         {
             _cbCalled.Should().BeFalse();
             _cbCalled = true;
+            _resolvedObject = resolvedObject;
         }
 
         event EventHandler IACore.ADone
@@ -232,17 +237,42 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_one_simple_mixin_as_singleton()
         {
+            ITestHelperResolver resolver = TestHelperResolver.Create();
             int eventCount = 0;
-            var a = TestHelperResolver.Default.Resolve<IA>();
+            var a = resolver.Resolve<IA>();
             a.ADone += ( e, arg ) => ++eventCount;
             a.ResolvedCallbackCalled.Should().BeTrue();
+            a.ResolvedObject.Should().BeAssignableTo<IA>( "The resolved object here is the Mixin." );
 
             int originalCount = a.CallACount;
             a.DoA();
             a.CallACount.Should().Be( originalCount + 1 );
 
-            var a2 = TestHelperResolver.Default.Resolve<IA>();
-            a2.Should().BeSameAs( a );
+            var a2 = resolver.Resolve<IACore>();
+            a2.Should().NotBeSameAs( a, "Accessing IACore returns the A implementation object." );
+            a2.DoA();
+            a.CallACount.Should().Be( originalCount + 2 );
+        }
+
+        [Test]
+        public void resolving_one_core_as_singleton()
+        {
+            ITestHelperResolver resolver = TestHelperResolver.Create();
+            int eventCount = 0;
+            var a = resolver.Resolve<IACore>();
+            a.ADone += ( e, arg ) => ++eventCount;
+            a.ResolvedCallbackCalled.Should().BeTrue();
+            a.ResolvedObject.Should().BeAssignableTo<A>( "The resolved object here is NOT a Mixin, It is just the A implementation." );
+
+            int originalCount = a.CallACount;
+            a.DoA();
+            a.CallACount.Should().Be( originalCount + 1 );
+
+            var a2 = resolver.Resolve<IA>();
+            a2.Should().NotBeSameAs( a, "This is the Mixin built on A." );
+
+            a2.DoA();
+            a.CallACount.Should().Be( originalCount + 2 );
         }
 
         [Test]
