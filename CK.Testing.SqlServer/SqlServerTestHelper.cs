@@ -68,7 +68,7 @@ namespace CK.Testing
                             _monitor.Monitor.CloseGroup( "Database already exists, collation and compatiblity level match." );
                             return false;
                         }
-                        _monitor.Monitor.Info( $"Current is {o.ToString()}. Must be recreated." );
+                        _monitor.Monitor.Info( $"Current is {current.ToString()}. Must be recreated." );
                         DoDrop( current.DatabaseName );
                     }
                     string create = $@"create database {o.DatabaseName} collate {o.Collation};";
