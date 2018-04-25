@@ -227,11 +227,14 @@ namespace CK.Testing.Tests
             var b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
             var config = new TestHelperConfiguration();
             var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
-            paths.Should().HaveCount( 4 );
+            paths.Should().HaveCount( 5 );
             paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{{SolutionFolder}}.." );
             paths[1].Should().Be( b.RepositoryFolder.AppendPart( b.BuildConfiguration ), "{{RepositoryFolder}}/../CK-Testing/{{BuildConfiguration}}" );
             paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{{TestProjectName}}" );
             paths[3].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+            // No .. resolved when { appears.
+            paths[4].Should().Be( $"{{X}}\\{b.BuildConfiguration}\\..\\Y", "Since a { exists, the .. are not resolved. {X}\\{BuildConfiguration}\\..\\Y" );
+            paths[4].ResolveDots().Should().Be( $"{{X}}\\Y" );
         }
 
         [Test]

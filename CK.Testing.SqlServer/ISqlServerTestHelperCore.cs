@@ -20,6 +20,12 @@ namespace CK.Testing.SqlServer
 
         /// <summary>
         /// Gets the default test database informations.
+        /// Its name is given by the "SqlServer/DatabaseName" configuration if it exists
+        /// or is automatically infered from <see cref="IBasicTestHelper.TestProjectName"/>.
+        /// Its collation is given by ""SqlServer/Collation" configuration it it exists or defaults
+        /// to "Latin1_General_100_BIN2".
+        /// Its compatibility level is given by "SqlServer/CompatibilityLevel" or is automatically
+        /// set to the actual compatibility level of the server (from <see cref="MasterConnectionString"/>).  
         /// </summary>
         ISqlServerDatabaseOptions DefaultDatabaseOptions { get; }
 
