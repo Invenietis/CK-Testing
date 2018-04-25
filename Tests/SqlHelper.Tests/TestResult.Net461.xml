@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\SqlHelper.Tests\bin\Debug\net461\SqlHelper.Tests.dll" total="3" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-10" time="19:50:29">
+<test-results name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\SqlHelper.Tests\bin\Debug\net461\SqlHelper.Tests.dll" total="3" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2018-04-25" time="17:05:05">
   <environment nunit-version="2.6.4.14350" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Dev\CK-Core-Projects\CK-Testing" machine-name="DESKTOP-5BQ4M95" user="olivi" user-domain="DESKTOP-5BQ4M95" />
   <culture-info current-culture="fr-FR" current-uiculture="fr-FR" />
-  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\SqlHelper.Tests\bin\Debug\net461\SqlHelper.Tests.dll" executed="True" result="Success" success="True" time="2.986" asserts="0">
+  <test-suite type="Assembly" name="C:\Dev\CK-Core-Projects\CK-Testing\Tests\SqlHelper.Tests\bin\Debug\net461\SqlHelper.Tests.dll" executed="True" result="Success" success="True" time="3.630" asserts="0">
     <results>
-      <test-suite type="Namespace" name="SqlHelperTests" executed="True" result="Success" success="True" time="2.974" asserts="0">
+      <test-suite type="Namespace" name="SqlHelperTests" executed="True" result="Success" success="True" time="3.614" asserts="0">
         <results>
-          <test-suite type="TestFixture" name="DBLayerTests" executed="True" result="Success" success="True" time="2.973" asserts="0">
+          <test-suite type="TestFixture" name="DBLayerTests" executed="True" result="Success" success="True" time="3.611" asserts="0">
             <results>
-              <test-case name="SqlHelperTests.DBLayerTests.connection_string" executed="True" result="Success" success="True" time="0.883" asserts="0" />
-              <test-case name="SqlHelperTests.DBLayerTests.dropping_database_multiple_times" executed="True" result="Success" success="True" time="1.384" asserts="0" />
-              <test-case name="SqlHelperTests.DBLayerTests.Execute_create_script_on_Database_and_Drop" executed="True" result="Success" success="True" time="0.694" asserts="0" />
+              <test-case name="SqlHelperTests.DBLayerTests.connection_string" executed="True" result="Success" success="True" time="1.142" asserts="0" />
+              <test-case name="SqlHelperTests.DBLayerTests.dropping_database_multiple_times" executed="True" result="Success" success="True" time="1.708" asserts="0" />
+              <test-case name="SqlHelperTests.DBLayerTests.Execute_create_script_on_Database_and_Drop" executed="True" result="Success" success="True" time="0.745" asserts="0" />
             </results>
           </test-suite>
         </results>
