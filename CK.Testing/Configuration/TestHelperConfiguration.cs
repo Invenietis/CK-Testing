@@ -13,9 +13,9 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Simple configuration that reads its content from the first "TestHelper.config" "Test.config" or "App.Config"
-    /// in current execution path and parent paths and from environment variables that start
-    /// with "TestHelper::" prefix.
+    /// Simple configuration that reads its content from all "*.TestHelper.config" and then "TestHelper.config" files
+    /// in folders from <see cref="IBasicTestHelper.SolutionFolder"/> down to the  current execution path.
+    /// Once all these files are applied, environment variables that start with "TestHelper::" prefix are applied.
     /// </summary>
     public class TestHelperConfiguration : ITestHelperConfiguration
     {
@@ -96,6 +96,10 @@ namespace CK.Testing
             if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count )
             {
                 ApplyFilesConfig( folder.RemoveLastPart() );
+            }
+            foreach( var f in Directory.EnumerateFiles( folder, "*.TestHelper.config" ).OrderBy( n => n ) )
+            {
+                SimpleReadFromAppSetting( f );
             }
             var file = folder.AppendPart( "TestHelper.config" );
             if( File.Exists( file ) )
