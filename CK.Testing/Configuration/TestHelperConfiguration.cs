@@ -13,8 +13,9 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Simple configuration that reads its content from all "*.TestHelper.config" and then "TestHelper.config" files
-    /// in folders from <see cref="IBasicTestHelper.SolutionFolder"/> down to the  current execution path.
+    /// Simple configuration that reads its content from all "*.TestHelper.config" (in lexicographical 
+    /// order) and then "TestHelper.config" files in folders from <see cref="IBasicTestHelper.SolutionFolder"/> 
+    /// down to the current execution path.
     /// Once all these files are applied, environment variables that start with "TestHelper::" prefix are applied.
     /// </summary>
     public class TestHelperConfiguration : ITestHelperConfiguration
