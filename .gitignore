@@ -288,3 +288,5 @@ __pycache__/
 CodeCakeBuilder/Tools/
 Tests/GlobalLogs.Tests/Logs/
 Tests/LogToTextAndBinFile.Tests/Logs/
+
+TestResult*.xml
