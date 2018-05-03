@@ -165,7 +165,7 @@ namespace CK.Testing
             return result;
         }
 
-        void ITestHelperResolvedCallback.OnTestHelperGraphResolved()
+        void ITestHelperResolvedCallback.OnTestHelperGraphResolved( object finalMixin )
         {
             DrainAssemblyLoadConflicts( _monitor );
         }

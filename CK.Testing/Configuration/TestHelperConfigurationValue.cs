@@ -15,7 +15,7 @@ namespace CK.Testing
     public struct TestHelperConfigurationValue
     {
         /// <summary>
-        /// The base path of this confivguration value.
+        /// The base path of this configuration value.
         /// Defaults to <see cref="IBasicTestHelper.TestProjectFolder"/> (for environment setting for instance).
         /// </summary>
         public readonly NormalizedPath BasePath;
@@ -33,32 +33,44 @@ namespace CK.Testing
 
         /// <summary>
         /// Gets the <see cref="Value"/> as an absolute path or relative to <see cref="BasePath"/>.
-        /// If the value is not a valid path, result is what it is, without any warranty.
-        /// The Value can start with '{BinFolder}', {SolutionFolder} or {RepositoryFolder}: <see cref="IBasicTestHelper.BinFolder"/>,
-        /// <see cref="IBasicTestHelper.SolutionFolder"/> or <see cref="IBasicTestHelper.RepositoryFolder"/> is expanded and the suffix
-        /// is resolved (suffixes with \.. are handled).
+        /// <para>
         /// Placeholders {BuildConfiguration} and {TestProjectName} can appear anywhere in the Value
         /// and are replaced with <see cref="IBasicTestHelper.BuildConfiguration"/> and <see cref="IBasicTestHelper.TestProjectName"/>.
+        /// </para>
+        /// <para>
+        /// The Value can start with {BinFolder}, {SolutionFolder} or {RepositoryFolder}: <see cref="IBasicTestHelper.BinFolder"/>,
+        /// <see cref="IBasicTestHelper.SolutionFolder"/> or <see cref="IBasicTestHelper.RepositoryFolder"/> is expanded.
+        /// If the Value does not start with one of this 3 paths and no { appear, the <see cref="BasePath"/> is prepended.
+        /// </para>
+        /// <para>
+        /// If there is no '{' (ie. there is no unresolved placeholder), all '/../' are automatically resolved.
+        /// If a '{'  remains in the path, the dots are not resolved: this is up to the code that will use the path to resolve the placeholders
+        /// and the dots (see <see cref="NormalizedPath.ResolveDots(int, bool)"/>).
+        /// </para>
+        /// Note that if the value is not a valid path, result is what it is, without any warranty.
         /// </summary>
         /// <returns>The path.</returns>
         public string GetValueAsPath()
         {
             Debug.Assert( Value != null && !BasePath.IsEmpty );
-            NormalizedPath raw;
+
+            string v = Value.Replace( "{BuildConfiguration}", BasicTestHelper._buildConfiguration )
+                            .Replace( "{TestProjectName}", BasicTestHelper._testProjectName );
+
             Debug.Assert( "{BinFolder}".Length == 11 );
             Debug.Assert( "{SolutionFolder}".Length == 16 );
             Debug.Assert( "{RepositoryFolder}".Length == 18 );
-            if( Value.StartsWith( "{BinFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._binFolder.Combine( Value.Substring( 11 ) );
-            else if( Value.StartsWith( "{SolutionFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._solutionFolder.Combine( Value.Substring( 16 ) );
-            else if( Value.StartsWith( "{RepositoryFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._repositoryFolder.Combine( Value.Substring( 18 ) );
+            NormalizedPath raw;
+            if( v.StartsWith( "{BinFolder}" ) ) raw = BasicTestHelper._binFolder.Combine( v.Substring( 11 ) );
+            else if( v.StartsWith( "{SolutionFolder}" ) ) raw = BasicTestHelper._solutionFolder.Combine( v.Substring( 16 ) );
+            else if( v.StartsWith( "{RepositoryFolder}" ) ) raw = BasicTestHelper._repositoryFolder.Combine( v.Substring( 18 ) );
             if( raw.IsEmpty )
             {
-                if( Path.IsPathRooted( Value ) ) raw = Path.GetFullPath( Value );
-                else raw = BasePath.Combine( Value ).ResolveDots();
+                if( Path.IsPathRooted( v ) ) return Path.GetFullPath( v );
+                if( v.IndexOf( '{' ) >= 0 ) return v;
+                raw = BasePath.Combine( v );
             }
-            else raw = raw.ResolveDots();
-            return raw.ToString().Replace( "{BuildConfiguration}", BasicTestHelper._buildConfiguration )
-                                 .Replace( "{TestProjectName}", BasicTestHelper._testProjectName );
+            return raw.Path.IndexOf( '{' ) < 0 ? raw.ResolveDots() : raw;
         }
 
     }
