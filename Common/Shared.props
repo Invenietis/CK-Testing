@@ -29,7 +29,7 @@
     <CKActivityMonitorVersion>10.0.1-C0006-local</CKActivityMonitorVersion>
     <CKMonitoringVersion>9.0.2-C0006-local</CKMonitoringVersion>
     <CKReflectionVersion>7.0.1-C0004-local</CKReflectionVersion>
-    <FluentAssertionsVersion>5.3.0</FluentAssertionsVersion>
+    <FluentAssertionsVersion>5.3.2</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
        Keep obj folders since removing them messes up VS Project System.
