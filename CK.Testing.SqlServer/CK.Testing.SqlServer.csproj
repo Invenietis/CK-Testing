@@ -8,6 +8,6 @@
     <ProjectReference Include="..\CK.Testing.Monitoring\CK.Testing.Monitoring.csproj" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.0" />
   </ItemGroup>
 </Project>
