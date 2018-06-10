@@ -24,11 +24,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1-C0030-develop</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>10.0.2-C0051-develop</CKCoreVersion>
-    <CKActivityMonitorVersion>10.0.1-C0050-develop</CKActivityMonitorVersion>
-    <CKMonitoringVersion>9.0.2-C0051-develop</CKMonitoringVersion>
-    <CKReflectionVersion>7.0.1-C0032-develop</CKReflectionVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1-C0033-local</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>10.0.2-C0055-local</CKCoreVersion>
+    <CKActivityMonitorVersion>10.0.1-C0054-local</CKActivityMonitorVersion>
+    <CKMonitoringVersion>9.0.2-C0055-local</CKMonitoringVersion>
+    <CKReflectionVersion>7.0.1-C0035-local</CKReflectionVersion>
     <FluentAssertionsVersion>5.3.2</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
