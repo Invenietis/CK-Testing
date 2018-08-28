@@ -27,29 +27,26 @@ namespace GlobalLogs.Tests
                         .Select( f => File.ReadAllText( f ) )
                         .Count( text => text.Contains( secret ) )
                         .Should().Be( 1 );
-            Directory.EnumerateFiles( TestHelper.LogFolder, "*.ckmon", SearchOption.AllDirectories )
-                        .Where( f => SearchBytes( File.ReadAllBytes( f ), binSecret ) > 0 )
-                        .Should().HaveCount( 1 );
-
+            // ckmon files are now gzipped by default.
+            int count = 0;
+            foreach( var fName in Directory.EnumerateFiles( TestHelper.LogFolder, "*.ckmon", SearchOption.AllDirectories ) )
+            {
+                using( var input = LogReader.Open( fName ) )
+                {
+                    while( input.MoveNext() )
+                    {
+                        if( input.Current.LogType != LogEntryType.CloseGroup
+                            && input.Current.Text.Contains( secret ) )
+                        {
+                            ++count;
+                        }
+                    }
+                }
+            }
+            count.Should().Be( 1 );
             //
             TestHelper.WithWeakAssemblyResolver( () => TestHelper.Monitor.Info( "From WeakAssemblyResolver." ) );
             TestHelper.Monitor.Info( $"From WeakAssemblyResolver: {TestHelper.WithWeakAssemblyResolver( () => 3 )}" );
-        }
-
-        static int SearchBytes( byte[] haystack, byte[] needle )
-        {
-            var len = needle.Length;
-            var limit = haystack.Length - len;
-            for( var i = 0; i <= limit; i++ )
-            {
-                var k = 0;
-                for( ; k < len; k++ )
-                {
-                    if( needle[k] != haystack[i + k] ) break;
-                }
-                if( k == len ) return i;
-            }
-            return -1;
         }
 
         [Test]
