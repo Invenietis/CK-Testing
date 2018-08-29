@@ -54,6 +54,7 @@ namespace CK.Testing
                 {
                     var binConf = new BinaryFileConfiguration
                     {
+                        UseGzipCompression = true,
                         Path = FileUtil.CreateUniqueTimedFolder( LogFile.RootLogPath + "CKMon/", null, DateTime.UtcNow )
                     };
                     conf.AddHandler( binConf );
