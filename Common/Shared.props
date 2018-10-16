@@ -25,9 +25,9 @@
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
     <CKWeakAssemblyNameResolverVersion>0.5.1--0057-develop</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>10.1.2--0012-develop</CKCoreVersion>
-    <CKActivityMonitorVersion>10.1.2--0011-develop</CKActivityMonitorVersion>
-    <CKMonitoringVersion>9.1.2--0010-develop</CKMonitoringVersion>
+    <CKCoreVersion>10.1.2--0014-develop</CKCoreVersion>
+    <CKActivityMonitorVersion>10.1.2--0014-develop</CKActivityMonitorVersion>
+    <CKMonitoringVersion>9.1.2--0012-develop</CKMonitoringVersion>
     <CKReflectionVersion>8.0.1--0016-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
   </PropertyGroup>
