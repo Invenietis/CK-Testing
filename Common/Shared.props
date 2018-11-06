@@ -24,11 +24,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1--0066-local</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>10.1.2--0027-local</CKCoreVersion>
-    <CKActivityMonitorVersion>10.1.2--0027-local</CKActivityMonitorVersion>
-    <CKMonitoringVersion>9.1.2--0026-local</CKMonitoringVersion>
-    <CKReflectionVersion>8.0.1--0025-local</CKReflectionVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1--0067-local</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>10.1.2--0029-local</CKCoreVersion>
+    <CKActivityMonitorVersion>10.1.2--0029-local</CKActivityMonitorVersion>
+    <CKMonitoringVersion>9.1.2--0028-local</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.1--0026-local</CKReflectionVersion>
     <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
@@ -68,9 +68,9 @@
   <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-</PropertyGroup>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(CakeBuild)' == 'true' ">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
-</ItemGroup>
+  </ItemGroup>
   <!--</SourceLink>-->
 </Project>
