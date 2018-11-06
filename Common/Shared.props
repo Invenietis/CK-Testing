@@ -64,4 +64,13 @@
     <PackageLicenseUrl>https://bitbucket.org/olivier_spinelli/ck-database/license</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/Invenietis/olivier_spinelli/ck-database</RepositoryUrl>
   </PropertyGroup>
+  <!--<SourceLink>: is enabled only for Cake build. -->
+  <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+</PropertyGroup>
+  <ItemGroup Condition=" '$(CakeBuild)' == 'true' ">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+</ItemGroup>
+  <!--</SourceLink>-->
 </Project>
