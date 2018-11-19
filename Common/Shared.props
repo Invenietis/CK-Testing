@@ -24,10 +24,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1--0068-local</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>10.1.2--0031-local</CKCoreVersion>
-    <CKActivityMonitorVersion>10.1.2--0031-local</CKActivityMonitorVersion>
-    <CKMonitoringVersion>9.1.2--0031-local</CKMonitoringVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1--0069-local</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>10.1.2--0033-local</CKCoreVersion>
+    <CKActivityMonitorVersion>10.1.2--0034-local</CKActivityMonitorVersion>
+    <CKMonitoringVersion>9.1.2--0033-local</CKMonitoringVersion>
     <CKReflectionVersion>8.0.1--0027-local</CKReflectionVersion>
     <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
   </PropertyGroup>
