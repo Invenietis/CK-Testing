@@ -1,12 +1,11 @@
 <Project>
-
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1--0069-local</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>10.1.2--0033-local</CKCoreVersion>
-    <CKActivityMonitorVersion>10.1.2--0034-local</CKActivityMonitorVersion>
-    <CKMonitoringVersion>9.1.2--0033-local</CKMonitoringVersion>
-    <CKReflectionVersion>8.0.1--0027-local</CKReflectionVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1--0070-local</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>10.1.2--0035-local</CKCoreVersion>
+    <CKActivityMonitorVersion>10.1.2--0036-local</CKActivityMonitorVersion>
+    <CKMonitoringVersion>9.1.2--0035-local</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.1--0028-local</CKReflectionVersion>
     <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
@@ -16,7 +15,6 @@
     <Message Text="CKExtendClean: Deleting $(TargetDir)" />
     <RemoveDir Directories="$(TargetDir)" />
   </Target>
-
   <!--<SourceLink>: is enabled only for Cake build. -->
   <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -27,7 +25,6 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
   </ItemGroup>
   <!--</SourceLink>-->
-
   <!--<BasicDefinitions>: It is useful to knwow whether we are in the Tests/ folder and/or if the current project is a Test.-->
   <PropertyGroup>
     <IsTestProject Condition="$(MSBuildProjectName.EndsWith('.Tests'))">true</IsTestProject>
@@ -36,7 +33,6 @@
     <SolutionDir Condition=" $(SolutionDir) != '' ">$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))\</SolutionDir>
   </PropertyGroup>
   <!--</BasicDefinitions>-->
-
   <!--<StandardProperties>-->
   <PropertyGroup>
     <RepositoryUrl>https://github.com/Invenietis/CK-Testing.git</RepositoryUrl>
@@ -50,7 +46,6 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
   <!--</StandardProperties>-->
-
   <!--<ReproducibleBuilds>: See http://blog.paranoidcoding.com/2016/04/05/deterministic-builds-in-roslyn.html.-->
   <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
     <Deterministic>true</Deterministic>
@@ -59,7 +54,6 @@
     <PathMap Condition=" '$(CKWorldPath)' != '' ">$(CKWorldPath)=C:\CK-World</PathMap>
   </PropertyGroup>
   <!--</ReproducibleBuilds>-->
-
   <!--<ZeroVersion>: When not building from the CI, assemblies always use the ZeroVersion (see CSemVer.InformationalVersion).-->
   <PropertyGroup Condition=" '$(CakeBuild)' != 'true' ">
     <Version>0.0.0-0</Version>
@@ -68,7 +62,6 @@
     <InformationalVersion>0.0.0-0 (0.0.0-0) - SHA1: 0000000000000000000000000000000000000000 - CommitDate: 0001-01-01 00:00:00Z</InformationalVersion>
   </PropertyGroup>
   <!--</ZeroVersion>-->
-
   <!--<GenerateDocumentation>: Default is in Release or during Cake builds (except for projects below Tests/). Each project can override GenerateDocumentationFile property.-->
   <PropertyGroup Condition=" '$(IsInTestsFolder)' != 'true' And ('$(CakeBuild)' == 'true' Or '$(Configuration)' == 'Release') ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
