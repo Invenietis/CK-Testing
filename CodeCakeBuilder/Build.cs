@@ -84,8 +84,8 @@ namespace CodeCake
                                      || Cake.ReadInteractiveOption( "RunUnitTests", "Run Unit Tests?", 'Y', 'N' ) == 'Y' )
                 .Does( () =>
                 {
-                    var tests = projects.Where( p => p.Name.EndsWith( ".Tests" ) || p.Name == "SqlHelperTests" );
-                    StandardUnitTests( globalInfo.BuildConfiguration, tests );
+                    var testProjects = projects.Where( p => p.Name.EndsWith( ".Tests" ) || p.Name == "SqlHelperTests" );
+                    StandardUnitTests( globalInfo, testProjects );
                 } );
 
             Task( "Create-NuGet-Packages" )
