@@ -30,7 +30,8 @@ namespace CK.Testing
         static BasicTestHelper()
         {
             _onlyOnce = new HashSet<string>();
-            string p = _binFolder = AppContext.BaseDirectory;
+            string p = AppContext.BaseDirectory;
+            _binFolder = p;
             string buildConfDir = null;
             foreach( var config in _allowedConfigurations )
             {
