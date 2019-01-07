@@ -52,19 +52,30 @@ namespace CK.Testing
         /// <returns>The path.</returns>
         public string GetValueAsPath()
         {
-            Debug.Assert( Value != null && !BasePath.IsEmpty );
+            Debug.Assert( Value != null && !BasePath.IsEmptyPath );
 
             string v = Value.Replace( "{BuildConfiguration}", BasicTestHelper._buildConfiguration )
                             .Replace( "{TestProjectName}", BasicTestHelper._testProjectName );
+
+            string SubPathNoRoot( string theV, int prefixLen )
+            {
+                if( theV.Length > prefixLen
+                    && ( theV[prefixLen] == System.IO.Path.DirectorySeparatorChar
+                         || theV[prefixLen] == System.IO.Path.AltDirectorySeparatorChar) )
+                {
+                    ++prefixLen;
+                }
+                return v.Substring( prefixLen );
+            }
 
             Debug.Assert( "{BinFolder}".Length == 11 );
             Debug.Assert( "{SolutionFolder}".Length == 16 );
             Debug.Assert( "{RepositoryFolder}".Length == 18 );
             NormalizedPath raw;
-            if( v.StartsWith( "{BinFolder}" ) ) raw = BasicTestHelper._binFolder.Combine( v.Substring( 11 ) );
-            else if( v.StartsWith( "{SolutionFolder}" ) ) raw = BasicTestHelper._solutionFolder.Combine( v.Substring( 16 ) );
-            else if( v.StartsWith( "{RepositoryFolder}" ) ) raw = BasicTestHelper._repositoryFolder.Combine( v.Substring( 18 ) );
-            if( raw.IsEmpty )
+            if( v.StartsWith( "{BinFolder}" ) ) raw = BasicTestHelper._binFolder.Combine( SubPathNoRoot( v, 11 ) );
+            else if( v.StartsWith( "{SolutionFolder}" ) ) raw = BasicTestHelper._solutionFolder.Combine( SubPathNoRoot( v, 16 ) );
+            else if( v.StartsWith( "{RepositoryFolder}" ) ) raw = BasicTestHelper._repositoryFolder.Combine( SubPathNoRoot( v, 18 ) );
+            else
             {
                 if( Path.IsPathRooted( v ) ) return Path.GetFullPath( v );
                 if( v.IndexOf( '{' ) >= 0 ) return v;
