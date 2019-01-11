@@ -42,7 +42,7 @@ namespace CK.Testing
         /// <returns>The configured value.</returns>
         public TestHelperConfigurationValue? GetConfigValue( NormalizedPath key )
         {
-            while( !key.IsEmpty )
+            while( key.HasParts )
             {
                 if( _config.TryGetValue( key, out var result ) ) return result;
                 if( key.Parts.Count == 1 ) break;
@@ -82,7 +82,7 @@ namespace CK.Testing
             if( value == null ) _config.Remove( k );
             else
             {
-                if( basePath.IsEmpty ) basePath = BasicTestHelper._testProjectFolder;
+                if( basePath.IsEmptyPath ) basePath = BasicTestHelper._testProjectFolder;
                 _config[k] = new TestHelperConfigurationValue( basePath, value );
             }
         }
@@ -122,7 +122,7 @@ namespace CK.Testing
                 else if( e.Name.LocalName == "remove" )
                 {
                     var k = NormalizeKey( e.AttributeRequired( "key" ).Value );
-                    while( !k.IsEmpty )
+                    while( !k.IsEmptyPath )
                     {
                         _config.Remove( k );
                         k = k.RemoveFirstPart();
