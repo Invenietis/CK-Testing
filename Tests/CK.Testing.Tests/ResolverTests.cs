@@ -233,8 +233,8 @@ namespace CK.Testing.Tests
             paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{{TestProjectName}}" );
             paths[3].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
             // No .. resolved when { appears.
-            paths[4].Should().Be( $"{{X}}\\{b.BuildConfiguration}\\..\\Y", "Since a { exists, the .. are not resolved. {X}\\{BuildConfiguration}\\..\\Y" );
-            paths[4].ResolveDots().Should().Be( $"{{X}}\\Y" );
+            paths[4].Should().Be( $"{{X}}/{b.BuildConfiguration}/../Y", "Since a { exists, the .. are not resolved. {X}/{BuildConfiguration}/../Y" );
+            paths[4].ResolveDots().Should().Be( $"{{X}}/Y" );
         }
 
         [Test]

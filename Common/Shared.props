@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.0.0--023uqof-local</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>0.0.0--023zw5x-local</CKCoreVersion>
-    <CKActivityMonitorVersion>0.0.0--023zw5y-local</CKActivityMonitorVersion>
-    <CKMonitoringVersion>0.0.0--023zw60-local</CKMonitoringVersion>
+    <CKWeakAssemblyNameResolverVersion>0.0.0--0240f3h-local</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>0.0.0--02405lw-local</CKCoreVersion>
+    <CKActivityMonitorVersion>0.0.0--0240gf8-local</CKActivityMonitorVersion>
+    <CKMonitoringVersion>0.0.0--0240hs1-local</CKMonitoringVersion>
     <CKReflectionVersion>0.0.0--023uqoe-local</CKReflectionVersion>
     <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
   </PropertyGroup>

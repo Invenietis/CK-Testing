@@ -89,7 +89,8 @@ namespace CK.Testing
 
         static NormalizedPath NormalizeKey( string key )
         {
-            return key.Replace( "::", FileUtil.DirectorySeparatorString );
+            return key.Replace( "::", NormalizedPath.DirectorySeparatorString )
+                      .Replace( "__", NormalizedPath.DirectorySeparatorString );
         }
 
         void ApplyFilesConfig( NormalizedPath folder )
@@ -122,7 +123,7 @@ namespace CK.Testing
                 else if( e.Name.LocalName == "remove" )
                 {
                     var k = NormalizeKey( e.AttributeRequired( "key" ).Value );
-                    while( !k.IsEmptyPath )
+                    while( k.HasParts )
                     {
                         _config.Remove( k );
                         k = k.RemoveFirstPart();
@@ -138,15 +139,17 @@ namespace CK.Testing
 
         void SimpleReadFromEnvironment()
         {
-            const string prefix = "TestHelper::";
-            Debug.Assert( prefix.Length == 12 );
+            const string prefix1 = "TestHelper::";
+            const string prefix2 = "TestHelper__";
+            Debug.Assert( prefix1.Length == 12 && prefix2.Length == 12 );
             var env = Environment.GetEnvironmentVariables()
                         .Cast<DictionaryEntry>()
-                        .Select( e => Tuple.Create( (string)e.Key, (string)e.Value ) )
-                        .Where( t => t.Item1.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
-                        .Select( t => Tuple.Create( t.Item1.Substring( 12 ), t.Item2 ) );
+                        .Select( e => new KeyValuePair<string,string>( (string)e.Key, (string)e.Value ) )
+                        .Where( t => t.Key.StartsWith( prefix1, StringComparison.OrdinalIgnoreCase )
+                                     || t.Key.StartsWith( prefix2, StringComparison.OrdinalIgnoreCase ) )
+                        .Select( t => new KeyValuePair<string, string>( t.Key.Substring( 12 ), t.Value ) );
 
-            foreach( var kv in env ) SetEntry( kv.Item1, BasicTestHelper._testProjectFolder, kv.Item2 );
+            foreach( var kv in env ) SetEntry( kv.Key, BasicTestHelper._testProjectFolder, kv.Value );
         }
 
         /// <summary>
