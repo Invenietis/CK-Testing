@@ -1,3 +1,4 @@
+using CK.Core;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
@@ -41,6 +42,7 @@ namespace SqlHelperTests
         [Test]
         public void connection_string()
         {
+            TestHelper.Monitor.Info( $"Current User: {Environment.UserDomainName}/{Environment.UserName}" );
             var c = TestHelper.MasterConnectionString;
             c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
             var c2 = TestHelper.GetConnectionString( "Toto" );
