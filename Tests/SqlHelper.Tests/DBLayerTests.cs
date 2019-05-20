@@ -14,6 +14,16 @@ namespace SqlHelperTests
     [TestFixture]
     public class DBLayerTests
     {
+        static int _consoleToggleCount = 0;
+
+        [Explicit]
+        [Test]
+        public void toggle_console_output()
+        {
+            TestHelper.Monitor.Info( $"Before Toggle n°{++_consoleToggleCount}" );
+            TestHelper.LogToConsole = !TestHelper.LogToConsole;
+            TestHelper.Monitor.Info( $"After Toggle n°{_consoleToggleCount}" );
+        }
 
         [Test]
         public void dropping_database_multiple_times()
