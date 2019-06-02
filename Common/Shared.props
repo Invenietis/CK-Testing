@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.0</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>11.0.2</CKCoreVersion>
-    <CKActivityMonitorVersion>11.0.2</CKActivityMonitorVersion>
-    <CKMonitoringVersion>10.0.2</CKMonitoringVersion>
-    <CKReflectionVersion>8.0.1</CKReflectionVersion>
-    <FluentAssertionsVersion>5.4.1</FluentAssertionsVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>11.1.0</CKCoreVersion>
+    <CKActivityMonitorVersion>11.1.0</CKActivityMonitorVersion>
+    <CKMonitoringVersion>10.1.0</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.2</CKReflectionVersion>
+    <FluentAssertionsVersion>5.6.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
        Keep obj folders since removing them messes up VS Project System.
@@ -53,9 +53,9 @@
   <!--<ReproducibleBuilds>: See http://blog.paranoidcoding.com/2016/04/05/deterministic-builds-in-roslyn.html.-->
   <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
     <Deterministic>true</Deterministic>
-    <!-- Finds the CK-World.htm that must exist at the root of the development directory. This is path to map to C:\CK-World. -->
-    <CKWorldPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CK-World.htm))</CKWorldPath>
-    <PathMap Condition=" '$(CKWorldPath)' != '' ">$(CKWorldPath)=C:\CK-World</PathMap>
+    <!-- Finds the CKli-World.htm that must exist at the root of the development directory. This is path to map to C:\CKli-World. -->
+    <CKliWorldPath>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), CKli-World.htm))</CKliWorldPath>
+    <PathMap Condition=" '$(CKliWorldPath)' != '' ">$(CKliWorldPath)=C:\CKli-World</PathMap>
   </PropertyGroup>
   <!--</ReproducibleBuilds>-->
   <!--<ZeroVersion>: When not building from the CI, assemblies always use the ZeroVersion (see CSemVer.InformationalVersion).-->

@@ -1,3 +1,4 @@
+using CK.Core;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
@@ -13,6 +14,16 @@ namespace SqlHelperTests
     [TestFixture]
     public class DBLayerTests
     {
+        static int _consoleToggleCount = 0;
+
+        [Explicit]
+        [Test]
+        public void toggle_console_output()
+        {
+            TestHelper.Monitor.Info( $"Before Toggle n°{++_consoleToggleCount}" );
+            TestHelper.LogToConsole = !TestHelper.LogToConsole;
+            TestHelper.Monitor.Info( $"After Toggle n°{_consoleToggleCount}" );
+        }
 
         [Test]
         public void dropping_database_multiple_times()
@@ -41,6 +52,7 @@ namespace SqlHelperTests
         [Test]
         public void connection_string()
         {
+            TestHelper.Monitor.Info( $"Current User: {Environment.UserDomainName}/{Environment.UserName}" );
             var c = TestHelper.MasterConnectionString;
             c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
             var c2 = TestHelper.GetConnectionString( "Toto" );
