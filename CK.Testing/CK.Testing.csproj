@@ -1,17 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <Import Project="..\Common\Shared.props" />
-
   <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
     <Description>Contains Test Helpers mixin infrastructure.</Description>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="CK.Core" Version="$(CKCoreVersion)" />
     <PackageReference Include="CK.Reflection" Version="$(CKReflectionVersion)" />
     <PackageReference Include="CK.WeakAssemblyNameResolver" Version="$(CKWeakAssemblyNameResolverVersion)" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
   </ItemGroup>
-  
 </Project>
