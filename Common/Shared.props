@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>11.1.0</CKCoreVersion>
-    <CKActivityMonitorVersion>11.1.0</CKActivityMonitorVersion>
-    <CKMonitoringVersion>10.1.1-p</CKMonitoringVersion>
-    <CKReflectionVersion>8.0.2</CKReflectionVersion>
-    <FluentAssertionsVersion>5.6.0</FluentAssertionsVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.2--0007-develop</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>11.2.0</CKCoreVersion>
+    <CKActivityMonitorVersion>11.1.1--0016-develop</CKActivityMonitorVersion>
+    <CKMonitoringVersion>10.1.1-p00-00-0007-develop</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.3--0007-develop</CKReflectionVersion>
+    <FluentAssertionsVersion>5.7.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
        Keep obj folders since removing them messes up VS Project System.
