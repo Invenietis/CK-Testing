@@ -70,7 +70,9 @@ namespace CK.Testing
             }
             _solutionFolder = Path.GetDirectoryName( testsFolder );
             _logFolder = Path.Combine( _testProjectFolder, "Logs" );
-            _isTestHost = AppDomain.CurrentDomain.GetAssemblies().IndexOf( a => a.GetName().Name == "testhost" ) >= 0;
+            // The first works in .Net framework, the second one in netcore.
+            _isTestHost =  Environment.CommandLine.Contains("testhost")
+                            || AppDomain.CurrentDomain.GetAssemblies().IndexOf( a => a.GetName().Name == "testhost" ) >= 0;
         }
 
         event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
