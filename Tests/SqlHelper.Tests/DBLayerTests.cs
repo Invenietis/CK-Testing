@@ -20,6 +20,7 @@ namespace SqlHelperTests
         [Test]
         public void toggle_console_output()
         {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             TestHelper.Monitor.Info( $"Before Toggle n°{++_consoleToggleCount}" );
             TestHelper.LogToConsole = !TestHelper.LogToConsole;
             TestHelper.Monitor.Info( $"After Toggle n°{_consoleToggleCount}" );
@@ -30,23 +31,23 @@ namespace SqlHelperTests
         {
             TestHelper.EnsureDatabase( reset: false );
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
         [Test]
         public void Execute_create_script_on_Database_and_Drop()
         {
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName = null;
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.LastDatabaseCreatedOrDroppedName.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
+            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
         [Test]
