@@ -53,22 +53,6 @@ namespace CK.Testing
             }
             _testProjectFolder = p = Path.GetDirectoryName( p );
             _testProjectName = Path.GetFileName( p );
-            Assembly entry = Assembly.GetEntryAssembly();
-            if( entry != null )
-            {
-                string assemblyName = entry.GetName().Name;
-                if( _testProjectName != assemblyName )
-                {
-                    if( assemblyName == "testhost" )
-                    {
-                        _isTestHost = true;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException( $"Initialization error: Current test project assembly is '{assemblyName}' but folder is '{_testProjectName}' (above '{_buildConfiguration}' in '{_binFolder}')." );
-                    }
-                }
-            }
             p = Path.GetDirectoryName( p );
 
             string testsFolder = null;
@@ -86,6 +70,7 @@ namespace CK.Testing
             }
             _solutionFolder = Path.GetDirectoryName( testsFolder );
             _logFolder = Path.Combine( _testProjectFolder, "Logs" );
+            _isTestHost = AppDomain.CurrentDomain.GetAssemblies().IndexOf( a => a.GetName().Name == "testhost" ) >= 0;
         }
 
         event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
