@@ -106,6 +106,8 @@ namespace CK.Testing
 
         NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
 
+        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed; 
+
         void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
         {
             int tryCount = 0;
