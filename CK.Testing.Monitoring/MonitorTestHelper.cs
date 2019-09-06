@@ -24,7 +24,7 @@ namespace CK.Testing
         readonly ActivityMonitorConsoleClient _console;
         readonly ITestHelperConfiguration _config;
         readonly IBasicTestHelper _basic;
-        static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
+        static readonly CKTag _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
         static int _loadConflictCount = 0;
         static bool _logToBinFile;
         static bool _logToTextFile;
