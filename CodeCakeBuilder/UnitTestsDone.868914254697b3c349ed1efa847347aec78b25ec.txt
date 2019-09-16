@@ -1,6 +1,0 @@
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/CK.Testing.Tests/bin/Debug/net461/CK.Testing.Tests.dll
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/CK.Testing.Tests/bin/Debug/netcoreapp2.1/CK.Testing.Tests.dll
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/LogToTextAndBinFile.Tests/bin/Debug/net461/LogToTextAndBinFile.Tests.dll
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/LogToTextAndBinFile.Tests/bin/Debug/netcoreapp2.1/LogToTextAndBinFile.Tests.dll
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/SqlHelper.Tests/bin/Debug/net461/SqlHelper.Tests.dll
-C:/Dev/CK/CK-Core-Projects/CK-Testing/Tests/SqlHelper.Tests/bin/Debug/netcoreapp2.1/SqlHelper.Tests.dll
