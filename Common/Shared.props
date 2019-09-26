@@ -2,11 +2,11 @@
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
     <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>11.2.0</CKCoreVersion>
-    <CKActivityMonitorVersion>11.1.2</CKActivityMonitorVersion>
-    <CKMonitoringVersion>10.2.1</CKMonitoringVersion>
-    <CKReflectionVersion>8.0.3</CKReflectionVersion>
-    <FluentAssertionsVersion>5.8.0</FluentAssertionsVersion>
+    <CKCoreVersion>12.0.0</CKCoreVersion>
+    <CKActivityMonitorVersion>12.0.0</CKActivityMonitorVersion>
+    <CKMonitoringVersion>11.0.0</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.4</CKReflectionVersion>
+    <FluentAssertionsVersion>5.9.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
        Keep obj folders since removing them messes up VS Project System.
@@ -62,7 +62,7 @@
     <Version>0.0.0-0</Version>
     <AssemblyVersion>0.0.0</AssemblyVersion>
     <FileVersion>0.0.0.0</FileVersion>
-    <InformationalVersion>0.0.0-0 (0.0.0-0) - SHA1: 0000000000000000000000000000000000000000 - CommitDate: 0001-01-01 00:00:00Z</InformationalVersion>
+    <InformationalVersion>0.0.0-0/0000000000000000000000000000000000000000/0001-01-01 00:00:00Z</InformationalVersion>
   </PropertyGroup>
   <!--</ZeroVersion>-->
   <!--<GenerateDocumentation>: Default is in Release or during Cake builds (except for projects below Tests/). Each project can override GenerateDocumentationFile property.-->
