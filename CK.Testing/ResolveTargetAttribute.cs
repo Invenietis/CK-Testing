@@ -8,7 +8,7 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// This attribute forwards the resolution of a type to anotner one.
+    /// This attribute forwards the resolution of a type to another one.
     /// This can typically be used by a core interface or an implementation of a core interface to
     /// forward their resolution to their associated mixin.
     /// </summary>
