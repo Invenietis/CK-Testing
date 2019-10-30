@@ -207,7 +207,6 @@ namespace CK.Testing.Tests
         }
     }
 
-    // B is like SqlTransform.
     public interface INotImplCore
     {
         void Do();
