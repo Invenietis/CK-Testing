@@ -95,7 +95,7 @@ namespace CK.Testing
 
         bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed; 
 
-        void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
+        void IBasicTestHelper.CleanupFolder( string folder, bool ensureFolderAvailable, int maxRetryCount )
         {
             int tryCount = 0;
             for(; ; )
@@ -103,10 +103,13 @@ namespace CK.Testing
                 try
                 {
                     if( Directory.Exists( folder ) ) Directory.Delete( folder, true );
-                    Directory.CreateDirectory( folder );
-                    File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
-                    File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
-                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder ) );
+                    if( ensureFolderAvailable )
+                    {
+                        Directory.CreateDirectory( folder );
+                        File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
+                        File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
+                    }
+                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder, ensureFolderAvailable ) );
                     return;
                 }
                 catch( Exception )
