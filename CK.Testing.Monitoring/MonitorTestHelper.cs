@@ -17,7 +17,7 @@ namespace CK.Testing
 
     /// <summary>
     /// Provides default implementation of <see cref="Monitoring.IMonitorTestHelperCore"/>
-    /// and easyt to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
+    /// and easy to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
     /// </summary>
     public class MonitorTestHelper : Monitoring.IMonitorTestHelperCore
     {
@@ -83,9 +83,15 @@ namespace CK.Testing
             basic.OnlyOnce( () =>
             {
                 var basePath = LogFile.RootLogPath + "Text" + FileUtil.DirectorySeparatorString;
-                CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                if( Directory.Exists( basePath ) )
+                {
+                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                }
                 basePath = LogFile.RootLogPath + "CKMon" + FileUtil.DirectorySeparatorString;
-                CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                if( Directory.Exists( basePath ) )
+                {
+                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                }
             } );
         }
 
