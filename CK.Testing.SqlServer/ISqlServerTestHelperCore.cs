@@ -15,6 +15,10 @@ namespace CK.Testing.SqlServer
         /// <summary>
         /// Gets the connection string to the master database from "SqlServer/MasterConnectionString" configuration.
         /// Defaults to "Server=.;Database=master;Integrated Security=true".
+        /// <para>
+        /// As usual, when no configuration exists, if an environement variable that starts with "TestHelper__" exists,
+        /// its value is used (its name must be 'TestHelper__MasterConnectionString' or 'TestHelper__SqlServer__MasterConnectionString').
+        /// </para>
         /// </summary>
         string MasterConnectionString { get; }
 
