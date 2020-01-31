@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.6.0-a</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>13.0.0-a</CKCoreVersion>
-    <CKActivityMonitorVersion>13.0.0-a</CKActivityMonitorVersion>
-    <CKMonitoringVersion>12.0.0-a</CKMonitoringVersion>
-    <CKReflectionVersion>9.0.0-a</CKReflectionVersion>
+    <CKWeakAssemblyNameResolverVersion>0.6.0-a00-00-0011-develop</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>13.0.0-a00-00-0017-develop</CKCoreVersion>
+    <CKActivityMonitorVersion>13.0.0-a00-00-0018-develop</CKActivityMonitorVersion>
+    <CKMonitoringVersion>12.0.0-a00-00-0019-develop</CKMonitoringVersion>
+    <CKReflectionVersion>9.0.0-a00-00-0011-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.9.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
@@ -24,7 +24,7 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup Condition=" '$(CakeBuild)' == 'true' ">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <!--</SourceLink>-->
   <!--<BasicDefinitions>: It is useful to knwow whether we are in the Tests/ folder and/or if the current project is a Test.-->
