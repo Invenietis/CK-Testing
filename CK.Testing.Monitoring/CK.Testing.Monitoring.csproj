@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Common\Shared.props" />
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Description>Contains ActivityMonitor Test Helper mixin.</Description>
   </PropertyGroup>
   <ItemGroup>
