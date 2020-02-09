@@ -5,7 +5,7 @@
     <CKCoreVersion>13.0.0-a00-00-0013-develop</CKCoreVersion>
     <CKActivityMonitorVersion>13.0.0-a00-00-0013-develop</CKActivityMonitorVersion>
     <CKMonitoringVersion>12.0.0-a00-00-0015-develop</CKMonitoringVersion>
-    <CKReflectionVersion>9.0.0-a00-00-0007-develop</CKReflectionVersion>
+    <CKReflectionVersion>9.0.0-a00-00-0008-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.9.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
