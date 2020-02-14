@@ -4,7 +4,7 @@
     <CKWeakAssemblyNameResolverVersion>0.5.2--0038-develop</CKWeakAssemblyNameResolverVersion>
     <CKCoreVersion>13.0.1--0001-develop</CKCoreVersion>
     <CKActivityMonitorVersion>13.0.1--0003-develop</CKActivityMonitorVersion>
-    <CKMonitoringVersion>12.0.1--0004-develop</CKMonitoringVersion>
+    <CKMonitoringVersion>12.0.1--0007-develop</CKMonitoringVersion>
     <CKReflectionVersion>9.0.1--0000-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.10.2</FluentAssertionsVersion>
   </PropertyGroup>
