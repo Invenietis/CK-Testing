@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>13.0.0</CKCoreVersion>
-    <CKActivityMonitorVersion>13.1.0</CKActivityMonitorVersion>
-    <CKMonitoringVersion>12.1.0</CKMonitoringVersion>
-    <CKReflectionVersion>9.0.0</CKReflectionVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.2--0038-develop</CKWeakAssemblyNameResolverVersion>
+    <CKCoreVersion>13.0.1--0003-develop</CKCoreVersion>
+    <CKActivityMonitorVersion>13.1.1--0003-develop</CKActivityMonitorVersion>
+    <CKMonitoringVersion>12.1.1--0002-develop</CKMonitoringVersion>
+    <CKReflectionVersion>9.0.1--0000-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.10.2</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
