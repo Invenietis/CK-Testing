@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2D172FAA-2799-4F93-B774-3BA6C1BECA6D}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
+		Common\CentralPackages.props = Common\CentralPackages.props
 		nuget.config = nuget.config
 		RepositoryInfo.xml = RepositoryInfo.xml
 		Common\Shared.props = Common\Shared.props

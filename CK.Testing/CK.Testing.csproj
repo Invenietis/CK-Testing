@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
   <Import Project="..\Common\Shared.props" />
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netcoreapp2.2</TargetFrameworks>
     <Description>Contains Test Helpers mixin infrastructure.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.Core" Version="$(CKCoreVersion)" />
-    <PackageReference Include="CK.Reflection" Version="$(CKReflectionVersion)" />
-    <PackageReference Include="CK.WeakAssemblyNameResolver" Version="$(CKWeakAssemblyNameResolverVersion)" />
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+    <PackageReference Include="CK.Core" />
+    <PackageReference Include="CK.Reflection" />
+    <PackageReference Include="CK.WeakAssemblyNameResolver" />
+    <PackageReference Include="FluentAssertions" />
   </ItemGroup>
 </Project>
