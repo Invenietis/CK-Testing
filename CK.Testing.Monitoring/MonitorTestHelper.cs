@@ -116,7 +116,7 @@ namespace CK.Testing
                     Directory.Move( old, target );
                 }
                 GetTimedFolders( archivePath, out timedFolders, out _, true );
-                foreach( var tooOld in timedFolders.Values.Skip( MaxArchivedLogFolderCount ) )
+                foreach( var tooOld in timedFolders.Values.Skip( maxArchivedLogFolderCount ) )
                 {
                     basic.CleanupFolder( tooOld, false );
                 }
