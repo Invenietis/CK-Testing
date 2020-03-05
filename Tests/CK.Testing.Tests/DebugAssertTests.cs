@@ -2,6 +2,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CK.Testing.Tests
@@ -21,6 +22,7 @@ namespace CK.Testing.Tests
             // In "normal" use a TestHelper has been required, this initialization has already been done.
             //
             StaticBasicTestHelper.Touch();
+            Assume.That( CK.Testing.BasicTestHelper.TestHelper.BuildConfiguration == "Debug" );
             try
             {
                 System.Diagnostics.Debug.Assert( 1 == 0, "This should lead to a simple exception, not the death of the process..." );
