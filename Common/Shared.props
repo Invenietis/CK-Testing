@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.6.0-a00-00-0001-develop</CKWeakAssemblyNameResolverVersion>
+    <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
     <CKCoreVersion>12.1.2--0004-develop</CKCoreVersion>
     <CKActivityMonitorVersion>12.2.1--0004-develop</CKActivityMonitorVersion>
     <CKMonitoringVersion>11.2.1--0004-develop</CKMonitoringVersion>
