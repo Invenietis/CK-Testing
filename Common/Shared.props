@@ -2,10 +2,10 @@
   <PropertyGroup>
     <!-- Centralized version dependencies. -->
     <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>12.1.2--0004-develop</CKCoreVersion>
-    <CKActivityMonitorVersion>12.2.1--0005-develop</CKActivityMonitorVersion>
-    <CKMonitoringVersion>11.2.1--0005-develop</CKMonitoringVersion>
-    <CKReflectionVersion>9.0.0-a00-00-0001-develop</CKReflectionVersion>
+    <CKCoreVersion>12.1.2--0005-develop</CKCoreVersion>
+    <CKActivityMonitorVersion>12.2.1--0006-develop</CKActivityMonitorVersion>
+    <CKMonitoringVersion>11.2.1--0006-develop</CKMonitoringVersion>
+    <CKReflectionVersion>8.0.5--0008-develop</CKReflectionVersion>
     <FluentAssertionsVersion>5.9.0</FluentAssertionsVersion>
   </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
@@ -24,7 +24,7 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup Condition=" '$(CakeBuild)' == 'true' ">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <!--</SourceLink>-->
   <!--<BasicDefinitions>: It is useful to knwow whether we are in the Tests/ folder and/or if the current project is a Test.-->
@@ -32,7 +32,7 @@
     <IsTestProject Condition="$(MSBuildProjectName.EndsWith('.Tests'))">true</IsTestProject>
     <IsInTestsFolder Condition="$(MSBuildProjectDirectoryNoRoot.Contains('\Tests\'))">true</IsInTestsFolder>
     <!-- SolutionDir is defined by Visual Studio, we unify the behavior here. -->
-    <SolutionDir Condition=" $(SolutionDir) != '' ">$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))\</SolutionDir>
+    <SolutionDir Condition=" $(SolutionDir) == '' ">$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))\</SolutionDir>
   </PropertyGroup>
   <!--</BasicDefinitions>-->
   <!--<StandardProperties>-->
@@ -54,7 +54,6 @@
   <PropertyGroup Condition=" '$(CakeBuild)' == 'true' ">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
-    <PathMap>'$(SolutionDir)'=C:\CKli-World\CK-Core-Projects\CK-Testing</PathMap>
   </PropertyGroup>
   <!--</ReproducibleBuilds>-->
   <!--<ZeroVersion>: When not building from the CI, assemblies always use the ZeroVersion (see CSemVer.InformationalVersion).-->
