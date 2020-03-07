@@ -4,7 +4,7 @@
   <Import Project="..\Common\Shared.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netcoreapp2.2;netcoreapp2.1</TargetFrameworks>
     <Description>Contains Monitoring Test Helper mixin.</Description>
   </PropertyGroup>
   <ItemGroup>
