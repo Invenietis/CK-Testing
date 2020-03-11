@@ -1,13 +1,4 @@
 <Project>
-  <PropertyGroup>
-    <!-- Centralized version dependencies. -->
-    <CKWeakAssemblyNameResolverVersion>0.5.1</CKWeakAssemblyNameResolverVersion>
-    <CKCoreVersion>13.0.0</CKCoreVersion>
-    <CKActivityMonitorVersion>13.1.0</CKActivityMonitorVersion>
-    <CKMonitoringVersion>12.1.0</CKMonitoringVersion>
-    <CKReflectionVersion>9.0.0</CKReflectionVersion>
-    <FluentAssertionsVersion>5.10.2</FluentAssertionsVersion>
-  </PropertyGroup>
   <!-- Extends Clean to fully remove bin folders. 
        Keep obj folders since removing them messes up VS Project System.
   -->
@@ -24,7 +15,7 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup Condition=" '$(CakeBuild)' == 'true' ">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
   <!--</SourceLink>-->
   <!--<BasicDefinitions>: It is useful to knwow whether we are in the Tests/ folder and/or if the current project is a Test.-->
@@ -33,6 +24,8 @@
     <IsInTestsFolder Condition="$(MSBuildProjectDirectoryNoRoot.Contains('\Tests\'))">true</IsInTestsFolder>
     <!-- SolutionDir is defined by Visual Studio, we unify the behavior here. -->
     <SolutionDir Condition=" $(SolutionDir) == '' ">$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))))\</SolutionDir>
+    <!-- Using Microsoft.Build.CentralPackageVersions: this avoids the Packages.props at the root of the repository. -->
+    <CentralPackagesFile>$(MSBuildThisFileDirectory)CentralPackages.props</CentralPackagesFile>
   </PropertyGroup>
   <!--</BasicDefinitions>-->
   <!--<StandardProperties>-->

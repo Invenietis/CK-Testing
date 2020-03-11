@@ -76,7 +76,7 @@ namespace CK.Testing
                     GrandOutput.EnsureActiveDefault( conf );
                 }
             } );
-            _monitor = new ActivityMonitor();
+            _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
             LogToConsole = _config.GetBoolean( "Monitor/LogToConsole" ) ?? false;
             basic.OnCleanupFolder += OnCleanupFolder;
@@ -116,7 +116,7 @@ namespace CK.Testing
                     Directory.Move( old, target );
                 }
                 GetTimedFolders( archivePath, out timedFolders, out _, true );
-                foreach( var tooOld in timedFolders.Values.Skip( MaxArchivedLogFolderCount ) )
+                foreach( var tooOld in timedFolders.Values.Skip( maxArchivedLogFolderCount ) )
                 {
                     basic.CleanupFolder( tooOld, false );
                 }
@@ -225,7 +225,7 @@ namespace CK.Testing
 
         T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
         {
-            T result = default(T);
+            T result = default( T );
             DoWithWeakAssemblyResolver( () => result = action() );
             return result;
         }
