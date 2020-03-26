@@ -36,10 +36,11 @@ namespace CK.Testing
 
         NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
 
-        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed; 
+        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed;
 
-        void IBasicTestHelper.CleanupFolder( string folder, bool ensureFolderAvailable, int maxRetryCount )
+        NormalizedPath IBasicTestHelper.CleanupFolder( NormalizedPath folder, bool ensureFolderAvailable, int maxRetryCount )
         {
+            if( folder.IsEmptyPath ) throw new ArgumentOutOfRangeException( nameof( folder ) );
             int tryCount = 0;
             for(; ; )
             {
@@ -53,7 +54,7 @@ namespace CK.Testing
                         File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
                     }
                     _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder, ensureFolderAvailable ) );
-                    return;
+                    return folder;
                 }
                 catch( Exception )
                 {
