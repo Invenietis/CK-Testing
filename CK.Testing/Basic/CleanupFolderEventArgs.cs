@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CK.Text;
 
 namespace CK.Testing
 {
@@ -14,7 +15,7 @@ namespace CK.Testing
         /// </summary>
         /// <param name="folder">The folder.</param>
         /// <param name="folderIsAvailable">See <see cref="FolderIsAvailable"/>.</param>
-        public CleanupFolderEventArgs( string folder, bool folderIsAvailable )
+        public CleanupFolderEventArgs( NormalizedPath folder, bool folderIsAvailable )
         {
             Folder = folder;
             FolderIsAvailable = folderIsAvailable;
@@ -23,7 +24,7 @@ namespace CK.Testing
         /// <summary>
         /// Gets the folder path that has been cleaned up.
         /// </summary>
-        public string Folder { get; }
+        public NormalizedPath Folder { get; }
 
         /// <summary>
         /// Gets whether the folder is available (its content has been cleared and a write test has been executed)
