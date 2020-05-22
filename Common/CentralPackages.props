@@ -3,7 +3,7 @@
     <PackageReference Update="CK.WeakAssemblyNameResolver" Version="0.5.1" />
     <PackageReference Update="CK.Core" Version="13.2.0" />
     <PackageReference Update="CK.Reflection" Version="9.0.1" />
-    <PackageReference Update="CK.Monitoring" Version="12.3.0" />
+    <PackageReference Update="CK.Monitoring" Version="12.3.1" />
     <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="13.3.0" />
     <PackageReference Update="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" />
