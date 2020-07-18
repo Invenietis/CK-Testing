@@ -18,8 +18,9 @@ namespace CK.Testing
         bool TransientMode { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMixinTestHelper"/> that are pre loaded from "TestHelper/PreLoadedAssemblies"
-        /// configuration.
+        /// Gets the <see cref="IMixinTestHelper"/> that are pre-loaded from "TestHelper/PreLoadedAssemblies"
+        /// configuration: this is an optional comma separated list of assembly names for which all IMixinTestHelper
+        /// implementations available will be resolved, even if it's only a "more basic one" that is actually resolved.
         /// </summary>
         IReadOnlyList<Type> PreLoadedTypes { get; }
 

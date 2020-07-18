@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,10 +17,13 @@ namespace CK.Testing
 
     /// <summary>
     /// Provides default implementation of <see cref="Monitoring.IMonitorTestHelperCore"/>
-    /// and easyt to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
+    /// and easy to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
     /// </summary>
     public class MonitorTestHelper : Monitoring.IMonitorTestHelperCore
     {
+        const int MaxCurrentLogFolderCount = 5;
+        const int MaxArchivedLogFolderCount = 20;
+
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
         readonly ITestHelperConfiguration _config;
@@ -72,10 +76,70 @@ namespace CK.Testing
                     GrandOutput.EnsureActiveDefault( conf );
                 }
             } );
-            _monitor = new ActivityMonitor();
+            _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
             LogToConsole = _config.GetBoolean( "Monitor/LogToConsole" ) ?? false;
             basic.OnCleanupFolder += OnCleanupFolder;
+            basic.OnlyOnce( () =>
+            {
+                var basePath = LogFile.RootLogPath + "Text" + FileUtil.DirectorySeparatorString;
+                if( Directory.Exists( basePath ) )
+                {
+                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                }
+                basePath = LogFile.RootLogPath + "CKMon" + FileUtil.DirectorySeparatorString;
+                if( Directory.Exists( basePath ) )
+                {
+                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                }
+            } );
+        }
+
+        static void CleanupTimedFolders( IActivityMonitor m, IBasicTestHelper basic, string basePath, int maxCurrentLogFolderCount, int maxArchivedLogFolderCount )
+        {
+            Debug.Assert( basePath.EndsWith( FileUtil.DirectorySeparatorString ) );
+            // Note: The comparer is a reverse comparer. The most RECENT timed folder is the FIRST.
+            GetTimedFolders( basePath, out SortedDictionary<DateTime, string> timedFolders, out string archivePath, false );
+            if( timedFolders.Count > maxCurrentLogFolderCount )
+            {
+                if( archivePath == null )
+                {
+                    m.Trace( "Creating Archive folder." );
+                    Directory.CreateDirectory( archivePath = basePath + "Archive" );
+                }
+                foreach( var old in timedFolders.Values.Skip( maxCurrentLogFolderCount ) )
+                {
+                    var fName = Path.GetFileName( old );
+                    m.Trace( $"Moving '{fName}' folder into Archive folder." );
+                    var target = Path.Combine( archivePath, fName );
+                    if( Directory.Exists( target ) ) target += '-' + Guid.NewGuid().ToString();
+                    Directory.Move( old, target );
+                }
+                GetTimedFolders( archivePath, out timedFolders, out _, true );
+                foreach( var tooOld in timedFolders.Values.Skip( maxArchivedLogFolderCount ) )
+                {
+                    basic.CleanupFolder( tooOld, false );
+                }
+            }
+        }
+
+        static void GetTimedFolders( string folder, out SortedDictionary<DateTime, string> timedFolders, out string archivePath, bool allowNameSuffix )
+        {
+            timedFolders = new SortedDictionary<DateTime, string>( Comparer<DateTime>.Create( ( x, y ) => y.CompareTo( x ) ) );
+            archivePath = null;
+            foreach( var d in Directory.EnumerateDirectories( folder ) )
+            {
+                var name = d.Substring( folder.Length );
+                if( name == "Archive" ) archivePath = d + FileUtil.DirectorySeparatorString;
+                else
+                {
+                    if( FileUtil.TryParseFileNameUniqueTimeUtcFormat( name, out DateTime date, allowNameSuffix ) )
+                    {
+                        // Take no risk: ignore (highly unlikely to happen) duplicates. 
+                        timedFolders[date] = d;
+                    }
+                }
+            }
         }
 
         void OnCleanupFolder( object sender, CleanupFolderEventArgs e )
@@ -161,7 +225,7 @@ namespace CK.Testing
 
         T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
         {
-            T result = default(T);
+            T result = default( T );
             DoWithWeakAssemblyResolver( () => result = action() );
             return result;
         }

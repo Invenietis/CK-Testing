@@ -266,10 +266,19 @@ namespace CK.Testing
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
             {
                 var p = longestCtor.Parameters[i];
-                // We generated the Type dynamically... but:
-                // https://github.com/dotnet/corefx/issues/17943
-                // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
-                longestCtor.Values[i] = Resolve( ctx, p.ParameterType );
+                bool shouldBePreloaded = p.Name == "isMissingFromPreloaded" && p.ParameterType == typeof(bool);
+                if( shouldBePreloaded )
+                {
+                    longestCtor.Values[i] = !_preLoadedTypes.Any( preloaded => preloaded.IsAssignableFrom( t )
+                                                                               || (MapType( preloaded, false )?.IsAssignableFrom( t ) ?? false) );
+                }
+                else
+                {
+                    // We generated the Type dynamically... but:
+                    // https://github.com/dotnet/corefx/issues/17943
+                    // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                    longestCtor.Values[i] = Resolve( ctx, p.ParameterType );
+                }
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }

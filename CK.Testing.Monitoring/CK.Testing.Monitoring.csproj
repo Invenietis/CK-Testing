@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  
+  <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
   <Import Project="..\Common\Shared.props" />
+  
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
-    <Description>Contains ActivityMonitor Test Helper mixin.</Description>
+    <TargetFrameworks>netstandard2.1;netcoreapp2.2;netcoreapp2.1</TargetFrameworks>
+    <Description>Contains Monitoring Test Helper mixin.</Description>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
-    <PackageReference Include="CK.Monitoring" Version="$(CKMonitoringVersion)" />
-    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="$(CKActivityMonitorVersion)" />
+    <PackageReference Include="CK.Monitoring" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" />
+    
   </ItemGroup>
 </Project>

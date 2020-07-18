@@ -63,11 +63,17 @@ namespace CK.Testing
 
         /// <summary>
         /// Clears a folder from all its existing content or ensures it exists
-        /// and that a file can be written in it.
+        /// and that a file can be written in it, or simple destroys it.
+        /// This method raises the <see cref="OnCleanupFolder"/> event.
         /// </summary>
         /// <param name="folder">The path to the folder.</param>
+        /// <param name="ensureFolderAvailable">
+        /// By default, ensures that the the folder exists and clears is content.
+        /// When false, the folder and its content is removed.
+        /// </param>
         /// <param name="maxRetryCount">Maximal number of retries on failure.</param>
-        void CleanupFolder( string folder, int maxRetryCount = 5 );
+        /// <returns>The <paramref name="folder"/>.</returns>
+        NormalizedPath CleanupFolder( NormalizedPath folder, bool ensureFolderAvailable = true, int maxRetryCount = 5 );
 
         /// <summary>
         /// Raised whenever a folder has been cleaned up.

@@ -23,7 +23,7 @@ namespace GlobalLogs.Tests
             TestHelper.Monitor.Info( $"This will appear in ckmon, text files and the console: {secret}" );
             GrandOutput.Default.Should().NotBeNull();
             GrandOutput.Default.Dispose();
-            Directory.EnumerateFiles( TestHelper.LogFolder, "*.txt", SearchOption.AllDirectories )
+            Directory.EnumerateFiles( TestHelper.LogFolder, "*.log", SearchOption.AllDirectories )
                         .Select( f => File.ReadAllText( f ) )
                         .Count( text => text.Contains( secret ) )
                         .Should().Be( 1 );

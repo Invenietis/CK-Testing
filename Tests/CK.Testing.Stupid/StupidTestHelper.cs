@@ -1,5 +1,7 @@
+using CK.Core;
 using CK.Testing.Stupid;
 using System;
+using System.Linq;
 
 namespace CK.Testing
 {
@@ -20,9 +22,20 @@ namespace CK.Testing
         /// This implementation uses them but focuses on the implementation of its own interface (here the <see cref="IStupidTestHelperCore"/>).
         /// </summary>
         /// <param name="sql">This helper is based on the (real) Sql test helper.</param>
-        internal StupidTestHelper( ISqlServerTestHelper sql )
+        /// <param name="isMissingFromPreloaded">
+        /// Optional parameter that when present states that the TestHelper's assembly should be preloaded.
+        /// This can be used when the TestHelper is a "plugin" that reacts to events emitted by
+        /// other TestHelpers: preloading this TestHelper means that its behavior will always be here, even if the
+        /// TestHelper is not explicitly resolved (or the first to be resolved).
+        /// </param>
+        internal StupidTestHelper( ISqlServerTestHelper sql, bool isMissingFromPreloaded )
         {
             _sql = sql;
+            if( isMissingFromPreloaded )
+            {
+                // This is not too hard... Just a warning (cound be a throw!).
+                _sql.Monitor.Warn( $"Assembly {GetType().Assembly.GetName().Name} should appear in 'TestHelper/PreLoadedAssemblies' configuration." );
+            }
             _sql.OnDatabaseCreatedOrDropped += ( source, e ) =>
             {
                 _lastDatabaseCreatedOrDroppedName = e.DatabaseOptions.DatabaseName;

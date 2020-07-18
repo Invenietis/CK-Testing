@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using CK.Core;
 using CK.Text;
@@ -14,65 +11,11 @@ namespace CK.Testing
     /// <summary>
     /// Provides default implementation of <see cref="IBasicTestHelper"/>.
     /// </summary>
-    public class BasicTestHelper : IBasicTestHelper
+    public class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
     {
-        static readonly string[] _allowedConfigurations = new[] { "Debug", "Release" };
-        internal static readonly NormalizedPath _binFolder;
-        internal static readonly string _buildConfiguration;
-        internal static readonly NormalizedPath _testProjectFolder;
-        internal static readonly string _testProjectName;
-        internal static readonly NormalizedPath _repositoryFolder;
-        internal static readonly NormalizedPath _solutionFolder;
-        internal static readonly NormalizedPath _logFolder;
-        internal static readonly bool _isTestHost;
-        internal static readonly HashSet<string> _onlyOnce;
-
         static BasicTestHelper()
         {
-            _onlyOnce = new HashSet<string>();
-            string p = AppContext.BaseDirectory;
-            _binFolder = p;
-            string buildConfDir = null;
-            foreach( var config in _allowedConfigurations )
-            {
-                buildConfDir = FindAbove( p, config );
-                if( buildConfDir != null )
-                {
-                    _buildConfiguration = config;
-                    break;
-                }
-            }
-            if( _buildConfiguration == null )
-            {
-                throw new InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
-            }
-            p = Path.GetDirectoryName( buildConfDir );
-            if( Path.GetFileName( p ) != "bin" )
-            {
-                throw new InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
-            }
-            _testProjectFolder = p = Path.GetDirectoryName( p );
-            _testProjectName = Path.GetFileName( p );
-            p = Path.GetDirectoryName( p );
-
-            string testsFolder = null;
-            bool hasGit = false;
-            while( p != null && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
-            {
-                if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
-                p = Path.GetDirectoryName( p );
-            }
-            if( !hasGit ) throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
-            _repositoryFolder = p;
-            if( testsFolder == null )
-            {
-                throw new InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
-            }
-            _solutionFolder = Path.GetDirectoryName( testsFolder );
-            _logFolder = Path.Combine( _testProjectFolder, "Logs" );
-            // The first works in .Net framework, the second one in netcore.
-            _isTestHost =  Environment.CommandLine.Contains("testhost")
-                            || AppDomain.CurrentDomain.GetAssemblies().IndexOf( a => a.GetName().Name == "testhost" ) >= 0;
+            if( _initializationError != null ) _initializationError.Throw();
         }
 
         event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
@@ -93,21 +36,25 @@ namespace CK.Testing
 
         NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
 
-        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed; 
+        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed;
 
-        void IBasicTestHelper.CleanupFolder( string folder, int maxRetryCount )
+        NormalizedPath IBasicTestHelper.CleanupFolder( NormalizedPath folder, bool ensureFolderAvailable, int maxRetryCount )
         {
+            if( folder.IsEmptyPath ) throw new ArgumentOutOfRangeException( nameof( folder ) );
             int tryCount = 0;
             for(; ; )
             {
                 try
                 {
                     if( Directory.Exists( folder ) ) Directory.Delete( folder, true );
-                    Directory.CreateDirectory( folder );
-                    File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
-                    File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
-                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder ) );
-                    return;
+                    if( ensureFolderAvailable )
+                    {
+                        Directory.CreateDirectory( folder );
+                        File.WriteAllText( Path.Combine( folder, "TestWrite.txt" ), "Test write works." );
+                        File.Delete( Path.Combine( folder, "TestWrite.txt" ) );
+                    }
+                    _onCleanupFolder?.Invoke( this, new CleanupFolderEventArgs( folder, ensureFolderAvailable ) );
+                    return folder;
                 }
                 catch( Exception )
                 {
@@ -132,15 +79,6 @@ namespace CK.Testing
                 shouldRun = _onlyOnce.Add( key );
             }
             if( shouldRun ) a();
-        }
-
-        static string FindAbove( string path, string folderName )
-        {
-            while( path != null && Path.GetFileName( path ) != folderName )
-            {
-                path = Path.GetDirectoryName( path );
-            }
-            return path;
         }
 
         /// <summary>
