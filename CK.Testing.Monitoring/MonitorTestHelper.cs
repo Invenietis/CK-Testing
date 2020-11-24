@@ -102,23 +102,39 @@ namespace CK.Testing
             GetTimedFolders( basePath, out SortedDictionary<DateTime, string> timedFolders, out string archivePath, false );
             if( timedFolders.Count > maxCurrentLogFolderCount )
             {
-                if( archivePath == null )
+                int retryCount = 5;
+                retry:
+                try
                 {
-                    m.Trace( "Creating Archive folder." );
-                    Directory.CreateDirectory( archivePath = basePath + "Archive" );
+                    if( archivePath == null )
+                    {
+                        m.Trace( "Creating Archive folder." );
+                        Directory.CreateDirectory( archivePath = basePath + "Archive" );
+                    }
+                    foreach( var old in timedFolders.Values.Skip( maxCurrentLogFolderCount ) )
+                    {
+                        var fName = Path.GetFileName( old );
+                        m.Trace( $"Moving '{fName}' folder into Archive folder." );
+                        var target = Path.Combine( archivePath, fName );
+                        if( Directory.Exists( target ) ) target += '-' + Guid.NewGuid().ToString();
+                        Directory.Move( old, target );
+                    }
+                    GetTimedFolders( archivePath, out timedFolders, out _, true );
+                    foreach( var tooOld in timedFolders.Values.Skip( maxArchivedLogFolderCount ) )
+                    {
+                        basic.CleanupFolder( tooOld, false );
+                    }
                 }
-                foreach( var old in timedFolders.Values.Skip( maxCurrentLogFolderCount ) )
+                catch( Exception ex )
                 {
-                    var fName = Path.GetFileName( old );
-                    m.Trace( $"Moving '{fName}' folder into Archive folder." );
-                    var target = Path.Combine( archivePath, fName );
-                    if( Directory.Exists( target ) ) target += '-' + Guid.NewGuid().ToString();
-                    Directory.Move( old, target );
-                }
-                GetTimedFolders( archivePath, out timedFolders, out _, true );
-                foreach( var tooOld in timedFolders.Values.Skip( maxArchivedLogFolderCount ) )
-                {
-                    basic.CleanupFolder( tooOld, false );
+                    if( --retryCount < 0 )
+                    {
+                        m.Error( $"Aborting Log's cleanup of timed folders in '{basePath}' after 5 retries.", ex );
+                        return;
+                    }
+                    m.Warn( $"Log's cleanup of timed folders in '{basePath}' failed. Retrying.", ex );
+                    Thread.Sleep( retryCount * 100 );
+                    goto retry;
                 }
             }
         }
