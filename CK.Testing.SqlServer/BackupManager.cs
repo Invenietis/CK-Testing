@@ -16,12 +16,13 @@ namespace CK.Testing.SqlServer
     {
         readonly SqlServerTestHelper _helper;
 
-        internal BackupManager( SqlServerTestHelper helper )
+        internal BackupManager( SqlServerTestHelper helper, IMonitorTestHelper others )
         {
             _helper = helper;
+            Helper = others;
         }
 
-        ISqlServerTestHelper Helper => (ISqlServerTestHelper)_helper;
+        IMonitorTestHelper Helper { get; }
 
         /// <summary>
         /// Captures simple ordered backup file.
@@ -70,15 +71,17 @@ namespace CK.Testing.SqlServer
         /// <returns>The list of available backups.</returns>
         public IReadOnlyList<Backup> GetAllBackups()
         {
-            return Directory.GetFiles( BackupFolder )
-                            .Select( f => MatchFileName( f ) )
-                            .Where( m => m.Success )
-                            .Select( m => (m.Groups[1].Value,
-                                           new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
-                                                         int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) )) )
-                            .GroupBy( m => m.Value )
-                            .SelectMany( g => g.OrderByDescending( p => p.Item2 ).Select( ( p, idx ) => new Backup( p.Value, p.Item2, idx ) ) )
-                            .ToArray();
+            return Directory.Exists( BackupFolder )
+                    ? Directory.GetFiles( BackupFolder )
+                               .Select( f => MatchFileName( f ) )
+                               .Where( m => m.Success )
+                               .Select( m => (m.Groups[1].Value,
+                                              new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
+                                                            int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) )) )
+                               .GroupBy( m => m.Value )
+                               .SelectMany( g => g.OrderByDescending( p => p.Item2 ).Select( ( p, idx ) => new Backup( p.Value, p.Item2, idx ) ) )
+                               .ToArray()
+                    : Array.Empty<Backup>();
         }
 
         /// <summary>
@@ -89,19 +92,21 @@ namespace CK.Testing.SqlServer
         public IReadOnlyList<Backup> GetBackups( string? dbName = null )
         {
             if( dbName == null ) dbName = _helper.DoGetDefaultDatabaseOptions().DatabaseName;
-            return Directory.GetFiles( BackupFolder, dbName + " *.bak" )
-                            .Select( f => MatchFileName( f ) )
-                            .Where( m => m.Success && m.Groups[1].Value == dbName )
-                            .Select( m => new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
-                                                        int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) ) )
-                            .OrderByDescending( d => d )
-                            .Select( ( p, idx ) => new Backup( dbName, p, idx ) )
-                            .ToArray();
+            return Directory.Exists( BackupFolder )
+                    ? Directory.GetFiles( BackupFolder, dbName + " *.bak" )
+                               .Select( f => MatchFileName( f ) )
+                               .Where( m => m.Success && m.Groups[1].Value == dbName )
+                               .Select( m => new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
+                                                           int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) ) )
+                               .OrderByDescending( d => d )
+                               .Select( ( p, idx ) => new Backup( dbName, p, idx ) )
+                               .ToArray()
+                    : Array.Empty<Backup>();
         }
 
         static Match MatchFileName( string f )
         {
-            return Regex.Match( f, @"(?<1>.*) (?<2>\d\d)-(?<3>\d\d)-(?<4>\d\d) (?<5>\d\d)-(?<6>\d\d)-(?<7>\d\d)\.bak$", RegexOptions.CultureInvariant );
+            return Regex.Match( f, @"(?<1>[^/\\]*) (?<2>\d\d)-(?<3>\d\d)-(?<4>\d\d) (?<5>\d\d)-(?<6>\d\d)-(?<7>\d\d)\.bak$", RegexOptions.CultureInvariant );
         }
 
         /// <summary>
@@ -116,10 +121,11 @@ namespace CK.Testing.SqlServer
             var t = DateTime.UtcNow;
             t = new DateTime( t.Ticks - (t.Ticks % TimeSpan.TicksPerSecond), t.Kind );
 
+            Directory.CreateDirectory( BackupFolder );
             var fName = BackupFolder.AppendPart( GetFileName( dbName, t ) );
             using( Helper.Monitor.OpenInfo( $"Creating a Backup for '{dbName}'." ) )
             {
-                if( Helper.ExecuteScripts( $"backup database [CKTEST_CK_DB_Workspace] to disk = N'{fName}' with name = N'{dbName}', copy_only, noformat, init, skip, compression;", dbName ) )
+                if( _helper.DoExecuteScripts( $"backup database [{dbName}] to disk = N'{fName}' with name = N'{dbName}', copy_only, noformat, init, skip, compression;", dbName ) )
                 {
                     if( File.Exists( fName ) )
                     {
@@ -180,11 +186,12 @@ namespace CK.Testing.SqlServer
             }
             using( Helper.Monitor.OpenInfo( msg ) )
             {
-                var script = $@"alter database [{dbName}] set single_user with rollback immediate;
+                _helper.DoEnsureDatabase( null, false ); 
+                var script = $@"use [master]; alter database [{dbName}] set single_user with rollback immediate;
 restore database [{dbName}] from disk = N'{BackupFolder.AppendPart( backup.FileName )}' with file = 1,  nounload, replace;
 alter database [{dbName}] set multi_user;";
 
-                if( Helper.ExecuteScripts( script, dbName ) )
+                if( _helper.DoExecuteScripts( script, dbName ) )
                 {
                     Helper.Monitor.CloseGroup( "Success." );
                     return backup;

@@ -46,9 +46,11 @@ namespace CK.Testing
 
         bool ISqlServerTestHelperCore.ExecuteScripts( IEnumerable<string> scripts, string? databaseName ) => DoExecuteScripts( scripts, databaseName );
 
-        bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string? databaseName ) => DoExecuteScripts( new[] { scripts }, databaseName );
+        bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string? databaseName ) => DoExecuteScripts( scripts, databaseName );
 
-        bool ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions? o, bool reset )
+        bool ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions? o, bool reset ) => DoEnsureDatabase( o, reset );
+
+        internal bool DoEnsureDatabase( ISqlServerDatabaseOptions? o, bool reset )
         {
             // Calls DoGetDefaultDatabaseOptions to update _maxCompatibilityLevel.
             var def = DoGetDefaultDatabaseOptions();
@@ -216,12 +218,14 @@ namespace CK.Testing
             }
         }
 
-        public BackupManager Backup => _backup ??= new BackupManager( this );
+        BackupManager ISqlServerTestHelperCore.Backup => _backup ??= new BackupManager( this, _monitor );
 
         #region Execute scripts
         static readonly Regex _rGo = new Regex( @"^\s*GO(?:\s|$)+", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled );
 
-        bool DoExecuteScripts( IEnumerable<string> scripts, string? databaseName )
+        internal bool DoExecuteScripts( string script, string? databaseName ) => DoExecuteScripts( new[] { script }, databaseName );
+
+        internal bool DoExecuteScripts( IEnumerable<string> scripts, string? databaseName )
         {
             using( var oCon = DoCreateOpenedConnection( databaseName ) )
             using( _monitor.Monitor.OpenInfo( $"Executing scripts on '{oCon.Database}'." ) )

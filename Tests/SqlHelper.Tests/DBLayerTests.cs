@@ -1,4 +1,5 @@
 using CK.Core;
+using CK.Text;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
@@ -60,6 +61,65 @@ namespace SqlHelperTests
             c2.Should().Contain( "Toto" ).And.Contain( "Integrated Security" );
             c = TestHelper.MasterConnectionString;
             c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
+        }
+
+        [TestCase( "reset" )]
+        [TestCase( "" )]
+        [Explicit]
+        public void ensure_database( string reset )
+        {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
+            TestHelper.EnsureDatabase( reset: reset == "reset" );
+        }
+
+        /// <summary>
+        /// Calls <see cref="CK.Testing.SqlServer.BackupManager.CreateBackup(string?)(string)"/> on the
+        /// default database (<see cref="CK.Testing.SqlServer.ISqlServerTestHelperCore.DefaultDatabaseOptions"/>).
+        /// </summary>
+        [Test]
+        [Explicit]
+        public void backup_create()
+        {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
+            Assert.That( TestHelper.Backup.CreateBackup() != null, "Backup should be possible." );
+        }
+
+        /// <summary>
+        /// Calls <see cref="CK.Testing.SqlServer.BackupManager.CreateBackup(string?)"/> on the
+        /// default database (<see cref="CK.Testing.SqlServer.ISqlServerTestHelperCore.DefaultDatabaseOptions"/>).
+        /// </summary>
+        [TestCase( "0 - Most recent one." )]
+        [TestCase( "1" )]
+        [TestCase( "2" )]
+        [TestCase( "3" )]
+        [TestCase( "4" )]
+        [TestCase( "5" )]
+        [TestCase( "X - Oldest one." )]
+        [Explicit]
+        public void backup_restore( string what )
+        {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
+            if( !int.TryParse( what, out var index ) )
+            {
+                index = what[0] == 'X' ? Int32.MaxValue : 0;
+            }
+            Assert.That( TestHelper.Backup.RestoreBackup( null, index ) != null, "Restoring should be possible." );
+        }
+
+        /// <summary>
+        /// Dumps all the available backup files in <see cref="CK.Testing.SqlServer.BackupManager.BackupFolder"/>
+        /// as information into the <see cref="CK.Testing.Monitoring.IMonitorTestHelperCore.Monitor"/>.
+        /// </summary>
+        [Test]
+        [Explicit]
+        public void backup_list()
+        {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
+            var all = TestHelper.Backup.GetAllBackups();
+            using( TestHelper.Monitor.OpenInfo( $"There is {all.Count} backups available in '{TestHelper.Backup.BackupFolder}'." ) )
+            {
+                TestHelper.Monitor.Info( all.Select( a => $"n° {a.Index} - {a.FileName}" ).Concatenate( Environment.NewLine ) );
+            }
         }
     }
 }
