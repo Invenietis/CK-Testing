@@ -22,7 +22,7 @@ namespace CK.Testing.SqlServer
         /// <summary>
         /// Gets the database collation from "SqlServer/Collation" configuration entry.
         /// Defaults to 'Latin1_General_100_BIN2'.
-        /// Use 'Random' while creating a database to use another random collation.
+        /// Use the string 'Random' while creating a database to use another random collation.
         /// </summary>
         string Collation { get; }
 

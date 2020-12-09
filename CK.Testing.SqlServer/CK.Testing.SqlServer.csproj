@@ -6,6 +6,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netcoreapp2.2;netcoreapp2.1</TargetFrameworks>
     <Description>Contains Sql Server test helpers.</Description>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing.Monitoring\CK.Testing.Monitoring.csproj" />

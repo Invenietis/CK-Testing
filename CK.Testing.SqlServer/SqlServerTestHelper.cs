@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,11 +22,13 @@ namespace CK.Testing
     {
         readonly ITestHelperConfiguration _config;
         readonly IMonitorTestHelper _monitor;
-        static Version _serverVersion;
+        static Version? _serverVersion;
         static int _maxCompatibilityLevel;
-        static ISqlServerDatabaseOptions _defaultDatabaseOptions;
-        static SqlConnectionStringBuilder _masterConnectionString;
-        event EventHandler<SqlServerDatabaseEventArgs> _onEvent;
+        static ISqlServerDatabaseOptions? _defaultDatabaseOptions;
+        static SqlConnectionStringBuilder? _masterConnectionString;
+
+        event EventHandler<SqlServerDatabaseEventArgs>? _onEvent;
+        BackupManager? _backup;
 
         internal SqlServerTestHelper( ITestHelperConfiguration config, IMonitorTestHelper monitor )
         {
@@ -37,20 +40,20 @@ namespace CK.Testing
 
         ISqlServerDatabaseOptions ISqlServerTestHelperCore.DefaultDatabaseOptions => DoGetDefaultDatabaseOptions();
 
-        SqlServerDatabaseOptions ISqlServerTestHelperCore.GetDatabaseOptions( string databaseName ) => DoGetDatabaseOptions( databaseName );
+        SqlServerDatabaseOptions? ISqlServerTestHelperCore.GetDatabaseOptions( string databaseName ) => DoGetDatabaseOptions( databaseName );
 
-        string ISqlServerTestHelperCore.GetConnectionString( string databaseName ) => DoGetConnectionString( databaseName );
+        string ISqlServerTestHelperCore.GetConnectionString( string? databaseName ) => DoGetConnectionString( databaseName );
 
-        bool ISqlServerTestHelperCore.ExecuteScripts( IEnumerable<string> scripts, string databaseName ) => DoExecuteScripts( scripts, databaseName );
+        bool ISqlServerTestHelperCore.ExecuteScripts( IEnumerable<string> scripts, string? databaseName ) => DoExecuteScripts( scripts, databaseName );
 
-        bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string databaseName ) => DoExecuteScripts( new[] { scripts }, databaseName );
+        bool ISqlServerTestHelperCore.ExecuteScripts( string scripts, string? databaseName ) => DoExecuteScripts( new[] { scripts }, databaseName );
 
-        bool ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions o, bool reset )
+        bool ISqlServerTestHelperCore.EnsureDatabase( ISqlServerDatabaseOptions? o, bool reset )
         {
             // Calls DoGetDefaultDatabaseOptions to update _maxCompatibilityLevel.
             var def = DoGetDefaultDatabaseOptions();
             if( o == null ) o = def;
-            using( _monitor.Monitor.OpenInfo( $"Ensuring database '{o.ToString()}'." ) )
+            using( _monitor.Monitor.OpenInfo( $"Ensuring database '{o}'." ) )
             {
                 try
                 {
@@ -68,7 +71,8 @@ namespace CK.Testing
                             _monitor.Monitor.CloseGroup( "Database already exists, collation and compatiblity level match." );
                             return false;
                         }
-                        _monitor.Monitor.Info( $"Current is {current.ToString()}. Must be recreated." );
+                        Debug.Assert( current.DatabaseName != null );
+                        _monitor.Monitor.Info( $"Current is {current}. Must be recreated." );
                         DoDrop( current.DatabaseName );
                     }
                     string create = $@"create database {o.DatabaseName} collate {o.Collation};";
@@ -83,7 +87,9 @@ namespace CK.Testing
                         oCon.Open();
                         cmd.ExecuteNonQuery();
                     }
-                    _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( DoGetDatabaseOptions( o.DatabaseName ), false ) );
+                    var opt = DoGetDatabaseOptions( o.DatabaseName );
+                    Debug.Assert( opt != null );
+                    _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( opt, false ) );
                     return true;
                 }
                 catch( Exception ex )
@@ -94,11 +100,11 @@ namespace CK.Testing
             }
         }
 
-        SqlConnection ISqlServerTestHelperCore.CreateOpenedConnection( string databaseName ) => DoCreateOpenedConnection( databaseName );
+        SqlConnection ISqlServerTestHelperCore.CreateOpenedConnection( string? databaseName ) => DoCreateOpenedConnection( databaseName );
 
-        Task<SqlConnection> ISqlServerTestHelperCore.CreateOpenedConnectionAsync(string databaseName) => DoCreateOpenedConnectionAsync( databaseName );
+        Task<SqlConnection> ISqlServerTestHelperCore.CreateOpenedConnectionAsync(string? databaseName) => DoCreateOpenedConnectionAsync( databaseName );
 
-        void ISqlServerTestHelperCore.DropDatabase( string databaseName )
+        void ISqlServerTestHelperCore.DropDatabase( string? databaseName )
         {
             var o = databaseName == null ? DoGetDefaultDatabaseOptions() : DoGetDatabaseOptions( databaseName );
             if( o != null )
@@ -114,21 +120,21 @@ namespace CK.Testing
             remove => _onEvent -= value;
         }
 
-        SqlConnection DoCreateOpenedConnection( string databaseName )
+        SqlConnection DoCreateOpenedConnection( string? databaseName )
         {
             var oCon = new SqlConnection( DoGetConnectionString( databaseName ) );
             oCon.Open();
             return oCon;
         }
 
-        async Task<SqlConnection> DoCreateOpenedConnectionAsync( string databaseName )
+        async Task<SqlConnection> DoCreateOpenedConnectionAsync( string? databaseName )
         {
             var oCon = new SqlConnection( DoGetConnectionString( databaseName ) );
             await oCon.OpenAsync();
             return oCon;
         }
 
-        SqlServerDatabaseOptions DoGetDatabaseOptions( string dbName )
+        SqlServerDatabaseOptions? DoGetDatabaseOptions( string? dbName )
         {
             if( dbName == null ) return new SqlServerDatabaseOptions( DoGetDefaultDatabaseOptions() );
             const string info = "select compatibility_level, IsNull( collation_name, convert(sysname,SERVERPROPERTY('Collation'))) from sys.databases where name=@N;"; 
@@ -142,9 +148,8 @@ namespace CK.Testing
                     if( !r.Read() ) return null;
                     int level = r.GetByte( 0 );
                     if( level == _maxCompatibilityLevel ) level = 0;
-                    return new SqlServerDatabaseOptions()
+                    return new SqlServerDatabaseOptions( dbName )
                     {
-                        DatabaseName = dbName,
                         CompatibilityLevel = level,
                         Collation = r.GetString( 1 )
                     };
@@ -152,7 +157,7 @@ namespace CK.Testing
             }
         }
 
-        ISqlServerDatabaseOptions DoGetDefaultDatabaseOptions()
+        internal ISqlServerDatabaseOptions DoGetDefaultDatabaseOptions()
         {
             if( _defaultDatabaseOptions == null )
             {
@@ -172,15 +177,14 @@ namespace CK.Testing
                         dbName = n.Replace( "_Tests", String.Empty );
                         if( dbName == n ) dbName = n.Replace( "Tests", String.Empty );
                     }
-                    _defaultDatabaseOptions = new SqlServerDatabaseOptions()
+                    _defaultDatabaseOptions = new SqlServerDatabaseOptions( dbName )
                     {
-                        DatabaseName = dbName,
                         Collation = _config.Get( "SqlServer/Collation" ) ?? "Latin1_General_100_BIN2",
                         CompatibilityLevel = _config.GetInt32( "SqlServer/CompatibilityLevel" ) ?? _maxCompatibilityLevel
                     };
                 } );
             }
-            return _defaultDatabaseOptions;
+            return _defaultDatabaseOptions!;
         }
 
         void DoDrop( string dbName )
@@ -212,10 +216,12 @@ namespace CK.Testing
             }
         }
 
+        public BackupManager Backup => _backup ??= new BackupManager( this );
+
         #region Execute scripts
         static readonly Regex _rGo = new Regex( @"^\s*GO(?:\s|$)+", RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled );
 
-        bool DoExecuteScripts( IEnumerable<string> scripts, string databaseName )
+        bool DoExecuteScripts( IEnumerable<string> scripts, string? databaseName )
         {
             using( var oCon = DoCreateOpenedConnection( databaseName ) )
             using( _monitor.Monitor.OpenInfo( $"Executing scripts on '{oCon.Database}'." ) )
@@ -269,7 +275,7 @@ namespace CK.Testing
 
         #endregion
 
-        string DoGetConnectionString( string dbName )
+        string DoGetConnectionString( string? dbName )
         {
             if( dbName == null ) dbName = DoGetDefaultDatabaseOptions().DatabaseName;
             var c = EnsureMasterConnection();
@@ -295,13 +301,14 @@ namespace CK.Testing
                     _masterConnectionString = new SqlConnectionStringBuilder( c );
                 } );
             }
-            return _masterConnectionString;
+            return _masterConnectionString!;
         }
 
         /// <summary>
         /// Gets the <see cref="ISqlServerTestHelper"/> default implementation.
         /// </summary>
         public static ISqlServerTestHelper TestHelper => TestHelperResolver.Default.Resolve<ISqlServerTestHelper>();
+
 
     }
 }
