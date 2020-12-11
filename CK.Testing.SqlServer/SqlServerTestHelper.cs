@@ -75,7 +75,7 @@ namespace CK.Testing
                         }
                         Debug.Assert( current.DatabaseName != null );
                         _monitor.Monitor.Info( $"Current is {current}. Must be recreated." );
-                        DoDrop( current.DatabaseName );
+                        DoDrop( current.DatabaseName, true );
                     }
                     string create = $@"create database {o.DatabaseName} collate {o.Collation};";
                     if( normalizedLevel != 0 )
@@ -106,12 +106,12 @@ namespace CK.Testing
 
         Task<SqlConnection> ISqlServerTestHelperCore.CreateOpenedConnectionAsync(string? databaseName) => DoCreateOpenedConnectionAsync( databaseName );
 
-        void ISqlServerTestHelperCore.DropDatabase( string? databaseName )
+        void ISqlServerTestHelperCore.DropDatabase( string? databaseName, bool closeExistingConnections )
         {
             var o = databaseName == null ? DoGetDefaultDatabaseOptions() : DoGetDatabaseOptions( databaseName );
             if( o != null )
             {
-                DoDrop( o.DatabaseName );
+                DoDrop( o.DatabaseName, closeExistingConnections );
                 _onEvent?.Invoke( this, new SqlServerDatabaseEventArgs( o, true ) );
             }
         }
@@ -189,9 +189,9 @@ namespace CK.Testing
             return _defaultDatabaseOptions!;
         }
 
-        void DoDrop( string dbName )
+        void DoDrop( string dbName, bool closeExistingConnections )
         {
-            using( _monitor.Monitor.OpenInfo( $"Dropping database '{dbName}'." ) )
+            using( _monitor.Monitor.OpenInfo( $"Dropping database '{dbName}' ({(closeExistingConnections ? "" : "NOT ")}closing existing connections)." ) )
             {
                 SqlConnection.ClearAllPools();
                 try
@@ -201,8 +201,19 @@ namespace CK.Testing
                     {
                         cmd.Connection = oCon;
                         oCon.Open();
-                        cmd.CommandText = $"if db_id('{dbName}') is not null begin drop database {dbName}; select 1; end else begin select 0; end";
-                        if( (int)cmd.ExecuteScalar() == 0 ) _monitor.Monitor.CloseGroup("Database does not exist.");
+
+                        var exec = $"if db_id('{dbName}') is not null begin ";
+                        if( closeExistingConnections )
+                        {
+                            exec += $"alter database [{dbName}] set single_user with rollback immediate;";
+                        }
+                        exec += $"drop database [{dbName}]; select 1; end else begin select 0; end";
+
+                        cmd.CommandText = exec;
+                        if( (int)cmd.ExecuteScalar() == 0 )
+                        {
+                            _monitor.Monitor.CloseGroup( "Database does not exist." );
+                        }
                         else
                         {
                             cmd.CommandText = $"exec msdb.dbo.sp_delete_database_backuphistory @database_name = N'{dbName}';";

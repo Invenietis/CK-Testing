@@ -27,6 +27,24 @@ namespace SqlHelperTests
             TestHelper.Monitor.Info( $"After Toggle n°{_consoleToggleCount}" );
         }
 
+        [Explicit]
+        [TestCase( "closeExistingConnections" )]
+        [TestCase( "" )]
+        public void drop_database( string mode )
+        {
+            TestHelper.DropDatabase( closeExistingConnections: mode == "closeExistingConnections" );
+        }
+
+        [TestCase( "reset" )]
+        [TestCase( "" )]
+        [Explicit]
+        public void ensure_database( string reset )
+        {
+            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
+            TestHelper.EnsureDatabase( reset: reset == "reset" );
+        }
+
+
         [Test]
         public void dropping_database_multiple_times()
         {
@@ -61,15 +79,6 @@ namespace SqlHelperTests
             c2.Should().Contain( "Toto" ).And.Contain( "Integrated Security" );
             c = TestHelper.MasterConnectionString;
             c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
-        }
-
-        [TestCase( "reset" )]
-        [TestCase( "" )]
-        [Explicit]
-        public void ensure_database( string reset )
-        {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
-            TestHelper.EnsureDatabase( reset: reset == "reset" );
         }
 
         /// <summary>

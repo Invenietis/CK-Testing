@@ -60,7 +60,8 @@ namespace CK.Testing.SqlServer
         /// Drops the database.
         /// </summary>
         /// <param name="databaseName">Database name to drop. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
-        void DropDatabase( string? databaseName = null );
+        /// <param name="closeExistingConnections">By default, exisiting connections are forcibly closed.</param>
+        void DropDatabase( string? databaseName = null, bool closeExistingConnections = true );
 
         /// <summary>
         /// Fires whenever a database is created, reset or droppped.
