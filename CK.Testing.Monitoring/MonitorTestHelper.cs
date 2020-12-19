@@ -73,7 +73,19 @@ namespace CK.Testing
                 }
                 if( conf.Handlers.Count > 0 )
                 {
-                    GrandOutput.EnsureActiveDefault( conf );
+                    GrandOutput.EnsureActiveDefault( conf, clearExistingTraceListeners: false );
+                    var listener = Trace.Listeners.OfType<MonitorTraceListener>().FirstOrDefault( m => m.GrandOutput == GrandOutput.Default );
+                    // (Defensive programming) There is no real reason for this listener to not be in the listeners, but it can be.
+                    if( listener != null )
+                    {
+                        // We don't want to fail fast: StaticBasicTestHelper added a listener that throws simple DebugAssertionException
+                        // on Trace and Debug.Assert/Fail.
+                        listener.FailFast = false;
+                        // But we want nevertheless traces to be routed to the grand output: this listener must be the first one
+                        // otherwise the throw of DebugAssertionException will hide them.
+                        Trace.Listeners.Remove( listener );
+                        Trace.Listeners.Insert( 0, listener );
+                    }
                 }
             } );
             _monitor = new ActivityMonitor( "MonitorTestHelper" );
