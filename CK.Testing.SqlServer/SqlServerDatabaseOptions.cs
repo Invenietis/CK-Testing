@@ -14,11 +14,13 @@ namespace CK.Testing
     public class SqlServerDatabaseOptions : ISqlServerDatabaseOptions
     {
         /// <summary>
-        /// Initializes a new <see cref="SqlServerDatabaseOptions"/>.
-        /// <see cref="DatabaseName"/> is null and <see cref="CompatibilityLevel"/> is 0 (maximal).
+        /// Initializes a new <see cref="SqlServerDatabaseOptions"/>. <see cref="CompatibilityLevel"/> is 0 (maximal) and
+        /// <see cref="Collation"/> is "Latin1_General_100_BIN2".
         /// </summary>
-        public SqlServerDatabaseOptions()
+        /// <param name="dbName">The database name.</param>
+        public SqlServerDatabaseOptions( string dbName )
         {
+            DatabaseName = dbName;
             Collation = "Latin1_General_100_BIN2";
         }
 
@@ -42,7 +44,7 @@ namespace CK.Testing
         /// <summary>
         /// Gets or sets the database collation.
         /// Defaults to 'Latin1_General_100_BIN2'.
-        /// Use 'Random' while creating a database to use another random collation.
+        /// Use the 'Random' string while creating a database to use another random collation.
         /// </summary>
         public string Collation { get; set; }
 

@@ -38,14 +38,14 @@ namespace CK.Testing.SqlServer
         /// </summary>
         /// <param name="databaseName">Database name. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
         /// <returns>The connection string to the database.</returns>
-        string GetConnectionString( string databaseName = null );
+        string GetConnectionString( string? databaseName = null );
 
         /// <summary>
         /// Gets the database options. Null if the database does not exist.
         /// </summary>
         /// <param name="databaseName">Name of the database.</param>
         /// <returns>The options or null if it does not exist.</returns>
-        SqlServerDatabaseOptions GetDatabaseOptions( string databaseName );
+        SqlServerDatabaseOptions? GetDatabaseOptions( string databaseName );
 
         /// <summary>
         /// Checks that the database exists and has the correct options and returns false in such case.
@@ -54,13 +54,14 @@ namespace CK.Testing.SqlServer
         /// <param name="o">Database options to use. Defaults to <see cref="DefaultDatabaseOptions"/>.</param>
         /// <param name="reset">True to drop and recreate the database.</param>
         /// <returns>True if the database has been reset. False if the database already exists and options are the same.</returns>
-        bool EnsureDatabase( ISqlServerDatabaseOptions o = null, bool reset = false );
+        bool EnsureDatabase( ISqlServerDatabaseOptions? o = null, bool reset = false );
 
         /// <summary>
         /// Drops the database.
         /// </summary>
         /// <param name="databaseName">Database name to drop. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
-        void DropDatabase( string databaseName = null );
+        /// <param name="closeExistingConnections">By default, exisiting connections are forcibly closed.</param>
+        void DropDatabase( string? databaseName = null, bool closeExistingConnections = true );
 
         /// <summary>
         /// Fires whenever a database is created, reset or droppped.
@@ -73,14 +74,14 @@ namespace CK.Testing.SqlServer
         /// </summary>
         /// <param name="databaseName">Database name to target. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
         /// <returns>An opened connection.</returns>
-        SqlConnection CreateOpenedConnection( string databaseName = null );
+        SqlConnection CreateOpenedConnection( string? databaseName = null );
 
         /// <summary>
         /// Creates an opened connection to a database.
         /// It must be disposed by the caller.
         /// </summary>
         /// <returns>An opened connection.</returns>
-        Task<SqlConnection> CreateOpenedConnectionAsync( string databaseName = null );
+        Task<SqlConnection> CreateOpenedConnectionAsync( string? databaseName = null );
 
         /// <summary>
         /// Executes scripts that may contain 'GO' separators (that must be alone in their line).
@@ -91,7 +92,7 @@ namespace CK.Testing.SqlServer
         /// The 'GO' may be lowercase but must always be alone on its line.
         /// </remarks>
         /// <returns>True on success, false if an error occurred.</returns>
-        bool ExecuteScripts( IEnumerable<string> scripts, string databaseName = null );
+        bool ExecuteScripts( IEnumerable<string> scripts, string? databaseName = null );
 
         /// <summary>
         /// Executes scripts that may contain 'GO' separators (that must be alone in their line).
@@ -102,7 +103,12 @@ namespace CK.Testing.SqlServer
         /// The 'GO' may be lowercase but must always be alone on its line.
         /// </remarks>
         /// <returns>True on success, false if an error occurred.</returns>
-        bool ExecuteScripts( string scripts, string databaseName = null );
+        bool ExecuteScripts( string scripts, string? databaseName = null );
+
+        /// <summary>
+        /// Gets a helper to backup/restore databases.
+        /// </summary>
+        BackupManager Backup { get; }
 
     }
 }
