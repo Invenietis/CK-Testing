@@ -26,15 +26,23 @@ namespace CK.Testing
         internal static readonly HashSet<string> _onlyOnce;
         internal static readonly ExceptionDispatchInfo _initializationError;
 
+        /// <summary>
+        /// This listener is removed by CK.Testing.MonitorTestHelper because the MonitorTraceListener
+        /// that throws MonitoringFailFastException is injected and does the job.
+        /// The key used to remove this listener is its name: "CK.Testing.SafeTraceListener" that
+        /// MUST NOT be changed since this magic string is used by the MonitorTestHelper.
+        /// </summary>
         class SafeTraceListener : System.Diagnostics.DefaultTraceListener
         {
+            private const string MessagePrefix = "Assertion Failed: ";
+
             public SafeTraceListener()
             {
                 Name = "CK.Testing.SafeTraceListener";
             }
 
-            public override void Fail( string message, string detailMessage ) => throw new DebugAssertionException( message, detailMessage );
-            public override void Fail( string message ) => throw new DebugAssertionException( message );
+            public override void Fail( string message, string detailMessage ) => throw new Exception( MessagePrefix + message + " - Detail: " + detailMessage );
+            public override void Fail( string message ) => throw new Exception( MessagePrefix + message );
         }
 
         static StaticBasicTestHelper()

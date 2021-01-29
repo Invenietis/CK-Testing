@@ -46,6 +46,7 @@ namespace CK.Testing
                 _logToTextFile = _config.GetBoolean( "Monitor/LogToTextFile" )
                                         ?? _config.GetBoolean( "Monitor/LogToTextFiles" )
                                         ?? false;
+                
                 string logLevel = _config.Get( "Monitor/LogLevel" );
                 if( logLevel != null )
                 {
@@ -71,21 +72,14 @@ namespace CK.Testing
                     };
                     conf.AddHandler( txtConf );
                 }
-                if( conf.Handlers.Count > 0 )
+                GrandOutput.EnsureActiveDefault( conf, clearExistingTraceListeners: false );
+                var monitorListener = Trace.Listeners.OfType<MonitorTraceListener>().FirstOrDefault( m => m.GrandOutput == GrandOutput.Default );
+                // (Defensive programming) There is no real reason for this listener to not be in the listeners, but it can be.
+                if( monitorListener != null )
                 {
-                    GrandOutput.EnsureActiveDefault( conf, clearExistingTraceListeners: false );
-                    var listener = Trace.Listeners.OfType<MonitorTraceListener>().FirstOrDefault( m => m.GrandOutput == GrandOutput.Default );
-                    // (Defensive programming) There is no real reason for this listener to not be in the listeners, but it can be.
-                    if( listener != null )
-                    {
-                        // We don't want to fail fast: StaticBasicTestHelper added a listener that throws simple DebugAssertionException
-                        // on Trace and Debug.Assert/Fail.
-                        listener.FailFast = false;
-                        // But we want nevertheless traces to be routed to the grand output: this listener must be the first one
-                        // otherwise the throw of DebugAssertionException will hide them.
-                        Trace.Listeners.Remove( listener );
-                        Trace.Listeners.Insert( 0, listener );
-                    }
+                    // If our standard MonitorTraceListener has been injected, then we remove the StaticBasicTestHelper.SafeTraceListener
+                    // that throws Exceptions instead of callinf FailFast.
+                    Trace.Listeners.Remove( "CK.Testing.SafeTraceListener" );
                 }
             } );
             _monitor = new ActivityMonitor( "MonitorTestHelper" );
