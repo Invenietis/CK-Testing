@@ -11,7 +11,7 @@ namespace CK.Testing.Tests
     public class DebugAssertTests
     {
         [Test]
-        public void Debug_Fail_does_not_crash_the_test_runner_process_but_throws_a_DebugAssertionException()
+        public void Debug_Fail_does_not_crash_the_test_runner_process_but_throws_an_Exception_with_a_Message_that_starts_with_Assertion_Failed()
         {
             // Even with a Module initializer (see the ModuleInit.Fody package for instance), when this
             // test is run with absolutely no interaction with the CK.Testing objects... The initializer is
@@ -28,10 +28,11 @@ namespace CK.Testing.Tests
                 System.Diagnostics.Debug.Assert( 1 == 0, "This should lead to a simple exception, not the death of the process..." );
                 Assert.Fail( "This is NEVER reached!" );
             }
-            catch( DebugAssertionException ex )
+            catch( Exception ex )
             {
                 // Everything is fine!
                 ex.Should().NotBeNull();
+                ex.Message.Should().StartWith( "Assertion Failed: " );
             }
         }
     }
