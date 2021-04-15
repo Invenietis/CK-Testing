@@ -1,10 +1,10 @@
 <Project>
   <ItemGroup>
-    <PackageReference Update="CK.WeakAssemblyNameResolver" Version="0.5.3--0002-develop" />
-    <PackageReference Update="CK.Core" Version="14.0.1--0003-develop" />
-    <PackageReference Update="CK.Reflection" Version="9.0.3--0002-develop" />
-    <PackageReference Update="CK.Monitoring" Version="14.0.1--0003-develop" />
-    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="14.0.1-r02-00-0002-develop" />
+    <PackageReference Update="CK.WeakAssemblyNameResolver" Version="0.5.2" />
+    <PackageReference Update="CK.Core" Version="14.1.0" />
+    <PackageReference Update="CK.Reflection" Version="9.0.2" />
+    <PackageReference Update="CK.Monitoring" Version="14.1.0" />
+    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="14.1.0" />
     <PackageReference Update="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" />
   </ItemGroup>
