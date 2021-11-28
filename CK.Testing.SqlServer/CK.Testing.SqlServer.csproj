@@ -4,14 +4,14 @@
   <Import Project="..\Common\Shared.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <Description>Contains Sql Server test helpers.</Description>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing.Monitoring\CK.Testing.Monitoring.csproj" />
-    <PackageReference Include="System.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
   </ItemGroup>
   
 </Project>

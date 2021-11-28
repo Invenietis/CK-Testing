@@ -1,5 +1,4 @@
 using CK.Core;
-using CK.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +13,7 @@ namespace CK.Testing
     /// </summary>
     public static class TestHelperResolver
     {
-        static object _lock = new object();
+        static readonly object _lock = new object();
         static ITestHelperResolver _resolver;
 
         /// <summary>

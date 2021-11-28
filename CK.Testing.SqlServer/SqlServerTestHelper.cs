@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CK.Core;
 using CK.Testing.SqlServer;
-using CK.Text;
 
 namespace CK.Testing
 {

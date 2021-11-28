@@ -1,5 +1,4 @@
 using CK.Core;
-using CK.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;

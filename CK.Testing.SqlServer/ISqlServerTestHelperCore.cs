@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 
 namespace CK.Testing.SqlServer
@@ -16,7 +16,7 @@ namespace CK.Testing.SqlServer
         /// Gets the connection string to the master database from "SqlServer/MasterConnectionString" configuration.
         /// Defaults to "Server=.;Database=master;Integrated Security=true".
         /// <para>
-        /// As usual, when no configuration exists, if an environement variable that starts with "TestHelper__" exists,
+        /// As usual, when no configuration exists, if an environment variable that starts with "TestHelper__" exists,
         /// its value is used (its name must be 'TestHelper__MasterConnectionString' or 'TestHelper__SqlServer__MasterConnectionString').
         /// </para>
         /// </summary>
@@ -25,8 +25,8 @@ namespace CK.Testing.SqlServer
         /// <summary>
         /// Gets the default test database informations.
         /// Its name is given by the "SqlServer/DatabaseName" configuration if it exists
-        /// or is automatically infered from <see cref="IBasicTestHelper.TestProjectName"/>.
-        /// Its collation is given by ""SqlServer/Collation" configuration it it exists or defaults
+        /// or is automatically inferred from <see cref="IBasicTestHelper.TestProjectName"/>.
+        /// Its collation is given by ""SqlServer/Collation" configuration if it exists or defaults
         /// to "Latin1_General_100_BIN2".
         /// Its compatibility level is given by "SqlServer/CompatibilityLevel" or is automatically
         /// set to the actual compatibility level of the server (from <see cref="MasterConnectionString"/>).  
@@ -60,11 +60,11 @@ namespace CK.Testing.SqlServer
         /// Drops the database.
         /// </summary>
         /// <param name="databaseName">Database name to drop. Defaults to default <see cref="DefaultDatabaseOptions"/>.</param>
-        /// <param name="closeExistingConnections">By default, exisiting connections are forcibly closed.</param>
+        /// <param name="closeExistingConnections">By default, existing connections are forcibly closed.</param>
         void DropDatabase( string? databaseName = null, bool closeExistingConnections = true );
 
         /// <summary>
-        /// Fires whenever a database is created, reset or droppped.
+        /// Fires whenever a database is created, reset or dropped.
         /// </summary>
         event EventHandler<SqlServerDatabaseEventArgs> OnDatabaseCreatedOrDropped;
 

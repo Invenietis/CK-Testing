@@ -1,4 +1,4 @@
-using CK.Text;
+using CK.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -78,7 +78,7 @@ namespace CK.Testing
             else
             {
                 if( Path.IsPathRooted( v ) ) return Path.GetFullPath( v );
-                if( v.IndexOf( '{' ) >= 0 ) return v;
+                if( v.Contains( '{' ) ) return v;
                 raw = BasePath.Combine( v );
             }
             return raw.Path.IndexOf( '{' ) < 0 ? raw.ResolveDots() : raw;

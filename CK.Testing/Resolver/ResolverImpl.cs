@@ -1,5 +1,4 @@
 using CK.Core;
-using CK.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -69,14 +68,14 @@ namespace CK.Testing
                 }
             }
 
-            public Type GetResolveTarget( Type t )
+            public static Type GetResolveTarget( Type target )
             {
-                var target = ((ResolveTargetAttribute)t.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
-                if( target != null && !target.IsInterface )
+                var t = ((ResolveTargetAttribute)target.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
+                if( t != null && !t.IsInterface )
                 {
-                    throw new ArgumentException( $"ResolveTarget attribute on {t.FullName}: must be an interface.", nameof( target ) );
+                    throw new ArgumentException( $"ResolveTarget attribute on {target.FullName}: must be an interface.", nameof( t ) );
                 }
-                return target;
+                return t;
             }
 
             public void AddMapping( Type t, object result )
@@ -184,7 +183,7 @@ namespace CK.Testing
                     bool isDynamicType = tMapped.Assembly.IsDynamic;
                     if( !isDynamicType
                         && ctx.CallDepth == 1
-                        && (mappingResolvedTarget = ctx.GetResolveTarget( tMapped )) != null )
+                        && (mappingResolvedTarget = Context.GetResolveTarget( tMapped )) != null )
                     {
                         result = Resolve( ctx, mappingResolvedTarget );
                     }
