@@ -309,7 +309,7 @@ namespace CK.Testing
                     string c = _config.Get( "SqlServer/MasterConnectionString" );
                     if( c == null )
                     {
-                        c = "Server=.;Database=master;Integrated Security=SSPI";
+                        c = "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True";
                         _monitor.Monitor.Info( $"Using default connection string: {c}" );
                     }
                     _masterConnectionString = new SqlConnectionStringBuilder( c );
