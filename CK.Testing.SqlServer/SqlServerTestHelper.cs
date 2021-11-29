@@ -115,7 +115,7 @@ namespace CK.Testing
             }
         }
 
-        event EventHandler<SqlServerDatabaseEventArgs> ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped
+        event EventHandler<SqlServerDatabaseEventArgs>? ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped
         {
             add => _onEvent += value;
             remove => _onEvent -= value;
@@ -306,7 +306,7 @@ namespace CK.Testing
             {
                 _monitor.OnlyOnce( () =>
                 {
-                    string c = _config.Get( "SqlServer/MasterConnectionString" );
+                    string? c = _config.Get( "SqlServer/MasterConnectionString" );
                     if( c == null )
                     {
                         c = "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True";

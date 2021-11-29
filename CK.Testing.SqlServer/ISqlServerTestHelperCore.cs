@@ -66,7 +66,7 @@ namespace CK.Testing.SqlServer
         /// <summary>
         /// Fires whenever a database is created, reset or dropped.
         /// </summary>
-        event EventHandler<SqlServerDatabaseEventArgs> OnDatabaseCreatedOrDropped;
+        event EventHandler<SqlServerDatabaseEventArgs>? OnDatabaseCreatedOrDropped;
 
         /// <summary>
         /// Creates an opened connection to a database.

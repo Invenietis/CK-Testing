@@ -40,6 +40,6 @@ namespace CK.Testing
         /// </summary>
         /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
         /// <returns>A new resolver.</returns>
-        public static ITestHelperResolver Create( ITestHelperConfiguration config = null ) => ResolverImpl.Create( config );
+        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
     }
 }

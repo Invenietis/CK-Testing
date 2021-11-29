@@ -55,7 +55,7 @@ namespace CK.Testing
         NormalizedPath LogFolder { get; }
 
         /// <summary>
-        /// Gets the bin folder where the tests are beeing executed.
+        /// Gets the bin folder where the tests are being executed.
         /// This normally is the same as <see cref="AppContext.BaseDirectory"/>.
         /// </summary>
         NormalizedPath BinFolder { get; }
@@ -67,7 +67,7 @@ namespace CK.Testing
         /// </summary>
         /// <param name="folder">The path to the folder.</param>
         /// <param name="ensureFolderAvailable">
-        /// By default, ensures that the the folder exists and clears is content.
+        /// By default, ensures that the folder exists and clears is content.
         /// When false, the folder and its content is removed.
         /// </param>
         /// <param name="maxRetryCount">Maximal number of retries on failure.</param>
@@ -77,7 +77,7 @@ namespace CK.Testing
         /// <summary>
         /// Raised whenever a folder has been cleaned up.
         /// </summary>
-        event EventHandler<CleanupFolderEventArgs> OnCleanupFolder;
+        event EventHandler<CleanupFolderEventArgs>? OnCleanupFolder;
 
         /// <summary>
         /// Executes an action once and only the first time it is called during the application lifetime.
@@ -86,6 +86,6 @@ namespace CK.Testing
         /// <param name="a">Action to execute.</param>
         /// <param name="s">Path of the source file, automatically sets by the compiler.</param>
         /// <param name="l">Line number in the source file, automatically sets by the compiler.</param>
-        void OnlyOnce( Action a, [CallerFilePath]string s = null, [CallerLineNumber] int l = 0 );
+        void OnlyOnce( Action a, [CallerFilePath]string? s = null, [CallerLineNumber] int l = 0 );
     }
 }

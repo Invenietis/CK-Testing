@@ -18,11 +18,11 @@ namespace CK.Testing
         class Context
         {
             readonly ISimpleServiceContainer _container;
-            List<ITestHelperResolvedCallback> _created;
-            HashSet<Type> _fromTypes;
+            List<ITestHelperResolvedCallback>? _created;
+            HashSet<Type>? _fromTypes;
             int _depth;
-            Type _initialRequestedType;
-            object _initialRequestedTypeResult;
+            Type? _initialRequestedType;
+            object? _initialRequestedTypeResult;
 
             public Context( ISimpleServiceContainer c )
             {
@@ -33,7 +33,7 @@ namespace CK.Testing
 
             public int CallDepth => _depth;
 
-            public void Start( ref Type t, ref object result )
+            public void Start( ref Type t, ref object? result )
             {
                 Debug.Assert( t != null && t != typeof( IMixinTestHelper ) && t != typeof(ITestHelperResolvedCallback) );
                 Debug.Assert( _depth >= 0 );
@@ -42,13 +42,13 @@ namespace CK.Testing
                 if( _depth++ == 0 )
                 {
                     _initialRequestedType = t;
-                    Type first = GetResolveTarget( t );
+                    Type? first = GetResolveTarget( t );
                     if( first == null ) return;
                     if( _fromTypes == null ) _fromTypes = new HashSet<Type>();
                     Type prev = t;
                     do
                     {
-                        if( !_fromTypes.Add( prev ) ) throw new Exception( $"ResolveTarget atttribute: cyclic references found between types: {prev.FullName} -> {_fromTypes.Select( x => x.FullName ).Concatenate()}" );
+                        if( !_fromTypes.Add( prev ) ) throw new Exception( $"ResolveTarget attribute: cyclic references found between types: {prev.FullName} -> {_fromTypes.Select( x => x.FullName! ).Concatenate()}" );
                         prev = first;
                         first = GetResolveTarget( first );
                     }
@@ -68,12 +68,12 @@ namespace CK.Testing
                 }
             }
 
-            public static Type GetResolveTarget( Type target )
+            public static Type? GetResolveTarget( Type target )
             {
-                var t = ((ResolveTargetAttribute)target.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
+                var t = ((ResolveTargetAttribute?)target.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
                 if( t != null && !t.IsInterface )
                 {
-                    throw new ArgumentException( $"ResolveTarget attribute on {target.FullName}: must be an interface.", nameof( t ) );
+                    throw new ArgumentException( $"ResolveTarget attribute on {target.FullName}: must be an interface.", nameof( target ) );
                 }
                 return t;
             }
@@ -85,9 +85,9 @@ namespace CK.Testing
                 _fromTypes?.Remove( t );
             }
 
-            public object GetAlreayResolved( Type t ) => _container.GetService( t );
+            public object? GetAlreayResolved( Type t ) => _container.GetService( t );
 
-            public object Stop( Type t, object result, bool mappingWithResolvedTarget )
+            public object? Stop( Type t, object? result, bool mappingWithResolvedTarget )
             {
                 Debug.Assert( t != null );
                 Debug.Assert( _depth >= 1 );
@@ -152,12 +152,12 @@ namespace CK.Testing
 
         public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
-        public object Resolve( Type t )
+        public object? Resolve( Type t )
         {
             if( t == null ) throw new ArgumentNullException( nameof( t ) );
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                Context ctx = null; 
+                Context? ctx = null; 
                 if( !TransientMode ) ctx = new Context( _container );
                 else
                 {
@@ -168,17 +168,17 @@ namespace CK.Testing
             }
         }
 
-        object Resolve( Context ctx, Type t )
+        object? Resolve( Context ctx, Type t )
         {
-            object result = ctx.GetAlreayResolved( t );
+            object? result = ctx.GetAlreayResolved( t );
             if( result == null && t != typeof(ITestHelperResolvedCallback) && t != typeof(IMixinTestHelper) )
             {
                 ctx.Start( ref t, ref result );
                 if( result != null ) return result;
-                Type mappingResolvedTarget = null;
+                Type? mappingResolvedTarget = null;
                 if( !t.IsClass || t.IsAbstract )
                 {
-                    Type tMapped = MapType( t, ctx.ThrowOnError );
+                    Type? tMapped = MapType( t, ctx.ThrowOnError );
                     if( tMapped == null ) return null;
                     bool isDynamicType = tMapped.Assembly.IsDynamic;
                     if( !isDynamicType
@@ -196,14 +196,14 @@ namespace CK.Testing
             return result;
         }
 
-        Type MapType( Type t, bool throwOnError )
+        Type? MapType( Type t, bool throwOnError )
         {
             Debug.Assert( t != typeof( ITestHelperResolvedCallback ) && t != typeof( IMixinTestHelper ) );
-            string typeName = _config.Get( "TestHelper/" + t.FullName );
+            string? typeName = _config.Get( "TestHelper/" + t.FullName );
             if( typeName != null )
             {
                 // Always throw when config is used.
-                Type fromConfig = SimpleTypeFinder.WeakResolver( typeName, true );
+                Type? fromConfig = SimpleTypeFinder.WeakResolver( typeName, true );
                 if( typeof(IMixinTestHelper).IsAssignableFrom(fromConfig))
                 {
                     throw new Exception( $"Mapped type '{fromConfig.FullName}' is a Mixin. It can not be explicitely implemented." );
@@ -214,12 +214,12 @@ namespace CK.Testing
             {
                 var cName = t.Name.Substring( 1 );
                 string fullName = $"{t.Namespace}.{cName}, {t.Assembly.FullName}";
-                Type found = SimpleTypeFinder.WeakResolver( fullName, false );
+                Type? found = SimpleTypeFinder.WeakResolver( fullName, false );
                 if( found == null && cName.EndsWith( "Core" ) )
                 {
                     var nameNoCore = cName.Remove( cName.Length - 4 );
-                    var ns = t.Namespace.Split( '.' ).ToList();
-                    while( ns.Count > 0 )
+                    var ns = t.Namespace?.Split( '.' ).ToList();
+                    while( ns != null && ns.Count > 0 )
                     {
                         fullName = $"{String.Join(".", ns)}.{nameNoCore}, {t.Assembly.FullName}";
                         found = SimpleTypeFinder.WeakResolver( fullName, false );
@@ -244,17 +244,17 @@ namespace CK.Testing
             throw new Exception( $"Unable to locate an implementation for {t.AssemblyQualifiedName}." );
         }
 
-        object Create( Context ctx, Type t )
+        object? Create( Context ctx, Type t )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
-            var longestCtor = t.GetConstructors( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic )
+            var longestCtor = t.GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
                                 .Select( x => Tuple.Create( x, x.GetParameters() ) )
                                 .OrderByDescending( x => x.Item2.Length )
                                 .Select( x => new
                                 {
                                     Ctor = x.Item1,
                                     Parameters = x.Item2,
-                                    Values = new object[x.Item2.Length]
+                                    Values = new object?[x.Item2.Length]
                                 } )
                                 .FirstOrDefault();
             if( longestCtor == null )
@@ -282,7 +282,7 @@ namespace CK.Testing
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
 
-        public static ITestHelperResolver Create( ITestHelperConfiguration config = null )
+        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null )
         {
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {

@@ -1,6 +1,7 @@
 using CK.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CK.Testing
@@ -16,7 +17,8 @@ namespace CK.Testing
         /// <param name="key">The path of the key to find.</param>
         /// <param name="defaultValue">The default value when not found.</param>
         /// <returns>The configured value or the default value.</returns>
-        string Get( NormalizedPath key, string defaultValue = null );
+        [return: NotNullIfNotNull("defaultValue")]
+        string? Get( NormalizedPath key, string? defaultValue = null );
 
         /// <summary>
         /// Gets the configuration value associated to a key with a lookup up to the root of the configuration.

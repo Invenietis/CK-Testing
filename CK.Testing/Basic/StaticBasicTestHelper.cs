@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -49,18 +50,18 @@ namespace CK.Testing
             try
             {
                 // Conservative approach here: we inject our own Listener if and only if it replaces the (only) default one.
-                if( System.Diagnostics.Trace.Listeners.Count == 1
-                    && System.Diagnostics.Trace.Listeners[0] is System.Diagnostics.DefaultTraceListener def
+                if( Trace.Listeners.Count == 1
+                    && Trace.Listeners[0] is DefaultTraceListener def
                     && def.Name == "Default" )
                 {
-                    System.Diagnostics.Trace.Listeners.Clear();
-                    System.Diagnostics.Trace.Listeners.Add( new SafeTraceListener() );
+                    Trace.Listeners.Clear();
+                    Trace.Listeners.Add( new SafeTraceListener() );
                 }
 
                 _onlyOnce = new HashSet<string>();
-                string p = AppContext.BaseDirectory;
+                string? p = AppContext.BaseDirectory;
                 _binFolder = p;
-                string buildConfDir = null;
+                string? buildConfDir = null;
                 foreach( var config in _allowedConfigurations )
                 {
                     buildConfDir = FindAbove( p, config );
@@ -74,29 +75,44 @@ namespace CK.Testing
                 {
                     throw new InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
                 }
+                Debug.Assert( buildConfDir != null );
                 p = Path.GetDirectoryName( buildConfDir );
                 if( Path.GetFileName( p ) != "bin" )
                 {
                     throw new InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
                 }
-                _testProjectFolder = p = Path.GetDirectoryName( p );
+                Debug.Assert( p != null );
+                p = Path.GetDirectoryName( p );
+                if( string.IsNullOrEmpty( p ) )
+                {
+                    throw new InvalidOperationException( $"The '{_binFolder}' must not be directly on the root." );
+                }
+
+                _testProjectFolder = p;
                 _testProjectName = Path.GetFileName( p );
                 p = Path.GetDirectoryName( p );
 
-                string testsFolder = null;
+                string? testsFolder = null;
                 bool hasGit = false;
                 while( p != null && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
                 {
                     if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
                     p = Path.GetDirectoryName( p );
                 }
-                if( !hasGit ) throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
+                if( !hasGit )
+                {
+                    throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
+                }
+                if( string.IsNullOrEmpty( p ) )
+                {
+                    throw new InvalidOperationException( $"The '.git' cannot be directly on the root." );
+                }
                 _repositoryFolder = p;
                 if( testsFolder == null )
                 {
                     throw new InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
                 }
-                _solutionFolder = Path.GetDirectoryName( testsFolder );
+                _solutionFolder = Path.GetDirectoryName( testsFolder )!;
                 _logFolder = Path.Combine( _testProjectFolder, "Logs" );
                 // The first works in .Net framework, the second one in netcore.
                 _isTestHost = Environment.CommandLine.Contains( "testhost" )
@@ -108,13 +124,14 @@ namespace CK.Testing
             }
         }
 
-        static string FindAbove( string path, string folderName )
+        static string? FindAbove( string path, string folderName )
         {
-            while( path != null && Path.GetFileName( path ) != folderName )
+            var p = path;
+            while( p != null && Path.GetFileName( p ) != folderName )
             {
-                path = Path.GetDirectoryName( path );
+                p = Path.GetDirectoryName( p );
             }
-            return path;
+            return p;
         }
 
         /// <summary>
