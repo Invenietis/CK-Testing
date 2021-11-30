@@ -1,9 +1,9 @@
 using CK.Core;
-using CK.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -57,7 +57,8 @@ namespace CK.Testing
         /// <param name="key">The path of the key to find.</param>
         /// <param name="defaultValue">The default value when not found.</param>
         /// <returns>The configured value or the default value.</returns>
-        public string Get( NormalizedPath key, string defaultValue = null ) => GetConfigValue( key )?.Value ?? defaultValue;
+        [return: NotNullIfNotNull( "defaultValue" )]
+        public string? Get( NormalizedPath key, string? defaultValue = null ) => GetConfigValue( key )?.Value ?? defaultValue;
 
         /// <summary>
         /// Gets the configuration value associated to a key as a file or folder path
@@ -68,7 +69,7 @@ namespace CK.Testing
         public NormalizedPath? GetPath( NormalizedPath key )
         {
             var v = GetConfigValue( key );
-            return v.HasValue ? v.Value.GetValueAsPath() : null;
+            return v.HasValue ? new NormalizedPath( v.Value.GetValueAsPath() ) : (NormalizedPath?)null;
         }
 
         /// <summary>
@@ -114,6 +115,7 @@ namespace CK.Testing
         {
             var basePath = appConfigFile.RemoveLastPart();
             XDocument doc = XDocument.Load( appConfigFile );
+            Debug.Assert( doc.Root != null );
             foreach( var e in doc.Root.Elements( "appSettings" ).Elements() )
             {
                 if( e.Name.LocalName == "add" )
@@ -144,7 +146,7 @@ namespace CK.Testing
             Debug.Assert( prefix1.Length == 12 && prefix2.Length == 12 );
             var env = Environment.GetEnvironmentVariables()
                         .Cast<DictionaryEntry>()
-                        .Select( e => new KeyValuePair<string,string>( (string)e.Key, (string)e.Value ) )
+                        .Select( e => new KeyValuePair<string,string>( (string)e.Key, (string)e.Value! ) )
                         .Where( t => t.Key.StartsWith( prefix1, StringComparison.OrdinalIgnoreCase )
                                      || t.Key.StartsWith( prefix2, StringComparison.OrdinalIgnoreCase ) )
                         .Select( t => new KeyValuePair<string, string>( t.Key.Substring( 12 ), t.Value ) );

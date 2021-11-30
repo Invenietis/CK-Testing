@@ -10,7 +10,6 @@ using CK.Core;
 using CK.Monitoring;
 using CK.Monitoring.Handlers;
 using CK.Testing.Monitoring;
-using CK.Text;
 
 namespace CK.Testing
 {
@@ -220,7 +219,7 @@ namespace CK.Testing
             {
                 using( m.OpenWarn( $"{delta} assembly load conflicts occurred:" ) )
                 {
-                    while( prev < currents.Length ) m.Warn( currents[prev++].ToString(), _loadConflictTag );
+                    while( prev < currents.Length ) m.Warn( _loadConflictTag, currents[prev++].ToString() );
                 }
             }
         }

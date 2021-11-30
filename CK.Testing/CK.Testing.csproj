@@ -2,8 +2,9 @@
   <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
   <Import Project="..\Common\Shared.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <Description>Contains Test Helpers mixin infrastructure.</Description>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CK.Core" />

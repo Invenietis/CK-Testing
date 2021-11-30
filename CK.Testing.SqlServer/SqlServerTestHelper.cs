@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CK.Core;
 using CK.Testing.SqlServer;
-using CK.Text;
 
 namespace CK.Testing
 {
@@ -116,7 +115,7 @@ namespace CK.Testing
             }
         }
 
-        event EventHandler<SqlServerDatabaseEventArgs> ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped
+        event EventHandler<SqlServerDatabaseEventArgs>? ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped
         {
             add => _onEvent += value;
             remove => _onEvent -= value;
@@ -307,10 +306,10 @@ namespace CK.Testing
             {
                 _monitor.OnlyOnce( () =>
                 {
-                    string c = _config.Get( "SqlServer/MasterConnectionString" );
+                    string? c = _config.Get( "SqlServer/MasterConnectionString" );
                     if( c == null )
                     {
-                        c = "Server=.;Database=master;Integrated Security=SSPI";
+                        c = "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True";
                         _monitor.Monitor.Info( $"Using default connection string: {c}" );
                     }
                     _masterConnectionString = new SqlConnectionStringBuilder( c );
