@@ -94,7 +94,7 @@ namespace CK.Testing
 
                 string? testsFolder = null;
                 bool hasGit = false;
-                while( p != null && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
+                while( !string.IsNullOrEmpty( p ) && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
                 {
                     if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
                     p = Path.GetDirectoryName( p );
