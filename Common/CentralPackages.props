@@ -1,10 +1,10 @@
 <Project>
   <ItemGroup>
     <PackageReference Update="CK.WeakAssemblyNameResolver" Version="0.0.0--03n215m-local+v0.5.2" />
-    <PackageReference Update="CK.Core" Version="0.0.0--03n215m-local+v15.0.0-r" />
+    <PackageReference Update="CK.Core" Version="0.0.0--03n3xu9-local+v15.0.0-r" />
     <PackageReference Update="CK.Reflection" Version="0.0.0--03n215m-local+v9.0.2" />
-    <PackageReference Update="CK.Monitoring" Version="0.0.0--03n22u6-local+v15.0.0-r" />
-    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="0.0.0--03n22cc-local+v15.0.0-r" />
+    <PackageReference Update="CK.Monitoring" Version="0.0.0--03n3y05-local+v15.0.0-r" />
+    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="0.0.0--03n3y05-local+v15.0.0-r" />
     <PackageReference Update="Microsoft.Data.SqlClient" Version="4.0.0" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" />
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64" />
