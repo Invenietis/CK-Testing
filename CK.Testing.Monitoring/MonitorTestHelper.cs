@@ -154,7 +154,8 @@ namespace CK.Testing
                 if( name == "Archive" ) archivePath = d + FileUtil.DirectorySeparatorString;
                 else
                 {
-                    if( FileUtil.TryParseFileNameUniqueTimeUtcFormat( name, out DateTime date, allowNameSuffix ) )
+                    var n = name.AsSpan();
+                    if( FileUtil.TryMatchFileNameUniqueTimeUtcFormat( ref n, out DateTime date ) && (allowNameSuffix || n.IsEmpty) )
                     {
                         // Take no risk: ignore (highly unlikely to happen) duplicates. 
                         timedFolders[date] = d;
