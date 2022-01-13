@@ -2,6 +2,7 @@ using CK.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -28,8 +29,6 @@ namespace CK.Testing
             {
                 _container = c;
             }
-
-            public bool ThrowOnError => true;
 
             public int CallDepth => _depth;
 
@@ -73,7 +72,7 @@ namespace CK.Testing
                 var t = ((ResolveTargetAttribute?)target.GetCustomAttribute( typeof( ResolveTargetAttribute ) ))?.Target;
                 if( t != null && !t.IsInterface )
                 {
-                    throw new ArgumentException( $"ResolveTarget attribute on {target.FullName}: must be an interface.", nameof( target ) );
+                    Throw.ArgumentException( $"ResolveTarget attribute on {target.FullName}: must be an interface.", nameof( target ) );
                 }
                 return t;
             }
@@ -113,6 +112,7 @@ namespace CK.Testing
                 {
                     _fromTypes?.Clear();
                     _created?.Clear();
+                    Debug.Assert( _initialRequestedTypeResult != null );
                     return _initialRequestedTypeResult;
                 }
                 return result;
@@ -152,19 +152,21 @@ namespace CK.Testing
 
         public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
-        public object? Resolve( Type t )
+        public object Resolve( Type t )
         {
-            if( t == null ) throw new ArgumentNullException( nameof( t ) );
+            Throw.CheckNotNullArgument( t );
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                Context? ctx = null; 
+                Context ctx; 
                 if( !TransientMode ) ctx = new Context( _container );
                 else
                 {
                     ctx = new Context( new SimpleServiceContainer( _container ) );
                     foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
                 }
-                return Resolve( ctx, t );
+                var r = Resolve( ctx, t );
+                if( r == null ) Throw.Exception( $"Unable to resolve type '{t.AssemblyQualifiedName}'." );
+                return r;
             }
         }
 
@@ -178,8 +180,7 @@ namespace CK.Testing
                 Type? mappingResolvedTarget = null;
                 if( !t.IsClass || t.IsAbstract )
                 {
-                    Type? tMapped = MapType( t, ctx.ThrowOnError );
-                    if( tMapped == null ) return null;
+                    Type tMapped = MapType( t, throwOnError: true )!;
                     bool isDynamicType = tMapped.Assembly.IsDynamic;
                     if( !isDynamicType
                         && ctx.CallDepth == 1
@@ -188,7 +189,11 @@ namespace CK.Testing
                         result = Resolve( ctx, mappingResolvedTarget );
                     }
                     else result = Create( ctx, tMapped );
-                    if( result != null && !isDynamicType && mappingResolvedTarget == null ) ctx.AddMapping( tMapped, result );
+                    if( !isDynamicType && mappingResolvedTarget == null )
+                    {
+                        Debug.Assert( result != null );
+                        ctx.AddMapping( tMapped, result );
+                    }
                 }
                 else result = Create( ctx, t );
                 return ctx.Stop( t, result, mappingResolvedTarget != null );
@@ -244,7 +249,7 @@ namespace CK.Testing
             throw new Exception( $"Unable to locate an implementation for {t.AssemblyQualifiedName}." );
         }
 
-        object? Create( Context ctx, Type t )
+        object Create( Context ctx, Type t )
         {
             Debug.Assert( t != null && t.IsClass && !t.IsAbstract );
             var longestCtor = t.GetConstructors( BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
@@ -259,8 +264,8 @@ namespace CK.Testing
                                 .FirstOrDefault();
             if( longestCtor == null )
             {
-                if( ctx.ThrowOnError ) throw new Exception( $"Unable to find a public constructor for '{t.FullName}'." );
-                return null;
+                Throw.Exception( $"Unable to find a public constructor for '{t.FullName}'." );
+                return null!;
             }
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
             {

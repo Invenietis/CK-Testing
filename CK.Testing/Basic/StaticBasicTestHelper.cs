@@ -34,19 +34,21 @@ namespace CK.Testing
         /// </summary>
         class SafeTraceListener : System.Diagnostics.DefaultTraceListener
         {
-            private const string MessagePrefix = "Assertion Failed: ";
+            const string _messagePrefix = "Assertion Failed: ";
 
             public SafeTraceListener()
             {
                 Name = "CK.Testing.SafeTraceListener";
             }
 
-            public override void Fail( string message, string detailMessage ) => throw new Exception( MessagePrefix + message + " - Detail: " + detailMessage );
-            public override void Fail( string message ) => throw new Exception( MessagePrefix + message );
+            public override void Fail( string? message, string? detailMessage ) => throw new Exception( _messagePrefix + message + " - Detail: " + detailMessage );
+            public override void Fail( string? message ) => throw new Exception( _messagePrefix + message );
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         static StaticBasicTestHelper()
         {
+            _onlyOnce = new HashSet<string>();
             try
             {
                 // Conservative approach here: we inject our own Listener if and only if it replaces the (only) default one.
@@ -58,7 +60,6 @@ namespace CK.Testing
                     Trace.Listeners.Add( new SafeTraceListener() );
                 }
 
-                _onlyOnce = new HashSet<string>();
                 string? p = AppContext.BaseDirectory;
                 _binFolder = p;
                 string? buildConfDir = null;
@@ -123,6 +124,7 @@ namespace CK.Testing
                 _initializationError = ExceptionDispatchInfo.Capture( ex );
             }
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         static string? FindAbove( string path, string folderName )
         {

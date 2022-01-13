@@ -27,7 +27,7 @@ namespace CK.Testing
         /// <summary>
         /// Resolves an instance, either a singleton or a transient one depending on <see cref="TransientMode"/>.
         /// This method throw exceptions on failure and this is intended: test framework must be fully operational
-        /// and any error are considered developper errors.
+        /// and any error are considered developer errors.
         /// </summary>
         /// <param name="t">The type to resolve.</param>
         /// <returns>The resolved instance.</returns>

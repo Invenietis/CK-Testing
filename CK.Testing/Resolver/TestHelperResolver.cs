@@ -14,7 +14,7 @@ namespace CK.Testing
     public static class TestHelperResolver
     {
         static readonly object _lock = new object();
-        static ITestHelperResolver _resolver;
+        static ITestHelperResolver? _resolver;
 
         /// <summary>
         /// Gets the default <see cref="ITestHelperResolver"/> to use.

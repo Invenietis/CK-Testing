@@ -48,8 +48,17 @@ namespace CK.Testing.SqlServer
             /// </summary>
             public string FileName => GetFileName( DatabaseName, Date );
 
+            /// <summary>
+            /// Initializes a new Backup instance.
+            /// </summary>
+            /// <param name="dbName">The database name.</param>
+            /// <param name="date">Backup date (must be Utc).</param>
+            /// <param name="index">Index of the backup.</param>
             public Backup( string dbName, DateTime date, int index )
             {
+                Throw.CheckNotNullOrEmptyArgument( dbName );
+                Throw.CheckArgument( date.Kind == DateTimeKind.Utc );
+                Throw.CheckArgument( index >= 0 );
                 DatabaseName = dbName;
                 Index = index;
                 Date = date;
@@ -153,7 +162,7 @@ namespace CK.Testing.SqlServer
         /// <returns>The restored backup or null if no backup exists.</returns>
         public Backup? RestoreBackup( string? dbName = null, int index = 0 )
         {
-            if( index < 0 ) throw new ArgumentOutOfRangeException( "Must be greater or equal to 0.", nameof( index ) );
+            Throw.CheckOutOfRangeArgument( index >= 0 );
             if( dbName == null ) dbName = _helper.DoGetDefaultDatabaseOptions().DatabaseName;
             var all = GetBackups( dbName );
             if( all.Count == 0 )
