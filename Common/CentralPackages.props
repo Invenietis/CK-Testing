@@ -3,8 +3,8 @@
     <PackageReference Update="CK.WeakAssemblyNameResolver" Version="0.5.3--0021-develop" />
     <PackageReference Update="CK.Core" Version="15.0.0-r03-00-0006-develop" />
     <PackageReference Update="CK.Reflection" Version="9.0.3--0021-develop" />
-    <PackageReference Update="CK.Monitoring" Version="15.0.0-r05-00-0003-develop" />
-    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r05-00-0006-develop" />
+    <PackageReference Update="CK.Monitoring" Version="15.0.0-r05-00-0004-develop" />
+    <PackageReference Update="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r05-00-0007-develop" />
     <PackageReference Update="Microsoft.Data.SqlClient" Version="4.0.0" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" />
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64" />
