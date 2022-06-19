@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <Description>Contains Test Helpers mixin infrastructure.</Description>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.Core" />
-    <PackageReference Include="CK.Reflection" />
-    <PackageReference Include="CK.WeakAssemblyNameResolver" />
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="CK.Core" Version="15.0.0-r06" />
+    <PackageReference Include="CK.Reflection" Version="9.0.2" />
+    <PackageReference Include="CK.WeakAssemblyNameResolver" Version="0.5.2" />
+    <PackageReference Include="FluentAssertions" Version="6.5.1" />
   </ItemGroup>
 </Project>
