@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
   <Sdk Name="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
-  <Import Project="..\Common\Shared.props" />
-  
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <Description>Contains Sql Server test helpers.</Description>
@@ -13,5 +10,4 @@
     <ProjectReference Include="..\CK.Testing.Monitoring\CK.Testing.Monitoring.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
   </ItemGroup>
-  
 </Project>
