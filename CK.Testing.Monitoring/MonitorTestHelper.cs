@@ -10,7 +10,6 @@ using CK.Core;
 using CK.Monitoring;
 using CK.Monitoring.Handlers;
 using CK.Testing.Monitoring;
-using CK.Text;
 
 namespace CK.Testing
 {
@@ -21,8 +20,8 @@ namespace CK.Testing
     /// </summary>
     public class MonitorTestHelper : Monitoring.IMonitorTestHelperCore
     {
-        const int MaxCurrentLogFolderCount = 5;
-        const int MaxArchivedLogFolderCount = 20;
+        const int _maxCurrentLogFolderCount = 5;
+        const int _maxArchivedLogFolderCount = 20;
 
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
@@ -78,7 +77,7 @@ namespace CK.Testing
                 if( monitorListener != null )
                 {
                     // If our standard MonitorTraceListener has been injected, then we remove the StaticBasicTestHelper.SafeTraceListener
-                    // that throws Exceptions instead of callinf FailFast.
+                    // that throws Exceptions instead of calling FailFast.
                     Trace.Listeners.Remove( "CK.Testing.SafeTraceListener" );
                 }
             } );
@@ -91,12 +90,12 @@ namespace CK.Testing
                 var basePath = LogFile.RootLogPath + "Text" + FileUtil.DirectorySeparatorString;
                 if( Directory.Exists( basePath ) )
                 {
-                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                    CleanupTimedFolders( _monitor, _basic, basePath, _maxCurrentLogFolderCount, _maxArchivedLogFolderCount );
                 }
                 basePath = LogFile.RootLogPath + "CKMon" + FileUtil.DirectorySeparatorString;
                 if( Directory.Exists( basePath ) )
                 {
-                    CleanupTimedFolders( _monitor, _basic, basePath, MaxCurrentLogFolderCount, MaxArchivedLogFolderCount );
+                    CleanupTimedFolders( _monitor, _basic, basePath, _maxCurrentLogFolderCount, _maxArchivedLogFolderCount );
                 }
             } );
         }
@@ -155,7 +154,8 @@ namespace CK.Testing
                 if( name == "Archive" ) archivePath = d + FileUtil.DirectorySeparatorString;
                 else
                 {
-                    if( FileUtil.TryParseFileNameUniqueTimeUtcFormat( name, out DateTime date, allowNameSuffix ) )
+                    var n = name.AsSpan();
+                    if( FileUtil.TryMatchFileNameUniqueTimeUtcFormat( ref n, out DateTime date ) && (allowNameSuffix || n.IsEmpty) )
                     {
                         // Take no risk: ignore (highly unlikely to happen) duplicates. 
                         timedFolders[date] = d;
@@ -169,7 +169,11 @@ namespace CK.Testing
             _monitor.Info( $"Folder '{e.Folder}' has been cleaned up." );
         }
 
-        IActivityMonitor IMonitorTestHelperCore.Monitor => _monitor;
+        IActivityMonitor IMonitorTestHelperCore.Monitor
+        {
+            [DebuggerStepThrough]
+            get => _monitor;
+        }
 
         bool LogToConsole
         {
@@ -220,7 +224,7 @@ namespace CK.Testing
             {
                 using( m.OpenWarn( $"{delta} assembly load conflicts occurred:" ) )
                 {
-                    while( prev < currents.Length ) m.Warn( currents[prev++].ToString(), _loadConflictTag );
+                    while( prev < currents.Length ) m.Warn( _loadConflictTag, currents[prev++].ToString() );
                 }
             }
         }
@@ -247,7 +251,7 @@ namespace CK.Testing
 
         T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
         {
-            T result = default( T );
+            T result = default;
             DoWithWeakAssemblyResolver( () => result = action() );
             return result;
         }

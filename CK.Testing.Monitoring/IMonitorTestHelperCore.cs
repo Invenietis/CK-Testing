@@ -32,7 +32,7 @@ namespace CK.Testing.Monitoring
         bool LogToTextFile { get; }
 
         /// <summary>
-        /// Ensures that the console monitor is on (ie <see cref="LogToConsole"/> is true) until the
+        /// Ensures that the console monitor is on (i.e. <see cref="LogToConsole"/> is true) until the
         /// returned IDisposable is disposed.
         /// </summary>
         /// <returns>The disposable.</returns>
@@ -46,6 +46,7 @@ namespace CK.Testing.Monitoring
 
         /// <summary>
         /// Runs code inside a standard "weak assembly resolver" and dumps the eventual conflicts.
+        /// This can be used to provide a async lambda (a Task will be returned that must be awaited).
         /// </summary>
         /// <param name="action">The action. Must not be null.</param>
         /// <returns>The result.</returns>

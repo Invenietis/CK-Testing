@@ -1,5 +1,4 @@
 using CK.Core;
-using CK.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,8 +13,8 @@ namespace CK.Testing
     /// </summary>
     public static class TestHelperResolver
     {
-        static object _lock = new object();
-        static ITestHelperResolver _resolver;
+        static readonly object _lock = new object();
+        static ITestHelperResolver? _resolver;
 
         /// <summary>
         /// Gets the default <see cref="ITestHelperResolver"/> to use.
@@ -41,6 +40,6 @@ namespace CK.Testing
         /// </summary>
         /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
         /// <returns>A new resolver.</returns>
-        public static ITestHelperResolver Create( ITestHelperConfiguration config = null ) => ResolverImpl.Create( config );
+        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
     }
 }

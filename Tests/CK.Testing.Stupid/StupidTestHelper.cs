@@ -72,7 +72,7 @@ namespace CK.Testing
 
         /// <summary>
         /// This is where the final magic occurs: the TestHelper exposed here combines all the <see cref="IMixinTestHelper"/> interfaces
-        /// implementation into one façade object.
+        /// implementation into one facade object.
         /// (See <see cref="StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests"/> for tests.)
         /// </summary>
         /// <remarks>

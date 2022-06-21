@@ -28,12 +28,12 @@ namespace CK.Testing
             // Creates a new Module
             _moduleBuilder = assemblyBuilder.DefineDynamicModule( "ProxiesModule" );
 
-            _delegateGetInvocationList = typeof( Delegate ).GetMethod( "GetInvocationList", Type.EmptyTypes );
-            _delegateGetMethod = typeof( Delegate ).GetMethod( "get_Method", Type.EmptyTypes );
+            _delegateGetInvocationList = typeof( Delegate ).GetMethod( "GetInvocationList", Type.EmptyTypes )!;
+            _delegateGetMethod = typeof( Delegate ).GetMethod( "get_Method", Type.EmptyTypes )!;
 
             Type[] paramTwoDelegates = new Type[] { typeof( Delegate ), typeof( Delegate ) };
-            _delegateCombine = typeof( Delegate ).GetMethod( "Combine", paramTwoDelegates );
-            _delegateRemove = typeof( Delegate ).GetMethod( "Remove", paramTwoDelegates );
+            _delegateCombine = typeof( Delegate ).GetMethod( "Combine", paramTwoDelegates )!;
+            _delegateRemove = typeof( Delegate ).GetMethod( "Remove", paramTwoDelegates )!;
             _lock = new object();
         }
 
@@ -49,11 +49,10 @@ namespace CK.Testing
                 baseInterfaces.CopyTo( allInterfaces, 1 );
 
                 // Defines a public sealed class that implements typeInterface only.
-                TypeBuilder tB = _moduleBuilder.DefineType(
-                        typeName,
-                        TypeAttributes.Class | TypeAttributes.Sealed,
-                        null,
-                        allInterfaces );
+                TypeBuilder tB = _moduleBuilder.DefineType( typeName,
+                                                            TypeAttributes.Class | TypeAttributes.Sealed,
+                                                            null,
+                                                            allInterfaces );
 
                 // Actual interfaces have at least a member or end with "Core": this saves
                 // pure hook interfaces like the IStupidTestHelperCore (that has no members).
@@ -89,7 +88,7 @@ namespace CK.Testing
                         GenerateMethod( tB, m, fields[i], mDone  );
                     }
                 }
-                return tB.CreateTypeInfo().AsType();
+                return tB.CreateType()!;
             }
         }
 
@@ -157,8 +156,8 @@ namespace CK.Testing
             mB.SetReturnType( m.ReturnType );
             mB.SetParameters( parameters );
             // Set DebuggerStepThroughAttribute.
-            ConstructorInfo ctor = typeof( DebuggerStepThroughAttribute ).GetConstructor( Type.EmptyTypes );
-            CustomAttributeBuilder attr = new CustomAttributeBuilder( ctor, new object[0] );
+            ConstructorInfo ctor = typeof( DebuggerStepThroughAttribute ).GetConstructor( Type.EmptyTypes )!;
+            var attr = new CustomAttributeBuilder( ctor, Array.Empty<object>() );
             mB.SetCustomAttribute( attr );
             return mB;
         }

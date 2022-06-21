@@ -13,7 +13,7 @@ namespace CK.Testing.Stupid
     {
         /// <summary>
         /// Gets the last database name that has been dropped or created by <see cref="SqlServer.ISqlServerTestHelperCore"/>.
-        /// This helper subsribes to the <see cref="CK.Testing.SqlServer.ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped"/>
+        /// This helper subscribes to the <see cref="SqlServer.ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped"/>
         /// and when this event fires, captures the database name (and also calls <see cref="StupidMethod"/>).
         /// </summary>
         string LastDatabaseCreatedOrDroppedName { get; }

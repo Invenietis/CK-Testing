@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using CK.Core;
-using CK.Text;
 
 namespace CK.Testing
 {
@@ -18,7 +17,7 @@ namespace CK.Testing
             if( _initializationError != null ) _initializationError.Throw();
         }
 
-        event EventHandler<CleanupFolderEventArgs> _onCleanupFolder;
+        event EventHandler<CleanupFolderEventArgs>? _onCleanupFolder;
 
         string IBasicTestHelper.BuildConfiguration => _buildConfiguration;
 
@@ -64,13 +63,13 @@ namespace CK.Testing
             }
         }
 
-        event EventHandler<CleanupFolderEventArgs> IBasicTestHelper.OnCleanupFolder
+        event EventHandler<CleanupFolderEventArgs>? IBasicTestHelper.OnCleanupFolder
         {
             add => _onCleanupFolder += value;
             remove => _onCleanupFolder -= value;
         }
 
-        void IBasicTestHelper.OnlyOnce( Action a, string s, int l )
+        void IBasicTestHelper.OnlyOnce( Action a, string? s, int l )
         {
             var key = s + l.ToString();
             bool shouldRun;
