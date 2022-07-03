@@ -21,15 +21,21 @@ namespace CK.Testing.Monitoring
 
         /// <summary>
         /// Gets whether all activities will be logged to <see cref="IBasicTestHelper.LogFolder"/>/CKMon folders.
-        /// Configurable by "Monitor/LogToBinFile" = "true" (or "Monitor/LogToBinFiles"), otherwise defaults to false.
+        /// Configurable by "Monitor/LogToCKMon" = "false".
+        /// <para>
+        /// This defaults to true.
+        /// </para>
         /// </summary>
-        bool LogToBinFile { get; }
+        bool LogToCKMon { get; }
 
         /// <summary>
         /// Gets whether all activities will be logged to <see cref="IBasicTestHelper.LogFolder"/>/Text folders.
-        /// Configurable by "Monitor/LogToTextFile" = "true" (or "Monitor/LogToTextFiles"), otherwise defaults to false.
+        /// Configurable by "Monitor/LogToText" = "false".
+        /// <para>
+        /// This defaults to false.
+        /// </para>
         /// </summary>
-        bool LogToTextFile { get; }
+        bool LogToText { get; }
 
         /// <summary>
         /// Ensures that the console monitor is on (i.e. <see cref="LogToConsole"/> is true) until the

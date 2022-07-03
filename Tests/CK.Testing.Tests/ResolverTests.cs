@@ -224,16 +224,30 @@ namespace CK.Testing.Tests
         public void configuration_value_as_paths()
         {
             var b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+
+            b.SolutionName.Should().Be( "CK-Testing" );
+            b.TestProjectName.Should().Be( "CK.Testing.Tests" );
+            b.ClosestSUTProjectFolder.Path.Should().EndWith( "CK-Testing/CK.Testing" );
+
             var config = new TestHelperConfiguration();
             var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
-            paths.Should().HaveCount( 5 );
-            paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{{SolutionFolder}}.." );
-            paths[1].Should().Be( b.RepositoryFolder.AppendPart( b.BuildConfiguration ), "{{RepositoryFolder}}/../CK-Testing/{{BuildConfiguration}}" );
-            paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{{TestProjectName}}" );
-            paths[3].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+            paths.Should().HaveCount( 6 );
+
+            paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{SolutionFolder}.." );
+
+            paths[1].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "XXXXX" ).AppendPart( b.BuildConfiguration ), "{TestProjectFolder}/../XXXXX/{BuildConfiguration}" );
+
+            paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{TestProjectName}" );
+
+            var expectedPlacehoders = $"{b.BuildConfiguration}-{b.TestProjectName}-{b.SolutionName}";
+            paths[3].Should().Be( b.ClosestSUTProjectFolder.AppendPart( expectedPlacehoders ).Combine( b.PathToBin ),
+                "{ClosestSUTProjectFolder}/{BuildConfiguration}-{TestProjectName}-{SolutionName}/{PathToBin}" );
+
+            paths[4].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+
             // No .. resolved when { appears.
-            paths[4].Should().Be( $"{{X}}/{b.BuildConfiguration}/../Y", "Since a { exists, the .. are not resolved. {X}/{BuildConfiguration}/../Y" );
-            paths[4].ResolveDots().Should().Be( $"{{X}}/Y" );
+            paths[5].Should().Be( $"{{X}}/{b.BuildConfiguration}/../Y", "Since a { exists, the .. are not resolved. {X}/{BuildConfiguration}/../Y" );
+            paths[5].ResolveDots().Should().Be( $"{{X}}/Y" );
         }
 
         [Test]

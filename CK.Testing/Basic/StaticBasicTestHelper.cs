@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using CK.Core;
@@ -12,38 +13,18 @@ namespace CK.Testing
     /// <summary>
     /// Static part of the implementation of <see cref="BasicTestHelper"/>.
     /// </summary>
-    public class StaticBasicTestHelper
+    public partial class StaticBasicTestHelper
     {
         static readonly string[] _allowedConfigurations = new[] { "Debug", "Release" };
         internal static readonly NormalizedPath _binFolder;
         internal static readonly string _buildConfiguration;
         internal static readonly NormalizedPath _testProjectFolder;
-        internal static readonly string _testProjectName;
-        internal static readonly NormalizedPath _repositoryFolder;
+        internal static readonly NormalizedPath _closestSUTProjectFolder;
+        internal static readonly NormalizedPath _pathToBin;
         internal static readonly NormalizedPath _solutionFolder;
         internal static readonly NormalizedPath _logFolder;
-        internal static readonly bool _isTestHost;
         internal static readonly HashSet<string> _onlyOnce;
         internal static readonly ExceptionDispatchInfo _initializationError;
-
-        /// <summary>
-        /// This listener is removed by CK.Testing.MonitorTestHelper because the MonitorTraceListener
-        /// that throws MonitoringFailFastException is injected and does the job.
-        /// The key used to remove this listener is its name: "CK.Testing.SafeTraceListener" that
-        /// MUST NOT be changed since this magic string is used by the MonitorTestHelper.
-        /// </summary>
-        class SafeTraceListener : System.Diagnostics.DefaultTraceListener
-        {
-            const string _messagePrefix = "Assertion Failed: ";
-
-            public SafeTraceListener()
-            {
-                Name = "CK.Testing.SafeTraceListener";
-            }
-
-            public override void Fail( string? message, string? detailMessage ) => throw new Exception( _messagePrefix + message + " - Detail: " + detailMessage );
-            public override void Fail( string? message ) => throw new Exception( _messagePrefix + message );
-        }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         static StaticBasicTestHelper()
@@ -74,50 +55,62 @@ namespace CK.Testing
                 }
                 if( _buildConfiguration == null )
                 {
-                    throw new InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
+                    Throw.InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
                 }
                 Debug.Assert( buildConfDir != null );
                 p = Path.GetDirectoryName( buildConfDir );
                 if( Path.GetFileName( p ) != "bin" )
                 {
-                    throw new InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
+                    Throw.InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
                 }
                 Debug.Assert( p != null );
                 p = Path.GetDirectoryName( p );
                 if( string.IsNullOrEmpty( p ) )
                 {
-                    throw new InvalidOperationException( $"The '{_binFolder}' must not be directly on the root." );
+                    Throw.InvalidOperationException( $"The '{_binFolder}' must not be directly on the root." );
                 }
 
                 _testProjectFolder = p;
-                _testProjectName = Path.GetFileName( p );
                 p = Path.GetDirectoryName( p );
 
                 string? testsFolder = null;
                 bool hasGit = false;
+                // We stop looking for the "Tests" folder on the first, deepest one.
                 while( !string.IsNullOrEmpty( p ) && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
                 {
-                    if( Path.GetFileName( p ) == "Tests" ) testsFolder = p;
+                    if( testsFolder == null && Path.GetFileName( p ) == "Tests" ) testsFolder = p;
                     p = Path.GetDirectoryName( p );
                 }
                 if( !hasGit )
                 {
-                    throw new InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
+                    Throw.InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
+                }
+                if( testsFolder == null )
+                {
+                    Throw.InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
                 }
                 if( string.IsNullOrEmpty( p ) )
                 {
-                    throw new InvalidOperationException( $"The '.git' cannot be directly on the root." );
+                    Throw.InvalidOperationException( $"The '.git' cannot be directly on the root." );
                 }
-                _repositoryFolder = p;
-                if( testsFolder == null )
+                _solutionFolder = p;
+                _logFolder = _testProjectFolder.AppendPart( "Logs" );
+                _pathToBin = _binFolder.RemoveParts( 0, _testProjectFolder.Parts.Count );
+                // Tries to find the ClosestSUTProjectFolder. By default, it is the TestProjectFolder.
+                _closestSUTProjectFolder = _testProjectFolder;
+                string ? targetName = null;
+                if( _testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = _testProjectFolder.LastPart.Substring( 0, _testProjectFolder.LastPart.Length - 6 );
+                else if( _testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = _testProjectFolder.LastPart.Substring( 0, _testProjectFolder.LastPart.Length - 5 );
+                if( targetName != null )
                 {
-                    throw new InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
+                    var targetFolder = _testProjectFolder.PathsToFirstPart( null, new[] { targetName } )
+                        .Where( p => Directory.Exists( p ) )
+                        .FirstOrDefault();
+                    if( !targetFolder.IsEmptyPath )
+                    {
+                        _closestSUTProjectFolder = targetFolder;
+                    }
                 }
-                _solutionFolder = Path.GetDirectoryName( testsFolder )!;
-                _logFolder = Path.Combine( _testProjectFolder, "Logs" );
-                // The first works in .Net framework, the second one in netcore.
-                _isTestHost = Environment.CommandLine.Contains( "testhost" )
-                                || AppDomain.CurrentDomain.GetAssemblies().IndexOf( a => a.GetName().Name == "testhost" ) >= 0;
             }
             catch( Exception ex )
             {

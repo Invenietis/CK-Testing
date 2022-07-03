@@ -34,13 +34,13 @@ namespace CK.Testing
         /// <summary>
         /// Gets the <see cref="Value"/> as an absolute path or relative to <see cref="BasePath"/>.
         /// <para>
-        /// Placeholders {BuildConfiguration} and {TestProjectName} can appear anywhere in the Value
-        /// and are replaced with <see cref="IBasicTestHelper.BuildConfiguration"/> and <see cref="IBasicTestHelper.TestProjectName"/>.
+        /// Placeholders {BuildConfiguration}, {TestProjectName}, {PathToBin} and {SolutionName} can appear anywhere in the Value
+        /// and are replaced with their respective values.
         /// </para>
         /// <para>
-        /// The Value can start with {BinFolder}, {SolutionFolder} or {RepositoryFolder}: <see cref="IBasicTestHelper.BinFolder"/>,
-        /// <see cref="IBasicTestHelper.SolutionFolder"/> or <see cref="IBasicTestHelper.RepositoryFolder"/> is expanded.
-        /// If the Value does not start with one of this 3 paths and no { appear, the <see cref="BasePath"/> is prepended.
+        /// The Value can start with {BinFolder}, {SolutionFolder}, {TestProjectFolder} or {ClosestSUTProjectFolder}.
+        /// If the Value does not start with one of this 4 paths and the Path is not <see cref="NormalizedPath.IsRooted"/>, the
+        /// path is relative to <see cref="BasePath"/>.
         /// </para>
         /// <para>
         /// If there is no '{' (ie. there is no unresolved placeholder), all '/../' are automatically resolved.
@@ -55,7 +55,9 @@ namespace CK.Testing
             Debug.Assert( Value != null && !BasePath.IsEmptyPath );
 
             string v = Value.Replace( "{BuildConfiguration}", BasicTestHelper._buildConfiguration )
-                            .Replace( "{TestProjectName}", BasicTestHelper._testProjectName );
+                            .Replace( "{TestProjectName}", BasicTestHelper._testProjectFolder.LastPart )
+                            .Replace( "{PathToBin}", BasicTestHelper._pathToBin )
+                            .Replace( "{SolutionName}", BasicTestHelper._solutionFolder.LastPart );
 
             string SubPathNoRoot( string theV, int prefixLen )
             {
@@ -70,11 +72,13 @@ namespace CK.Testing
 
             Debug.Assert( "{BinFolder}".Length == 11 );
             Debug.Assert( "{SolutionFolder}".Length == 16 );
-            Debug.Assert( "{RepositoryFolder}".Length == 18 );
+            Debug.Assert( "{TestProjectFolder}".Length == 19 );
+            Debug.Assert( "{ClosestSUTProjectFolder}".Length == 25 );
             NormalizedPath raw;
-            if( v.StartsWith( "{BinFolder}" ) ) raw = BasicTestHelper._binFolder.Combine( SubPathNoRoot( v, 11 ) );
-            else if( v.StartsWith( "{SolutionFolder}" ) ) raw = BasicTestHelper._solutionFolder.Combine( SubPathNoRoot( v, 16 ) );
-            else if( v.StartsWith( "{RepositoryFolder}" ) ) raw = BasicTestHelper._repositoryFolder.Combine( SubPathNoRoot( v, 18 ) );
+            if( v.StartsWith( "{BinFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._binFolder.Combine( SubPathNoRoot( v, 11 ) );
+            else if( v.StartsWith( "{SolutionFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._solutionFolder.Combine( SubPathNoRoot( v, 16 ) );
+            else if( v.StartsWith( "{TestProjectFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._testProjectFolder.Combine( SubPathNoRoot( v, 19 ) );
+            else if( v.StartsWith( "{ClosestSUTProjectFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._closestSUTProjectFolder.Combine( SubPathNoRoot( v, 26 ) );
             else
             {
                 if( Path.IsPathRooted( v ) ) return Path.GetFullPath( v );

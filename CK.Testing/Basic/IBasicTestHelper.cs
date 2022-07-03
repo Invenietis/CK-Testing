@@ -15,29 +15,17 @@ namespace CK.Testing
         string BuildConfiguration { get;}
 
         /// <summary>
-        /// Gets whether the VS tests adapter is actually running this test.
+        /// Gets the name of the running test project (the last part of <see cref="TestProjectFolder"/>).
         /// </summary>
-        bool IsTestHost { get; }
+        string TestProjectName => TestProjectFolder.LastPart;
 
         /// <summary>
-        /// Workaround the VS tests limitation: this should be "assumed" at the start of every "Explicit" test method.
-        /// This is always true if <see cref="IsTestHost"/> is false.
+        /// Gets the name of the Solution (the last part of <see cref="SolutionFolder"/>).
         /// </summary>
-        bool IsExplicitAllowed { get; }
+        string SolutionName => SolutionFolder.LastPart;
 
         /// <summary>
-        /// Gets the name of the running test project that must be the name of the <see cref="System.Reflection.Assembly.GetEntryAssembly()"/>
-        /// (except if this is the assembly "testhost" that is running) otherwise an exception is thrown.
-        /// </summary>
-        string TestProjectName { get; }
-
-        /// <summary>
-        /// Gets the path to the root folder: where the .git folder is.
-        /// </summary>
-        NormalizedPath RepositoryFolder { get; }
-
-        /// <summary>
-        /// Gets the solution folder. It is the parent directory of the 'Tests/' folder (that must exist).
+        /// Gets the solution folder: where the .git folder is.
         /// </summary>
         NormalizedPath SolutionFolder { get; }
 
@@ -50,6 +38,15 @@ namespace CK.Testing
         NormalizedPath TestProjectFolder { get; }
 
         /// <summary>
+        /// Tries to locate the SUT (System Under Test) project based on the <see cref="TestProjectName"/> (if it ends with ".Tests"):
+        /// it is the first directory that exists in a directory above with a name without the ".Tests" suffix.
+        /// <para>
+        /// If no such project is found, this fallbacks to <see cref="TestProjectFolder"/>.
+        /// </para>
+        /// </summary>
+        NormalizedPath ClosestSUTProjectFolder { get; }
+
+        /// <summary>
         /// Gets the path to the log folder. It is the 'Logs' folder in the <see cref="TestProjectFolder"/>. 
         /// </summary>
         NormalizedPath LogFolder { get; }
@@ -59,6 +56,12 @@ namespace CK.Testing
         /// This normally is the same as <see cref="AppContext.BaseDirectory"/>.
         /// </summary>
         NormalizedPath BinFolder { get; }
+
+        /// <summary>
+        /// Gets the sub path from <see cref="TestProjectFolder"/> to <see cref="BinFolder"/>.
+        /// This captures the "bin/<see cref="BuildConfiguration"/>}/(target framework folder)"/>.
+        /// </summary>
+        NormalizedPath PathToBin { get; }
 
         /// <summary>
         /// Clears a folder from all its existing content or ensures it exists

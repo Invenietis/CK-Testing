@@ -21,13 +21,9 @@ namespace CK.Testing
 
         string IBasicTestHelper.BuildConfiguration => _buildConfiguration;
 
-        string IBasicTestHelper.TestProjectName => _testProjectName;
-
-        bool IBasicTestHelper.IsTestHost => _isTestHost;
-
-        NormalizedPath IBasicTestHelper.RepositoryFolder => _repositoryFolder;
-
         NormalizedPath IBasicTestHelper.SolutionFolder => _solutionFolder;
+
+        NormalizedPath IBasicTestHelper.ClosestSUTProjectFolder => _closestSUTProjectFolder;
 
         NormalizedPath IBasicTestHelper.LogFolder => _logFolder;
 
@@ -35,7 +31,7 @@ namespace CK.Testing
 
         NormalizedPath IBasicTestHelper.BinFolder => _binFolder;
 
-        bool IBasicTestHelper.IsExplicitAllowed => !_isTestHost || ExplicitTestManager.IsExplicitAllowed;
+        NormalizedPath IBasicTestHelper.PathToBin => _pathToBin;
 
         NormalizedPath IBasicTestHelper.CleanupFolder( NormalizedPath folder, bool ensureFolderAvailable, int maxRetryCount )
         {
