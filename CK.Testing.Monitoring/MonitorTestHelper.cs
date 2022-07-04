@@ -15,24 +15,24 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Provides default implementation of <see cref="Monitoring.IMonitorTestHelperCore"/>
+    /// Provides default implementation of <see cref="IMonitorTestHelperCore"/>
     /// and easy to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
     /// </summary>
-    public class MonitorTestHelper : Monitoring.IMonitorTestHelperCore
+    public class MonitorTestHelper : IMonitorTestHelperCore
     {
         const int _maxCurrentLogFolderCount = 5;
         const int _maxArchivedLogFolderCount = 20;
 
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly IBasicTestHelper _basic;
         static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
         static int _loadConflictCount = 0;
         static bool _logToCKMon;
         static bool _logToText;
 
-        internal MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
+        internal MonitorTestHelper( TestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
             _basic = basic;

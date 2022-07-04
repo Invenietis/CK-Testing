@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using CK.Core;
 
@@ -10,11 +12,32 @@ namespace CK.Testing
     /// <summary>
     /// Provides default implementation of <see cref="IBasicTestHelper"/>.
     /// </summary>
-    public class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
+    public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
     {
+        readonly NormalizedPath _closestSUTProjectFolder;
+
         static BasicTestHelper()
         {
             if( _initializationError != null ) _initializationError.Throw();
+        }
+
+        internal BasicTestHelper( TestHelperConfiguration config )
+        {
+            var p = config.GetPath( "TestHelper/ClosestSUTProjectFolder" );
+            if( p is not null )
+            {
+                _closestSUTProjectFolder = p.Value;
+            }
+            else
+            {
+                _closestSUTProjectFolder = GetClosestSUTProjectCandidatePaths( _solutionFolder, _testProjectFolder )
+                                            .FirstOrDefault( p => System.IO.Directory.Exists( p ) );
+                if( _closestSUTProjectFolder.IsEmptyPath )
+                {
+                    _closestSUTProjectFolder = _testProjectFolder;
+                }
+            }
+            config._basic = this;
         }
 
         event EventHandler<CleanupFolderEventArgs>? _onCleanupFolder;
@@ -35,7 +58,7 @@ namespace CK.Testing
 
         NormalizedPath IBasicTestHelper.CleanupFolder( NormalizedPath folder, bool ensureFolderAvailable, int maxRetryCount )
         {
-            if( folder.IsEmptyPath ) throw new ArgumentOutOfRangeException( nameof( folder ) );
+            Throw.CheckArgument( !folder.IsEmptyPath );
             int tryCount = 0;
             for(; ; )
             {
@@ -77,8 +100,47 @@ namespace CK.Testing
         }
 
         /// <summary>
+        /// Enumerates the <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/> candidate paths, starting with the best one.
+        /// This is public to ease tests and because it may be useful.
+        /// </summary>
+        /// <param name="solutionFolder">The root folder: nothing happen above this one.</param>
+        /// <param name="testProjectFolder">The test project that must be in <paramref name="solutionFolder"/> and contains at least one "Tests" part.</param>
+        /// <returns>The closest SUT path in order of preference.</returns>
+        public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
+        {
+            Throw.CheckArgument( testProjectFolder.StartsWith( solutionFolder ) );
+            Throw.CheckArgument( testProjectFolder.Parts.Contains( "Tests" ) );
+
+            string? targetName = null;
+            if( testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 6 );
+            else if( testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 5 );
+            if( !String.IsNullOrEmpty( targetName ) )
+            {
+                var testsSubPaths = ExpandTestsSubPaths( solutionFolder.Parts.Count, testProjectFolder );
+                return testProjectFolder.PathsToFirstPart( testsSubPaths, new[] { targetName } )
+                                        .Where( p => !testProjectFolder.StartsWith( p ) );
+            }
+            return Array.Empty<NormalizedPath>();
+
+            static IEnumerable<NormalizedPath> ExpandTestsSubPaths( int solutionFolderPartsCount, NormalizedPath testProjectFolder )
+            {
+                var testProjectParentFolder = testProjectFolder.RemoveLastPart();
+                int iTests = solutionFolderPartsCount;
+                for(; ; )
+                {
+                    while( iTests < testProjectFolder.Parts.Count && testProjectFolder.Parts[iTests] != "Tests" ) iTests++;
+                    if( iTests == testProjectFolder.Parts.Count ) break;
+                    var fromTestsToProject = testProjectParentFolder.RemoveParts( 0, ++iTests );
+                    foreach( var p in fromTestsToProject.Parents ) yield return p;
+                }
+                yield return default;
+            }
+        }
+
+        /// <summary>
         /// Gets the <see cref="IBasicTestHelper"/> default implementation.
         /// </summary>
         public static IBasicTestHelper TestHelper => TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+
     }
 }

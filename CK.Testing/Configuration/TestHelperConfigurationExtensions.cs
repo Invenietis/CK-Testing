@@ -17,7 +17,7 @@ namespace CK.Testing
         /// <param name="this">This configuration.</param>
         /// <param name="key">The configuration entry key.</param>
         /// <returns>The value or null if not found.</returns>
-        public static bool? GetBoolean( this ITestHelperConfiguration @this, NormalizedPath key )
+        public static bool? GetBoolean( this TestHelperConfiguration @this, NormalizedPath key )
         {
             var s = @this.Get( key );
             return s == null ? (bool?)null : StringComparer.OrdinalIgnoreCase.Equals( s, "true" );
@@ -29,7 +29,7 @@ namespace CK.Testing
         /// <param name="this">This configuration.</param>
         /// <param name="key">The configuration entry key.</param>
         /// <returns>The value or null if not found.</returns>
-        public static int? GetInt32( this ITestHelperConfiguration @this, NormalizedPath key )
+        public static int? GetInt32( this TestHelperConfiguration @this, NormalizedPath key )
         {
             var s = @this.Get( key );
             return s == null ? (int?)null : Int32.Parse( s );
@@ -42,12 +42,12 @@ namespace CK.Testing
         /// <param name="this">This configuration.</param>
         /// <param name="key">The configuration entry key.</param>
         /// <returns>The values as paths.</returns>
-        public static IEnumerable<NormalizedPath> GetMultiPaths( this ITestHelperConfiguration @this, NormalizedPath key )
+        public static IEnumerable<NormalizedPath> GetMultiPaths( this TestHelperConfiguration @this, NormalizedPath key )
         {
             var p = @this.GetConfigValue( key );
             if( !p.HasValue || p.Value.Value.Length == 0 ) return Array.Empty<NormalizedPath>();
             return p.Value.Value.Split( ';' )
-                                .Select( x => new TestHelperConfigurationValue( p.Value.BasePath, x.Trim() ) )
+                                .Select( x => new TestHelperConfigurationValue( @this, p.Value.BasePath, x.Trim() ) )
                                 .Where( x => x.Value.Length > 0 )
                                 .Select( x => x.GetValueAsPath() )
                                 .Select( x => new NormalizedPath( x ) );

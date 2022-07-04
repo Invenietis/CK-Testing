@@ -14,6 +14,8 @@ namespace CK.Testing
     /// </summary>
     public struct TestHelperConfigurationValue
     {
+        readonly TestHelperConfiguration _config;
+
         /// <summary>
         /// The base path of this configuration value.
         /// Defaults to <see cref="IBasicTestHelper.TestProjectFolder"/> (for environment setting for instance).
@@ -25,8 +27,9 @@ namespace CK.Testing
         /// </summary>
         public readonly string Value;
 
-        internal TestHelperConfigurationValue( NormalizedPath basePath, string value )
+        internal TestHelperConfigurationValue( TestHelperConfiguration config, NormalizedPath basePath, string value )
         {
+            _config = config;
             BasePath = basePath;
             Value = value;
         }
@@ -78,7 +81,7 @@ namespace CK.Testing
             if( v.StartsWith( "{BinFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._binFolder.Combine( SubPathNoRoot( v, 11 ) );
             else if( v.StartsWith( "{SolutionFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._solutionFolder.Combine( SubPathNoRoot( v, 16 ) );
             else if( v.StartsWith( "{TestProjectFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._testProjectFolder.Combine( SubPathNoRoot( v, 19 ) );
-            else if( v.StartsWith( "{ClosestSUTProjectFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = BasicTestHelper._closestSUTProjectFolder.Combine( SubPathNoRoot( v, 26 ) );
+            else if( _config._basic != null && v.StartsWith( "{ClosestSUTProjectFolder}", StringComparison.OrdinalIgnoreCase ) ) raw = _config._basic.ClosestSUTProjectFolder.Combine( SubPathNoRoot( v, 26 ) );
             else
             {
                 if( Path.IsPathRooted( v ) ) return Path.GetFullPath( v );

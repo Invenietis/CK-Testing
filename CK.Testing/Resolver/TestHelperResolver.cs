@@ -28,7 +28,10 @@ namespace CK.Testing
                 {
                     lock( _lock )
                     {
-                        _resolver = ResolverImpl.Create();
+                        if( _resolver == null )
+                        {
+                            _resolver = ResolverImpl.Create();
+                        }
                     }
                 }
                 return _resolver;
@@ -40,6 +43,6 @@ namespace CK.Testing
         /// </summary>
         /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
         /// <returns>A new resolver.</returns>
-        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
+        public static ITestHelperResolver Create( TestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
     }
 }

@@ -12,7 +12,7 @@ namespace CK.Testing
 {
     class ResolverImpl : ITestHelperResolver
     {
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly SimpleServiceContainer _container;
         readonly IReadOnlyList<Type> _preLoadedTypes;
 
@@ -120,7 +120,7 @@ namespace CK.Testing
 
         }
 
-        ResolverImpl( ITestHelperConfiguration config )
+        ResolverImpl( TestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
             _container.Add( config );
@@ -287,7 +287,7 @@ namespace CK.Testing
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
 
-        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null )
+        public static ITestHelperResolver Create( TestHelperConfiguration? config = null )
         {
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {

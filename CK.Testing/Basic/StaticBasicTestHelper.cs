@@ -19,7 +19,6 @@ namespace CK.Testing
         internal static readonly NormalizedPath _binFolder;
         internal static readonly string _buildConfiguration;
         internal static readonly NormalizedPath _testProjectFolder;
-        internal static readonly NormalizedPath _closestSUTProjectFolder;
         internal static readonly NormalizedPath _pathToBin;
         internal static readonly NormalizedPath _solutionFolder;
         internal static readonly NormalizedPath _logFolder;
@@ -73,19 +72,19 @@ namespace CK.Testing
                 _testProjectFolder = p;
                 p = Path.GetDirectoryName( p );
 
-                string? testsFolder = null;
+                string? firstTestsFolderAbove = null;
                 bool hasGit = false;
                 // We stop looking for the "Tests" folder on the first, deepest one.
                 while( !string.IsNullOrEmpty( p ) && !(hasGit = Directory.Exists( Path.Combine( p, ".git" ) )) )
                 {
-                    if( testsFolder == null && Path.GetFileName( p ) == "Tests" ) testsFolder = p;
+                    if( firstTestsFolderAbove == null && Path.GetFileName( p ) == "Tests" ) firstTestsFolderAbove = p;
                     p = Path.GetDirectoryName( p );
                 }
                 if( !hasGit )
                 {
                     Throw.InvalidOperationException( $"Initialization error: The project must be in a git repository (above '{_binFolder}')." );
                 }
-                if( testsFolder == null )
+                if( firstTestsFolderAbove == null )
                 {
                     Throw.InvalidOperationException( $"Initialization error: A parent 'Tests' folder must exist above '{_testProjectFolder}'." );
                 }
@@ -96,21 +95,6 @@ namespace CK.Testing
                 _solutionFolder = p;
                 _logFolder = _testProjectFolder.AppendPart( "Logs" );
                 _pathToBin = _binFolder.RemoveParts( 0, _testProjectFolder.Parts.Count );
-                // Tries to find the ClosestSUTProjectFolder. By default, it is the TestProjectFolder.
-                _closestSUTProjectFolder = _testProjectFolder;
-                string ? targetName = null;
-                if( _testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = _testProjectFolder.LastPart.Substring( 0, _testProjectFolder.LastPart.Length - 6 );
-                else if( _testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = _testProjectFolder.LastPart.Substring( 0, _testProjectFolder.LastPart.Length - 5 );
-                if( targetName != null )
-                {
-                    var targetFolder = _testProjectFolder.PathsToFirstPart( null, new[] { targetName } )
-                        .Where( p => Directory.Exists( p ) )
-                        .FirstOrDefault();
-                    if( !targetFolder.IsEmptyPath )
-                    {
-                        _closestSUTProjectFolder = targetFolder;
-                    }
-                }
             }
             catch( Exception ex )
             {

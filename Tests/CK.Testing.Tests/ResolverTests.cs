@@ -81,11 +81,11 @@ namespace CK.Testing.Tests
 
     public class B : IBCore
     {
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly IA _a;
         readonly IBasicTestHelper _basic;
 
-        internal B( ITestHelperConfiguration config, IA a, IBasicTestHelper basic )
+        internal B( TestHelperConfiguration config, IA a, IBasicTestHelper basic )
         {
             _config = config;
             _a = a;
@@ -195,7 +195,7 @@ namespace CK.Testing.Tests
         readonly IE _e;
         readonly IC _c;
 
-        public F( ITestHelperConfiguration config, ID d, IE e, IC c )
+        public F( TestHelperConfiguration config, ID d, IE e, IC c )
         {
             _d = d;
             _e = e;
@@ -220,16 +220,28 @@ namespace CK.Testing.Tests
     [TestFixture]
     public class ResolverTests
     {
-        [Test]
-        public void configuration_value_as_paths()
+        [TestCase( "ConfigurationResolvedFirst" )]
+        [TestCase( "BasicTestHelperResolvedFirst" )]
+        public void configuration_value_as_paths( string mode )
         {
-            var b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+            IBasicTestHelper b;
+            TestHelperConfiguration config;
+
+            if( mode == "BasicTestHelperResolvedFirst" )
+            {
+                b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+                config = TestHelperResolver.Default.Resolve<TestHelperConfiguration>();
+            }
+            else 
+            {
+                config = TestHelperResolver.Default.Resolve<TestHelperConfiguration>();
+                b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+            }
 
             b.SolutionName.Should().Be( "CK-Testing" );
             b.TestProjectName.Should().Be( "CK.Testing.Tests" );
             b.ClosestSUTProjectFolder.Path.Should().EndWith( "CK-Testing/CK.Testing" );
 
-            var config = new TestHelperConfiguration();
             var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
             paths.Should().HaveCount( 6 );
 

@@ -41,7 +41,11 @@ namespace CK.Testing
         /// Tries to locate the SUT (System Under Test) project based on the <see cref="TestProjectName"/> (if it ends with ".Tests"):
         /// it is the first directory that exists in a directory above with a name without the ".Tests" suffix.
         /// <para>
-        /// If no such project is found, this fallbacks to <see cref="TestProjectFolder"/>.
+        /// The lookup algorithm is implemented by <see cref="BasicTestHelper.GetClosestSUTProjectCandidatePaths(NormalizedPath, NormalizedPath)"/>.
+        /// If no matching directory is found, this fallbacks to <see cref="TestProjectFolder"/>.
+        /// </para>
+        /// <para>
+        /// This can be explicitly configured by "TestHelper/ClosestSUTProjectFolder" configuration if needed.
         /// </para>
         /// </summary>
         NormalizedPath ClosestSUTProjectFolder { get; }

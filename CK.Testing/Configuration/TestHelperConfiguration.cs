@@ -18,10 +18,11 @@ namespace CK.Testing
     /// down to the current execution path.
     /// Once all these files are applied, environment variables that start with "TestHelper::" prefix are applied.
     /// </summary>
-    public class TestHelperConfiguration : ITestHelperConfiguration
+    public sealed class TestHelperConfiguration
     {
         readonly Dictionary<NormalizedPath, TestHelperConfigurationValue> _config;
         readonly SimpleServiceContainer _container;
+        internal IBasicTestHelper? _basic;
 
         /// <summary>
         /// Initializes a new <see cref="TestHelperConfiguration"/>.
@@ -30,7 +31,6 @@ namespace CK.Testing
         {
             _config = new Dictionary<NormalizedPath, TestHelperConfigurationValue>();
             _container = new SimpleServiceContainer();
-            _container.Add<ITestHelperConfiguration>( this );
             ApplyFilesConfig( BasicTestHelper._binFolder );
             SimpleReadFromEnvironment();
         }
@@ -52,7 +52,7 @@ namespace CK.Testing
         }
 
         /// <summary>
-        /// Gets the configuration value associated to a key with a lookup up to the root of the configuration.
+        /// Gets the configuration string value associated to a key with a lookup up to the root of the configuration.
         /// </summary>
         /// <param name="key">The path of the key to find.</param>
         /// <param name="defaultValue">The default value when not found.</param>
@@ -84,7 +84,7 @@ namespace CK.Testing
             else
             {
                 if( basePath.IsEmptyPath ) basePath = BasicTestHelper._testProjectFolder;
-                _config[k] = new TestHelperConfigurationValue( basePath, value );
+                _config[k] = new TestHelperConfigurationValue( this, basePath, value );
             }
         }
 
@@ -157,6 +157,6 @@ namespace CK.Testing
         /// <summary>
         /// Gets a singleton that exposes the global configuration.
         /// </summary>
-        public static ITestHelperConfiguration Default { get; } = new TestHelperConfiguration();
+        public static TestHelperConfiguration Default { get; } = new TestHelperConfiguration();
     }
 }

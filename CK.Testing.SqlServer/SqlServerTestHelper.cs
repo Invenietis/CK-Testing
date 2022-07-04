@@ -19,7 +19,7 @@ namespace CK.Testing
     /// </summary>
     public class SqlServerTestHelper : ISqlServerTestHelperCore
     {
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly IMonitorTestHelper _monitor;
         static Version? _serverVersion;
         static int _maxCompatibilityLevel;
@@ -29,7 +29,7 @@ namespace CK.Testing
         event EventHandler<SqlServerDatabaseEventArgs>? _onEvent;
         BackupManager? _backup;
 
-        internal SqlServerTestHelper( ITestHelperConfiguration config, IMonitorTestHelper monitor )
+        internal SqlServerTestHelper( TestHelperConfiguration config, IMonitorTestHelper monitor )
         {
             _config = config;
             _monitor = monitor;
