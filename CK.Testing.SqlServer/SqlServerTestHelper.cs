@@ -21,10 +21,17 @@ namespace CK.Testing
     {
         readonly TestHelperConfiguration _config;
         readonly IMonitorTestHelper _monitor;
+        readonly string _confMasterConnectionString;
+        readonly string _confDBName;
+        readonly string _confCollation;
+        readonly int _confCompatibilityLevel;
+
+        // This is level obtained by opening a connection to the masterConnectionString.
+        // DoGetDefaultDatabaseOptions updates it at its first call.
+        int _maxCompatibilityLevel;
         static Version? _serverVersion;
-        static int _maxCompatibilityLevel;
         static ISqlServerDatabaseOptions? _defaultDatabaseOptions;
-        static SqlConnectionStringBuilder? _masterConnectionString;
+        static SqlConnectionStringBuilder? _connectionBuilder;
 
         event EventHandler<SqlServerDatabaseEventArgs>? _onEvent;
         BackupManager? _backup;
@@ -33,6 +40,32 @@ namespace CK.Testing
         {
             _config = config;
             _monitor = monitor;
+
+            var c = config.Declare( "SqlServer/DatabaseName", $"The default database name. When not configured this is built based on the project name '{_monitor.TestProjectName}'.", null );
+            if( c.ConfiguredValue == null )
+            {
+                var n = "CKTEST_" + _monitor.TestProjectName.Replace( '.', '_' ).Replace( '-', '_' );
+                var dbName = n.Replace( "_Tests", String.Empty );
+                if( dbName == n ) dbName = n.Replace( "Tests", String.Empty );
+                c.SetDefaultValue( dbName );
+            }
+            Debug.Assert( c.CurrentValue != null, "We set a non null default." );
+            _confDBName = c.CurrentValue;
+
+            _confMasterConnectionString = _config.Declare( "SqlServer/MasterConnectionString",
+                                                       "The connection string to the master database of the Sql Server that will be used by the tests.",
+                                                       null,
+                                                       "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True" ).Value;
+
+            _confCollation = config.Declare( "SqlServer/Collation",
+                                         "The expected collation of the Sql Server. The EnsureDatabase method drops and recreates a database if the collation differ.",
+                                         null,
+                                         "Latin1_General_100_BIN2" ).Value;
+
+            _confCompatibilityLevel = config.DeclareInt32( "SqlServer/CompatibilityLevel",
+                                                       "The compatibility level to use. The major of the Sql Server product version multiplied by 10 (it is 130 for Sql Server 2016 which product version is 13.0). Defaults to 0 that uses the current version of the server.",
+                                                       () => _confCompatibilityLevel.ToString() ).Value ?? 0;
+
         }
 
         string ISqlServerTestHelperCore.MasterConnectionString => EnsureMasterConnection().ToString();
@@ -69,7 +102,7 @@ namespace CK.Testing
                         }
                         if( !reset )
                         {
-                            _monitor.Monitor.CloseGroup( "Database already exists, collation and compatiblity level match." );
+                            _monitor.Monitor.CloseGroup( "Database already exists, collation and compatibility level match." );
                             return false;
                         }
                         Debug.Assert( current.DatabaseName != null );
@@ -171,17 +204,10 @@ namespace CK.Testing
                         _serverVersion = Version.Parse( (string)cmd.ExecuteScalar() );
                         _maxCompatibilityLevel = _serverVersion.Major * 10;
                     }
-                    var dbName = _config.Get( "SqlServer/DatabaseName" );
-                    if( dbName == null )
+                    _defaultDatabaseOptions = new SqlServerDatabaseOptions( _confDBName )
                     {
-                        var n  = "CKTEST_" + _monitor.TestProjectName.Replace( '.', '_' ).Replace( '-', '_' );
-                        dbName = n.Replace( "_Tests", String.Empty );
-                        if( dbName == n ) dbName = n.Replace( "Tests", String.Empty );
-                    }
-                    _defaultDatabaseOptions = new SqlServerDatabaseOptions( dbName )
-                    {
-                        Collation = _config.Get( "SqlServer/Collation" ) ?? "Latin1_General_100_BIN2",
-                        CompatibilityLevel = _config.GetInt32( "SqlServer/CompatibilityLevel" ) ?? _maxCompatibilityLevel
+                        Collation = _confCollation,
+                        CompatibilityLevel = _confCompatibilityLevel
                     };
                 } );
             }
@@ -302,20 +328,14 @@ namespace CK.Testing
 
         SqlConnectionStringBuilder EnsureMasterConnection()
         {
-            if( _masterConnectionString == null )
+            if( _connectionBuilder == null )
             {
                 _monitor.OnlyOnce( () =>
                 {
-                    string? c = _config.Get( "SqlServer/MasterConnectionString" );
-                    if( c == null )
-                    {
-                        c = "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True";
-                        _monitor.Monitor.Info( $"Using default connection string: {c}" );
-                    }
-                    _masterConnectionString = new SqlConnectionStringBuilder( c );
+                    _connectionBuilder = new SqlConnectionStringBuilder( _confMasterConnectionString );
                 } );
             }
-            return _masterConnectionString!;
+            return _connectionBuilder!;
         }
 
         /// <summary>

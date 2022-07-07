@@ -38,8 +38,8 @@ namespace CK.Testing.Tests
         [Test]
         public void isMissingFromPreloaded_constructor_parameter_does_the_job()
         {
-            
-            var r = TestHelperResolver.Create();
+
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
             r.Invoking( sut => sut.Resolve( typeof( ShouldBePreloaded ) ) ).Should()
                                     .Throw<TargetInvocationException>()
                                     .WithInnerException<Exception>()

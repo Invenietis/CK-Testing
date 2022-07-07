@@ -27,29 +27,39 @@ namespace CK.Testing
         readonly ActivityMonitorConsoleClient _console;
         readonly TestHelperConfiguration _config;
         readonly IBasicTestHelper _basic;
-        static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
-        static int _loadConflictCount = 0;
         static bool _logToCKMon;
         static bool _logToText;
+
+        static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
+        static int _loadConflictCount = 0;
 
         internal MonitorTestHelper( TestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
             _basic = basic;
 
+            // Defensive programming: even if more than one MonitorTestHelper is instantiated, the GrandOutput and the related
+            // configurations must be initialized once.
             basic.OnlyOnce( () =>
             {
-                _logToCKMon = _config.GetBoolean( "Monitor/LogToCKMon" )
-                                        ?? _config.GetBoolean( "Monitor/LogToBinFile" )
-                                        ?? _config.GetBoolean( "Monitor/LogToBinFiles" )
-                                        ?? true;
-                _logToText = _config.GetBoolean( "Monitor/LogToText" )
-                                        ?? _config.GetBoolean( "Monitor/LogToTextFile" )
-                                        ?? _config.GetBoolean( "Monitor/LogToTextFiles" )
-                                        ?? false;
+                _logToCKMon = _config.DeclareBoolean( "Monitor/LogToCKMon",
+                                                      $"Emits binary logs to {_basic.LogFolder}/CKMon folder.",
+                                                      null,
+                                                      true,
+                                                      "Monitor/LogToBinFile",
+                                                      "Monitor/LogToBinFiles" ).Value;
+
+                _logToText = _config.DeclareBoolean( "Monitor/LogToText",
+                                                      $"Emits text logs to {_basic.LogFolder}/Text folder.",
+                                                      null,
+                                                      false,
+                                                      "Monitor/LogToTextFile", "Monitor/LogToTextFiles" ).Value;
 
                 // LogLevel defaults to Debug while testing.
-                string logLevel = _config.Get( "Monitor/LogLevel" );
+                string logLevel = _config.Declare( "Monitor/LogLevel",
+                                                   "Initializes the static ActivityMonitor.DefaultFilter value.",
+                                                   () => ActivityMonitor.DefaultFilter.ToString(),
+                                                   "Debug" ).Value;
                 if( logLevel == null )
                 {
                     ActivityMonitor.DefaultFilter = LogFilter.Debug;
@@ -90,7 +100,10 @@ namespace CK.Testing
             } );
             _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
-            LogToConsole = _config.GetBoolean( "Monitor/LogToConsole" ) ?? false;
+            LogToConsole = _config.DeclareBoolean( "Monitor/LogToConsole",
+                                                   "Writes the text logs to the console.",
+                                                   () => LogToConsole.ToString(),
+                                                   false ).Value;
             basic.OnCleanupFolder += OnCleanupFolder;
             basic.OnlyOnce( () =>
             {

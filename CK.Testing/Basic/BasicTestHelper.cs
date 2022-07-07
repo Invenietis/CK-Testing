@@ -23,7 +23,9 @@ namespace CK.Testing
 
         internal BasicTestHelper( TestHelperConfiguration config )
         {
-            var p = config.GetPath( "TestHelper/ClosestSUTProjectFolder" );
+            var (c,p) = config.DeclarePath( "TestHelper/ClosestSUTProjectFolder",
+                                            description: $"The closest directory named '{_testProjectFolder.LastPart}.SUT' or '{_testProjectFolder.LastPart}' in the Solution. This test project if not found.",
+                                            editableValue: null );
             if( p is not null )
             {
                 _closestSUTProjectFolder = p.Value;
@@ -31,11 +33,16 @@ namespace CK.Testing
             else
             {
                 _closestSUTProjectFolder = GetClosestSUTProjectCandidatePaths( _solutionFolder, _testProjectFolder )
-                                            .FirstOrDefault( p => System.IO.Directory.Exists( p ) );
+                                            .FirstOrDefault( p => Directory.Exists( p ) );
                 if( _closestSUTProjectFolder.IsEmptyPath )
                 {
                     _closestSUTProjectFolder = _testProjectFolder;
                 }
+                c.SetDefaultValue( _closestSUTProjectFolder );
+            }
+            if( config._basic != null )
+            {
+                Throw.InvalidOperationException( "Resolver context error: the configuration object is already bound to a BasicTestHelper. Provides a new TestHelperConfiguration to the resolver or reuse already resolved helpers." );
             }
             config._basic = this;
         }
@@ -109,31 +116,83 @@ namespace CK.Testing
         public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
         {
             Throw.CheckArgument( testProjectFolder.StartsWith( solutionFolder ) );
-            Throw.CheckArgument( testProjectFolder.Parts.Contains( "Tests" ) );
 
             string? targetName = null;
             if( testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 6 );
             else if( testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 5 );
             if( !String.IsNullOrEmpty( targetName ) )
             {
-                var testsSubPaths = ExpandTestsSubPaths( solutionFolder.Parts.Count, testProjectFolder );
-                return testProjectFolder.PathsToFirstPart( testsSubPaths, new[] { targetName } )
-                                        .Where( p => !testProjectFolder.StartsWith( p ) );
-            }
-            return Array.Empty<NormalizedPath>();
-
-            static IEnumerable<NormalizedPath> ExpandTestsSubPaths( int solutionFolderPartsCount, NormalizedPath testProjectFolder )
-            {
-                var testProjectParentFolder = testProjectFolder.RemoveLastPart();
-                int iTests = solutionFolderPartsCount;
-                for(; ; )
+                var cache = new List<NormalizedPath>();
+                // The .SUT always has the priority, wherever it is.
+                var sutTargetName = targetName + ".SUT";
+                foreach( var p in GetClosestCandidates( solutionFolder.Parts.Count, testProjectFolder.RemoveLastPart(), sutTargetName ) )
                 {
-                    while( iTests < testProjectFolder.Parts.Count && testProjectFolder.Parts[iTests] != "Tests" ) iTests++;
-                    if( iTests == testProjectFolder.Parts.Count ) break;
-                    var fromTestsToProject = testProjectParentFolder.RemoveParts( 0, ++iTests );
-                    foreach( var p in fromTestsToProject.Parents ) yield return p;
+                    cache.Add( p );
+                    yield return p;
                 }
-                yield return default;
+                // Then we use the cache to avoid recomputing the combinations.
+                // Rationale: their should be much less SUT than regular assemblies, the first round will often not succeeds,
+                // we'll often have to replay the list...
+                // Note: the list's length depends on the number of parts (the depth of the testProjectFolder).
+                foreach( var c in cache )
+                {
+                    yield return c.RemoveLastPart().AppendPart( targetName );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates a set of lookup paths from a folder starting with the best one (implements <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/>).
+        /// This is public to ease tests and because it may be useful.
+        /// </summary>
+        /// <param name="rootCount">The root length: nothing will return above this one.</param>
+        /// <param name="startFolder">The starting folder.</param>
+        /// <param name="targetName">The leaf directory name to lookup.</param>
+        /// <param name="skipDirectParentFolder">False to allow candidates to be parent folders of <paramref name="startFolder"/>.</param>
+        /// <returns>The closest paths in order of preference.</returns>
+        public static IEnumerable<NormalizedPath> GetClosestCandidates( int rootCount,
+                                                                        NormalizedPath startFolder,
+                                                                        string targetName,
+                                                                        bool skipDirectParentFolder = true )
+        {
+            var head = startFolder;
+            var subPaths = new List<NormalizedPath>();
+
+            static IEnumerable<NormalizedPath> WithSubPaths( NormalizedPath startFolder,
+                                                             bool skipDirectParentFolder,
+                                                             List<NormalizedPath> subPaths,
+                                                             ref NormalizedPath head )
+            {
+                static IEnumerable<NormalizedPath> GenerateWithSubPaths( NormalizedPath startFolder,
+                                                                         bool skipDirectParentFolder,
+                                                                         List< NormalizedPath> subPaths,
+                                                                         NormalizedPath head,
+                                                                         string lastPart )
+                {
+                    foreach( var subPath in subPaths )
+                    {
+                        var p = head.Combine( subPath );
+                        if( !skipDirectParentFolder || !startFolder.StartsWith( p ) )
+                        yield return p;
+                    }
+                    int c = subPaths.Count;
+                    NormalizedPath h = new NormalizedPath( lastPart );
+                    for( int i = 0; i < c; i++ )
+                    {
+                        subPaths.Add( h.Combine( subPaths[i] ) );
+                    }
+                }
+
+                var lastPart = head.LastPart;
+                head = head.RemoveLastPart();
+                return GenerateWithSubPaths( startFolder, skipDirectParentFolder, subPaths, head, lastPart );
+            }
+
+            subPaths.Add( targetName );
+            yield return head.AppendPart( targetName );
+            while( head.Parts.Count >= rootCount )
+            {
+                foreach( var s in WithSubPaths( startFolder, skipDirectParentFolder, subPaths, ref head ) ) yield return s;
             }
         }
 

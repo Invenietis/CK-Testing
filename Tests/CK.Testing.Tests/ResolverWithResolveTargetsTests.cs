@@ -95,7 +95,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_with_targets_does_not_change_behavior_for_concrete_classes()
         {
-            var r = TestHelperResolver.Create();
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
             var c = r.Resolve<RACore>();
             c.Should().BeOfType<RACore>( "Obvious since we used the generic cast accessor." );
             c.ResolvedForIRACore.Should().BeAssignableTo<IRA>( "The IRA mixin has been injected." );
@@ -107,7 +107,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_with_targets_with_inner_mixin()
         {
-            var r = TestHelperResolver.Create();
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
             var c = r.Resolve<RBCore>();
             c.ResolvedForIRBCore.Should().BeAssignableTo<IRB>();
 
@@ -118,7 +118,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_with_targets_where_only_class_uses_ResolveTarget()
         {
-            var r = TestHelperResolver.Create();
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
             var c = r.Resolve<IRCCore>();
             c.Should().BeAssignableTo<IRC>();
             c.ResolvedForIRCCore.Should().BeSameAs( c );

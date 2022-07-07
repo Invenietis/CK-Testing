@@ -224,25 +224,29 @@ namespace CK.Testing.Tests
         [TestCase( "BasicTestHelperResolvedFirst" )]
         public void configuration_value_as_paths( string mode )
         {
+
             IBasicTestHelper b;
             TestHelperConfiguration config;
 
-            if( mode == "BasicTestHelperResolvedFirst" )
             {
-                b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
-                config = TestHelperResolver.Default.Resolve<TestHelperConfiguration>();
-            }
-            else 
-            {
-                config = TestHelperResolver.Default.Resolve<TestHelperConfiguration>();
-                b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
+                var resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
+                if( mode == "BasicTestHelperResolvedFirst" )
+                {
+                    b = resolver.Resolve<IBasicTestHelper>();
+                    config = resolver.Resolve<TestHelperConfiguration>();
+                }
+                else
+                {
+                    config = resolver.Resolve<TestHelperConfiguration>();
+                    b = resolver.Resolve<IBasicTestHelper>();
+                }
             }
 
             b.SolutionName.Should().Be( "CK-Testing" );
             b.TestProjectName.Should().Be( "CK.Testing.Tests" );
             b.ClosestSUTProjectFolder.Path.Should().EndWith( "CK-Testing/CK.Testing" );
 
-            var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
+            var paths = config.DeclareMultiPaths( "Test/MultiPaths", "The description of MultiPaths.", null ).Value.ToList();
             paths.Should().HaveCount( 6 );
 
             paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{SolutionFolder}.." );
@@ -265,7 +269,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_one_simple_mixin_as_singleton()
         {
-            ITestHelperResolver resolver = TestHelperResolver.Create();
+            ITestHelperResolver resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
             int eventCount = 0;
             var a = resolver.Resolve<IA>();
             a.ADone += ( e, arg ) => ++eventCount;
@@ -285,7 +289,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_one_core_as_singleton()
         {
-            ITestHelperResolver resolver = TestHelperResolver.Create();
+            ITestHelperResolver resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
             int eventCount = 0;
             var a = resolver.Resolve<IACore>();
             a.ADone += ( e, arg ) => ++eventCount;
@@ -315,7 +319,7 @@ namespace CK.Testing.Tests
         [TestCase( false )]
         public void accessing_mixins_as_singleton( bool revert )
         {
-            var r = TestHelperResolver.Create();
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
 
             IBasicTestHelper basic;
             IA a;

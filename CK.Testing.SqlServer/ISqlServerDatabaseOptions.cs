@@ -28,8 +28,8 @@ namespace CK.Testing.SqlServer
 
         /// <summary>
         /// Gets the database Compatibility level from "SqlServer/Collation" configuration entry.
-        /// Defaults to the major of the Sql Server product version multiplied by 10 that seems to do the job
-        /// (it is 130 for Sql Server 2016 which product version is 13.0...).
+        /// Defaults to the major of the Sql Server product version multiplied by 10: it is 130 for Sql Server 2016
+        /// which product version is 13.0.
         /// </summary>
         int CompatibilityLevel { get; set; }
     }
