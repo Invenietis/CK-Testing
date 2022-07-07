@@ -96,16 +96,16 @@ namespace CK.Testing
         /// </para>
         /// </summary>
         /// <param name="key">The path of the key to find.</param>
+        /// <param name="defaultValue">Default value to use if the key is not configured.</param>
         /// <param name="description">Required non empty description.</param>
         /// <param name="editableValue">Optional getter for the current value if it is editable.</param>
-        /// <param name="defaultValue">Default value to use if the key is not configured.</param>
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The configuration and its configured or default value.</returns>
         public (IValue Config, string Value) Declare( NormalizedPath key,
-                                                          string description,
-                                                          Func<string>? editableValue,
-                                                          string defaultValue,
-                                                          params string[] previousNames )
+                                                      string defaultValue,
+                                                      string description,
+                                                      Func<string>? editableValue,
+                                                      params string[] previousNames)
         {
             Throw.CheckNotNullArgument( defaultValue );
             var config = Declare( key, description, editableValue, previousNames );
@@ -143,9 +143,9 @@ namespace CK.Testing
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The configuration and its value or null if not found.</returns>
         public (IValue Config, NormalizedPath? Value) DeclarePath( NormalizedPath key,
-                                                                        string description,
-                                                                        Func<string>? editableValue,
-                                                                        params string[] previousNames )
+                                                                   string description,
+                                                                   Func<string>? editableValue,
+                                                                   params string[] previousNames )
         {
             var config = Declare( key, description, editableValue, previousNames );
             return (config, config.ConfiguredValue != null ? new NormalizedPath( GetValueAsPath( config, config.ConfiguredValue ) ) : (NormalizedPath?)null);
@@ -203,9 +203,9 @@ namespace CK.Testing
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The configuration and its value or null if not found.</returns>
         public (IValue Config, bool? Value) DeclareBoolean( NormalizedPath key,
-                                                                 string description,
-                                                                 Func<string>? editableValue,
-                                                                 params string[] previousNames )
+                                                            string description,
+                                                            Func<string>? editableValue,
+                                                            params string[] previousNames )
         {
             var config = Declare( key, description, editableValue, previousNames );
             return (config, config.ConfiguredValue != null ? StringComparer.OrdinalIgnoreCase.Equals( config.ConfiguredValue, "true" ) : null);
@@ -218,16 +218,16 @@ namespace CK.Testing
         /// </para>
         /// </summary>
         /// <param name="key">The path of the key to find.</param>
+        /// <param name="defaultValue">Default value to use when not configured.</param>
         /// <param name="description">Required non empty description.</param>
         /// <param name="editableValue">Optional getter for the current value if it is editable.</param>
-        /// <param name="defaultValue">Default value to use when not configured.</param>
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The configuration and its configured or default value.</returns>
         public (IValue Config, bool Value) DeclareBoolean( NormalizedPath key,
-                                                                 string description,
-                                                                 Func<string>? editableValue,
-                                                                 bool defaultValue,
-                                                                 params string[] previousNames )
+                                                           bool defaultValue,
+                                                           string description,
+                                                           Func<string>? editableValue,
+                                                           params string[] previousNames)
         {
             var config = Declare( key, description, editableValue, previousNames );
             if( !config.IsEditable ) config.SetDefaultValue( defaultValue.ToString() );
@@ -259,16 +259,16 @@ namespace CK.Testing
         /// </para>
         /// </summary>
         /// <param name="key">The path of the key to find.</param>
+        /// <param name="defaultValue">Default value to use when not configured.</param>
         /// <param name="description">Required non empty description.</param>
         /// <param name="editableValue">Optional getter for the current value if it is editable.</param>
-        /// <param name="defaultValue">Default value to use when not configured.</param>
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The configuration and its configured or default value.</returns>
         public (IValue Config, int Value) DeclareInt32( NormalizedPath key,
-                                                             string description,
-                                                             Func<string>? editableValue,
-                                                             int defaultValue,
-                                                             params string[] previousNames )
+                                                        int defaultValue,
+                                                        string description,
+                                                        Func<string>? editableValue,
+                                                        params string[] previousNames)
         {
             var config = Declare( key, description, editableValue, previousNames );
             if( !config.IsEditable ) config.SetDefaultValue( defaultValue.ToString() );
@@ -289,10 +289,10 @@ namespace CK.Testing
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The values as paths.</returns>
         public (IValue Config, IEnumerable<string> Value) DeclareMultiStrings( NormalizedPath key,
-                                                                                   string description,
-                                                                                   Func<string>? editableValue,
-                                                                                   char separator = ';',
-                                                                                   params string[] previousNames )
+                                                                               string description,
+                                                                               Func<string>? editableValue,
+                                                                               char separator = ';',
+                                                                               params string[] previousNames )
         {
             var config = Declare( key, description, editableValue, previousNames );
             if( string.IsNullOrWhiteSpace( config.ConfiguredValue ) ) return (config, Array.Empty<string>());
@@ -316,9 +316,9 @@ namespace CK.Testing
         /// <param name="previousNames">Optional deprecated aliases.</param>
         /// <returns>The values as paths.</returns>
         public (IValue Config, IEnumerable<NormalizedPath> Value) DeclareMultiPaths( NormalizedPath key,
-                                                                                         string description,
-                                                                                         Func<string>? editableValue,
-                                                                                         params string[] previousNames )
+                                                                                     string description,
+                                                                                     Func<string>? editableValue,
+                                                                                     params string[] previousNames )
         {
             var (config, values) = DeclareMultiStrings( key, description, editableValue, ';', previousNames );
             return (config, values.Select( x => new NormalizedPath( GetValueAsPath( config, x ) ) ) );

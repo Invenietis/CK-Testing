@@ -53,18 +53,18 @@ namespace CK.Testing
             _confDBName = c.CurrentValue;
 
             _confMasterConnectionString = _config.Declare( "SqlServer/MasterConnectionString",
-                                                       "The connection string to the master database of the Sql Server that will be used by the tests.",
-                                                       null,
-                                                       "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True" ).Value;
+                                                           "Server=.;Database=master;Integrated Security=SSPI;TrustServerCertificate=True",
+                                                           "The connection string to the master database of the Sql Server that will be used by the tests.",
+                                                           null ).Value;
 
             _confCollation = config.Declare( "SqlServer/Collation",
-                                         "The expected collation of the Sql Server. The EnsureDatabase method drops and recreates a database if the collation differ.",
-                                         null,
-                                         "Latin1_General_100_BIN2" ).Value;
+                                             "Latin1_General_100_BIN2",
+                                             "The expected collation of the Sql Server. The EnsureDatabase method drops and recreates a database if the collation differ.",
+                                             null ).Value;
 
             _confCompatibilityLevel = config.DeclareInt32( "SqlServer/CompatibilityLevel",
-                                                       "The compatibility level to use. The major of the Sql Server product version multiplied by 10 (it is 130 for Sql Server 2016 which product version is 13.0). Defaults to 0 that uses the current version of the server.",
-                                                       () => _confCompatibilityLevel.ToString() ).Value ?? 0;
+                                                           "The compatibility level to use. The major of the Sql Server product version multiplied by 10 (it is 130 for Sql Server 2016 which product version is 13.0). Defaults to 0 that uses the current version of the server.",
+                                                           () => _confCompatibilityLevel.ToString() ).Value ?? 0;
 
         }
 

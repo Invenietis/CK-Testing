@@ -43,23 +43,23 @@ namespace CK.Testing
             basic.OnlyOnce( () =>
             {
                 _logToCKMon = _config.DeclareBoolean( "Monitor/LogToCKMon",
+                                                      true,
                                                       $"Emits binary logs to {_basic.LogFolder}/CKMon folder.",
                                                       null,
-                                                      true,
                                                       "Monitor/LogToBinFile",
                                                       "Monitor/LogToBinFiles" ).Value;
 
                 _logToText = _config.DeclareBoolean( "Monitor/LogToText",
+                                                      false,
                                                       $"Emits text logs to {_basic.LogFolder}/Text folder.",
                                                       null,
-                                                      false,
                                                       "Monitor/LogToTextFile", "Monitor/LogToTextFiles" ).Value;
 
                 // LogLevel defaults to Debug while testing.
                 string logLevel = _config.Declare( "Monitor/LogLevel",
+                                                   "Debug",
                                                    "Initializes the static ActivityMonitor.DefaultFilter value.",
-                                                   () => ActivityMonitor.DefaultFilter.ToString(),
-                                                   "Debug" ).Value;
+                                                   () => ActivityMonitor.DefaultFilter.ToString() ).Value;
                 if( logLevel == null )
                 {
                     ActivityMonitor.DefaultFilter = LogFilter.Debug;
@@ -101,9 +101,9 @@ namespace CK.Testing
             _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
             LogToConsole = _config.DeclareBoolean( "Monitor/LogToConsole",
+                                                   false,
                                                    "Writes the text logs to the console.",
-                                                   () => LogToConsole.ToString(),
-                                                   false ).Value;
+                                                   () => LogToConsole.ToString() ).Value;
             basic.OnCleanupFolder += OnCleanupFolder;
             basic.OnlyOnce( () =>
             {
