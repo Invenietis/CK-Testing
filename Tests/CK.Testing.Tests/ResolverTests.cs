@@ -220,6 +220,40 @@ namespace CK.Testing.Tests
     [TestFixture]
     public class ResolverTests
     {
+        [Test]
+        public void configuration_values_Declared_and_Useless()
+        {
+            var config = new TestHelperConfiguration();
+
+            string editableValue = "I can change!";
+
+            var pathsAreOptionals = config.Declare( "Anything/nawak/Deep/Ambiguous", "D0", null ).ConfiguredValue.Should().Be( "I'm at the root!" );
+
+            var usedAndConfigured = config.DeclareMultiPaths( "Test/MultiPaths", "D1", null ).Value.ToList();
+            var unconfiguredWithDefault = config.Declare( "Test/UnconfWithDefault", "the default value", "D2", null );
+            var unconfiguredEditable = config.Declare( "Test/UnconfWithEditableValue", "D3", () => editableValue );
+            // A Value not editable AND without default should not exist but this is not checked (its CurrentValue is simply null).
+
+            config.UselessValues.Should().HaveCount( 1 ).And.Contain( x => x.UnusedKey.Path == "Test/UnusedKey" && x.ConfiguredValue == "unused" );
+            config.DeclaredValues.Should().HaveCount( 4 );
+
+            // MultiStrings are trimmed but duplicates ';;;;' appear in the ConfiguredValue so that user can see them
+            // (the default value is set (if not editable) to the evaluated paths (not tested here).
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/MultiPaths"
+                                                         && x.Description == "D1"
+                                                         && x.ConfiguredValue == @"{SolutionFolder}..;{TestProjectFolder}/../XXXXX/{BuildConfiguration};;X/../{TestProjectName};{ClosestSUTProjectFolder}/{BuildConfiguration}-{TestProjectName}-{SolutionName}/{PathToBin};../Y;{X}\{BuildConfiguration}\..\Y;;;;;;" );
+
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/UnconfWithDefault"
+                                                         && x.Description == "D2"
+                                                         && x.ConfiguredValue == null
+                                                         && x.CurrentValue == "the default value" );
+
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/UnconfWithEditableValue"
+                                                         && x.Description == "D3"
+                                                         && x.ConfiguredValue == null
+                                                         && x.CurrentValue == "I can change!" );
+        }
+
         [TestCase( "ConfigurationResolvedFirst" )]
         [TestCase( "BasicTestHelperResolvedFirst" )]
         public void configuration_value_as_paths( string mode )

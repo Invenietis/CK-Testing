@@ -22,7 +22,6 @@ namespace CK.Testing
     {
         readonly Dictionary<NormalizedPath, Value> _config;
         readonly List<IValue> _unconfiguredValues;
-        readonly IReadOnlyDictionary<NormalizedPath,IValue> _exposedConfig;
         internal IBasicTestHelper? _basic;
 
 
@@ -32,7 +31,6 @@ namespace CK.Testing
         public TestHelperConfiguration()
         {
             _config = new Dictionary<NormalizedPath, Value>();
-            _exposedConfig = _config.AsIReadOnlyDictionary<NormalizedPath, Value, IValue>();
             _unconfiguredValues = new List<IValue>();
             ApplyFilesConfig( BasicTestHelper._binFolder );
             SimpleReadFromEnvironment();
@@ -299,7 +297,9 @@ namespace CK.Testing
             // Don't use |StringSplitOptions.RemoveEmptyEntries so that the normalized Value displays the duplicates ;; if any.
             var strings = config.ConfiguredValue.Split( separator, StringSplitOptions.TrimEntries );
             // Normalize the Value.
-            config.SetNormalizedConfiguredValue( string.Join( separator, strings ) );
+            var normalized = string.Join( separator, strings );
+            config.SetNormalizedConfiguredValue( normalized );
+            if( editableValue == null ) config.SetDefaultValue( normalized );
             return (config, strings.Where( x => x.Length > 0 ));
         }
 
@@ -321,25 +321,37 @@ namespace CK.Testing
                                                                                      params string[] previousNames )
         {
             var (config, values) = DeclareMultiStrings( key, description, editableValue, ';', previousNames );
-            return (config, values.Select( x => new NormalizedPath( GetValueAsPath( config, x ) ) ) );
+            // To be "perfect" we reset the default value set by MultiStrings (if editableValue is null) to
+            // the normalized paths (but let the ConfigurationValue to what it is).
+
+            // And since we need to enumerate, we concretize the enumerable.
+            var result = values.Select( x => new NormalizedPath( GetValueAsPath( config, x ) ) );
+
+            if( editableValue == null )
+            {
+                result = result.ToArray();
+                var renormalized = string.Join( ';', result );
+                config.SetDefaultValue( renormalized );
+            }
+            return (config, result );
         }
 
         /// <summary>
-        /// Gets all the declared configuration values.
+        /// Gets all the declared configuration keys (that may or not have a <see cref="IValue.ConfiguredValue"/>).
         /// </summary>
-        public IReadOnlyDictionary<NormalizedPath, IValue> DeclaredValues => _exposedConfig;
+        public IEnumerable<IValue> DeclaredValues => _config.Values.Where( v => v.IsUsed ).Concat( _unconfiguredValues );
 
         /// <summary>
-        /// Gets the useless configuration values.
+        /// Gets the useless configuration values (they can be removed from the configuration).
         /// </summary>
-        public IReadOnlyList<IValue> UselessValues => _unconfiguredValues;
+        public IEnumerable<IUnusedValue> UselessValues => _config.Values.Where( v => !v.IsUsed );
 
         void SetEntry( string key, NormalizedPath basePath, string value )
         {
             Debug.Assert( value != null );
             NormalizedPath k = NormalizeKey( key );
             if( basePath.IsEmptyPath ) basePath = BasicTestHelper._testProjectFolder;
-            _config[k] = new Value( basePath, value );
+            _config[k] = new Value( basePath, k, value );
         }
 
         static NormalizedPath NormalizeKey( string key )

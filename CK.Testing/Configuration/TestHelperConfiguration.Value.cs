@@ -24,6 +24,8 @@ namespace CK.Testing
 
             public NormalizedPath FileBasePath { get; }
 
+            internal bool IsUsed => _description != null;
+
             public string ConfiguredValue => _configuredValue;
 
             public void SetNormalizedConfiguredValue( string normalizedValue ) => _configuredValue = normalizedValue;
@@ -42,8 +44,9 @@ namespace CK.Testing
 
             public void SetDefaultValue( string? defaultValue ) => _defaultValue = defaultValue;
 
-            internal Value( NormalizedPath basePath, string value )
+            internal Value( NormalizedPath basePath, NormalizedPath key, string value )
             {
+                Key = key;
                 FileBasePath = basePath;
                 _configuredValue = value;
             }
