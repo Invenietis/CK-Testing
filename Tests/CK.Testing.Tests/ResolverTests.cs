@@ -227,15 +227,22 @@ namespace CK.Testing.Tests
 
             string editableValue = "I can change!";
 
-            var pathsAreOptionals = config.Declare( "Anything/nawak/Deep/Ambiguous", "D0", null ).ConfiguredValue.Should().Be( "I'm at the root!" );
+            var pathsAreOptionals = config.Declare( "Anything/nawak/Deep/Ambiguous", "D0", null );
+            pathsAreOptionals.ConfiguredValue.Should().Be( "I'm at the root!" );
 
             var usedAndConfigured = config.DeclareMultiPaths( "Test/MultiPaths", "D1", null ).Value.ToList();
+            // A Value not editable AND without default should not exist but this is not checked (its CurrentValue is simply null).
             var unconfiguredWithDefault = config.Declare( "Test/UnconfWithDefault", "the default value", "D2", null );
             var unconfiguredEditable = config.Declare( "Test/UnconfWithEditableValue", "D3", () => editableValue );
-            // A Value not editable AND without default should not exist but this is not checked (its CurrentValue is simply null).
+            //
+            var renamed = config.Declare( "Thing/NewName", "Deprecated name", null, "OldThing/OldName" );
+            renamed.Key.Path.Should().Be( "Thing/NewName" );
+            renamed.ConfiguredValue.Should().Be( "I'm using a deprecated name." );
+            renamed.ObsoleteKeyUsed.Should().Be( "OldName" );
+
 
             config.UselessValues.Should().HaveCount( 1 ).And.Contain( x => x.UnusedKey.Path == "Test/UnusedKey" && x.ConfiguredValue == "unused" );
-            config.DeclaredValues.Should().HaveCount( 4 );
+            config.DeclaredValues.Should().HaveCount( 5 );
 
             // MultiStrings are trimmed but duplicates ';;;;' appear in the ConfiguredValue so that user can see them
             // (the default value is set (if not editable) to the evaluated paths (not tested here).
@@ -252,6 +259,9 @@ namespace CK.Testing.Tests
                                                          && x.Description == "D3"
                                                          && x.ConfiguredValue == null
                                                          && x.CurrentValue == "I can change!" );
+
+            config.DeclaredValues.Should().Contain( renamed );
+            config.DeclaredValues.Should().Contain( pathsAreOptionals );
         }
 
         [TestCase( "ConfigurationResolvedFirst" )]
