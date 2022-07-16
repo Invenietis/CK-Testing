@@ -10,7 +10,7 @@ namespace CK.Testing
     public static class TestHelperResolverExtensions
     {
         /// <summary>
-        /// Resolves an instance, either a singleton or a transient one depending on <see cref="ITestHelperResolver.TransientMode"/>.
+        /// Resolves an instance.
         /// This method throw exceptions on failure and this is intended: test framework must be fully operational
         /// and any error are considered developer errors.
         /// </summary>

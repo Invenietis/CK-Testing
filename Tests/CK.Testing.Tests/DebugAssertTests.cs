@@ -22,10 +22,10 @@ namespace CK.Testing.Tests
             // In "normal" use a TestHelper has been required, this initialization has already been done.
             //
             StaticBasicTestHelper.Touch();
-            Assume.That( CK.Testing.BasicTestHelper.TestHelper.BuildConfiguration == "Debug" );
+            Assume.That( BasicTestHelper.TestHelper.BuildConfiguration == "Debug" );
             try
             {
-                System.Diagnostics.Debug.Assert( 1 == 0, "This should lead to a simple exception, not the death of the process..." );
+                Debug.Assert( 1 == 0, "This should lead to a simple exception, not the death of the process..." );
                 Assert.Fail( "This is NEVER reached!" );
             }
             catch( Exception ex )

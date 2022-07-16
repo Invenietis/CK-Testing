@@ -12,7 +12,7 @@ namespace CK.Testing
 {
     class ResolverImpl : ITestHelperResolver
     {
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly SimpleServiceContainer _container;
         readonly IReadOnlyList<Type> _preLoadedTypes;
 
@@ -120,35 +120,32 @@ namespace CK.Testing
 
         }
 
-        ResolverImpl( ITestHelperConfiguration config )
+        ResolverImpl( TestHelperConfiguration config )
         {
             _container = new SimpleServiceContainer();
             _container.Add( config );
             _config = config;
-            TransientMode = config.GetBoolean( "TestHelper/TransientMode" ) ?? false;
-            string[] assemblies = config.Get( "TestHelper/PreLoadedAssemblies", String.Empty ).Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries );
-            if( assemblies.Length > 0 )
+
+            const string description = @"Semicolon separated list of assembly names to load and from which all IMixinTestHelper implementations will be resolved.";
+
+            var (c,names) = config.DeclareMultiStrings( "TestHelper/PreLoadedAssemblies", description, null );
+            if( names.Any() )
             {
                 using( WeakAssemblyNameResolver.TemporaryInstall() )
                 {
                     var types = new List<Type>();
-                    foreach( var n in assemblies )
+                    foreach( var n in names )
                     {
                         var a = Assembly.Load( n );
                         types.AddRange( a.GetExportedTypes().Where( t => t.IsInterface && typeof( IMixinTestHelper ).IsAssignableFrom( t ) ) );
                     }
                     _preLoadedTypes = types;
-                    if( !TransientMode )
-                    {
-                        var ctx = new Context( _container );
-                        foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
-                    }
+                    var ctx = new Context( _container );
+                    foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
                 }
             }
             else _preLoadedTypes = Type.EmptyTypes;
         }
-
-        public bool TransientMode { get; }
 
         public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
@@ -157,13 +154,7 @@ namespace CK.Testing
             Throw.CheckNotNullArgument( t );
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {
-                Context ctx; 
-                if( !TransientMode ) ctx = new Context( _container );
-                else
-                {
-                    ctx = new Context( new SimpleServiceContainer( _container ) );
-                    foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
-                }
+                Context ctx = new Context( _container );
                 var r = Resolve( ctx, t );
                 if( r == null ) Throw.Exception( $"Unable to resolve type '{t.AssemblyQualifiedName}'." );
                 return r;
@@ -204,17 +195,6 @@ namespace CK.Testing
         Type? MapType( Type t, bool throwOnError )
         {
             Debug.Assert( t != typeof( ITestHelperResolvedCallback ) && t != typeof( IMixinTestHelper ) );
-            string? typeName = _config.Get( "TestHelper/" + t.FullName );
-            if( typeName != null )
-            {
-                // Always throw when config is used.
-                Type? fromConfig = SimpleTypeFinder.WeakResolver( typeName, true );
-                if( typeof(IMixinTestHelper).IsAssignableFrom(fromConfig))
-                {
-                    throw new Exception( $"Mapped type '{fromConfig.FullName}' is a Mixin. It can not be explicitely implemented." );
-                }
-                return fromConfig;
-            }
             if( t.IsInterface && t.Name[0] == 'I' )
             {
                 var cName = t.Name.Substring( 1 );
@@ -287,7 +267,7 @@ namespace CK.Testing
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }
 
-        public static ITestHelperResolver Create( ITestHelperConfiguration? config = null )
+        public static ITestHelperResolver Create( TestHelperConfiguration? config = null )
         {
             using( WeakAssemblyNameResolver.TemporaryInstall() )
             {

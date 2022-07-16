@@ -15,46 +15,63 @@ namespace CK.Testing
 {
 
     /// <summary>
-    /// Provides default implementation of <see cref="Monitoring.IMonitorTestHelperCore"/>
+    /// Provides default implementation of <see cref="IMonitorTestHelperCore"/>
     /// and easy to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
     /// </summary>
-    public class MonitorTestHelper : Monitoring.IMonitorTestHelperCore
+    public class MonitorTestHelper : IMonitorTestHelperCore
     {
         const int _maxCurrentLogFolderCount = 5;
         const int _maxArchivedLogFolderCount = 20;
 
         readonly IActivityMonitor _monitor;
         readonly ActivityMonitorConsoleClient _console;
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly IBasicTestHelper _basic;
+        static bool _logToCKMon;
+        static bool _logToText;
+
         static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
         static int _loadConflictCount = 0;
-        static bool _logToBinFile;
-        static bool _logToTextFile;
 
-        internal MonitorTestHelper( ITestHelperConfiguration config, IBasicTestHelper basic )
+        internal MonitorTestHelper( TestHelperConfiguration config, IBasicTestHelper basic )
         {
             _config = config;
             _basic = basic;
 
+            // Defensive programming: even if more than one MonitorTestHelper is instantiated, the GrandOutput and the related
+            // configurations must be initialized once.
             basic.OnlyOnce( () =>
             {
-                _logToBinFile = _config.GetBoolean( "Monitor/LogToBinFile" )
-                                        ?? _config.GetBoolean( "Monitor/LogToBinFiles" )
-                                        ?? false;
-                _logToTextFile = _config.GetBoolean( "Monitor/LogToTextFile" )
-                                        ?? _config.GetBoolean( "Monitor/LogToTextFiles" )
-                                        ?? false;
-                
-                string logLevel = _config.Get( "Monitor/LogLevel" );
-                if( logLevel != null )
+                _logToCKMon = _config.DeclareBoolean( "Monitor/LogToCKMon",
+                                                      true,
+                                                      $"Emits binary logs to {_basic.LogFolder}/CKMon folder.",
+                                                      null,
+                                                      "Monitor/LogToBinFile",
+                                                      "Monitor/LogToBinFiles" ).Value;
+
+                _logToText = _config.DeclareBoolean( "Monitor/LogToText",
+                                                      false,
+                                                      $"Emits text logs to {_basic.LogFolder}/Text folder.",
+                                                      null,
+                                                      "Monitor/LogToTextFile", "Monitor/LogToTextFiles" ).Value;
+
+                // LogLevel defaults to Debug while testing.
+                string logLevel = _config.Declare( "Monitor/LogLevel",
+                                                   "Debug",
+                                                   "Initializes the static ActivityMonitor.DefaultFilter value.",
+                                                   () => ActivityMonitor.DefaultFilter.ToString() ).Value;
+                if( logLevel == null )
+                {
+                    ActivityMonitor.DefaultFilter = LogFilter.Debug;
+                }
+                else
                 {
                     var lf = LogFilter.Parse( logLevel );
                     ActivityMonitor.DefaultFilter = lf;
                 }
                 LogFile.RootLogPath = basic.LogFolder;
                 var conf = new GrandOutputConfiguration();
-                if( _logToBinFile )
+                if( _logToCKMon )
                 {
                     var binConf = new BinaryFileConfiguration
                     {
@@ -63,7 +80,7 @@ namespace CK.Testing
                     };
                     conf.AddHandler( binConf );
                 }
-                if( _logToTextFile )
+                if( _logToText )
                 {
                     var txtConf = new TextFileConfiguration
                     {
@@ -73,17 +90,20 @@ namespace CK.Testing
                 }
                 GrandOutput.EnsureActiveDefault( conf, clearExistingTraceListeners: false );
                 var monitorListener = Trace.Listeners.OfType<MonitorTraceListener>().FirstOrDefault( m => m.GrandOutput == GrandOutput.Default );
+                // If our standard MonitorTraceListener has been injected by the GrandOuput, then we remove the StaticBasicTestHelper.SafeTraceListener
+                // that always throws Exceptions and never calls FailFast.
                 // (Defensive programming) There is no real reason for this listener to not be in the listeners, but it can be.
                 if( monitorListener != null )
                 {
-                    // If our standard MonitorTraceListener has been injected, then we remove the StaticBasicTestHelper.SafeTraceListener
-                    // that throws Exceptions instead of calling FailFast.
                     Trace.Listeners.Remove( "CK.Testing.SafeTraceListener" );
                 }
             } );
             _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
-            LogToConsole = _config.GetBoolean( "Monitor/LogToConsole" ) ?? false;
+            LogToConsole = _config.DeclareBoolean( "Monitor/LogToConsole",
+                                                   false,
+                                                   "Writes the text logs to the console.",
+                                                   () => LogToConsole.ToString() ).Value;
             basic.OnCleanupFolder += OnCleanupFolder;
             basic.OnlyOnce( () =>
             {
@@ -137,7 +157,7 @@ namespace CK.Testing
                         m.Error( $"Aborting Log's cleanup of timed folders in '{basePath}' after 5 retries.", ex );
                         return;
                     }
-                    m.Warn( $"Log's cleanup of timed folders in '{basePath}' failed. Retrying.", ex );
+                    m.Warn( $"Log's cleanup of timed folders in '{basePath}' failed. Retrying in {retryCount * 100} ms.", ex );
                     Thread.Sleep( retryCount * 100 );
                     goto retry;
                 }
@@ -202,9 +222,9 @@ namespace CK.Testing
             set => LogToConsole = value;
         }
 
-        bool IMonitorTestHelperCore.LogToBinFile => _logToBinFile;
+        bool IMonitorTestHelperCore.LogToCKMon => _logToCKMon;
 
-        bool IMonitorTestHelperCore.LogToTextFile => _logToTextFile;
+        bool IMonitorTestHelperCore.LogToText => _logToText;
 
         IDisposable IMonitorTestHelperCore.TemporaryEnsureConsoleMonitor()
         {

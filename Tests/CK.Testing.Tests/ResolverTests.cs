@@ -81,11 +81,11 @@ namespace CK.Testing.Tests
 
     public class B : IBCore
     {
-        readonly ITestHelperConfiguration _config;
+        readonly TestHelperConfiguration _config;
         readonly IA _a;
         readonly IBasicTestHelper _basic;
 
-        internal B( ITestHelperConfiguration config, IA a, IBasicTestHelper basic )
+        internal B( TestHelperConfiguration config, IA a, IBasicTestHelper basic )
         {
             _config = config;
             _a = a;
@@ -195,7 +195,7 @@ namespace CK.Testing.Tests
         readonly IE _e;
         readonly IC _c;
 
-        public F( ITestHelperConfiguration config, ID d, IE e, IC c )
+        public F( TestHelperConfiguration config, ID d, IE e, IC c )
         {
             _d = d;
             _e = e;
@@ -221,25 +221,99 @@ namespace CK.Testing.Tests
     public class ResolverTests
     {
         [Test]
-        public void configuration_value_as_paths()
+        public void configuration_values_Declared_and_Useless()
         {
-            var b = TestHelperResolver.Default.Resolve<IBasicTestHelper>();
             var config = new TestHelperConfiguration();
-            var paths = config.GetMultiPaths( "Test/MultiPaths" ).ToList();
-            paths.Should().HaveCount( 5 );
-            paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{{SolutionFolder}}.." );
-            paths[1].Should().Be( b.RepositoryFolder.AppendPart( b.BuildConfiguration ), "{{RepositoryFolder}}/../CK-Testing/{{BuildConfiguration}}" );
-            paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{{TestProjectName}}" );
-            paths[3].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+
+            string editableValue = "I can change!";
+
+            var pathsAreOptionals = config.Declare( "Anything/nawak/Deep/Ambiguous", "D0", null );
+            pathsAreOptionals.ConfiguredValue.Should().Be( "I'm at the root!" );
+
+            var usedAndConfigured = config.DeclareMultiPaths( "Test/MultiPaths", "D1", null ).Value.ToList();
+            // A Value not editable AND without default should not exist but this is not checked (its CurrentValue is simply null).
+            var unconfiguredWithDefault = config.Declare( "Test/UnconfWithDefault", "the default value", "D2", null );
+            var unconfiguredEditable = config.Declare( "Test/UnconfWithEditableValue", "D3", () => editableValue );
+            //
+            var renamed = config.Declare( "Thing/NewName", "Deprecated name", null, "OldThing/OldName" );
+            renamed.Key.Path.Should().Be( "Thing/NewName" );
+            renamed.ConfiguredValue.Should().Be( "I'm using a deprecated name." );
+            renamed.ObsoleteKeyUsed.Should().Be( "OldName" );
+
+
+            config.UselessValues.Should().HaveCount( 1 ).And.Contain( x => x.UnusedKey.Path == "Test/UnusedKey" && x.ConfiguredValue == "unused" );
+            config.DeclaredValues.Should().HaveCount( 5 );
+
+            // MultiStrings are trimmed but duplicates ';;;;' appear in the ConfiguredValue so that user can see them
+            // (the default value is set (if not editable) to the evaluated paths (not tested here).
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/MultiPaths"
+                                                         && x.Description == "D1"
+                                                         && x.ConfiguredValue == @"{SolutionFolder}..;{TestProjectFolder}/../XXXXX/{BuildConfiguration};;X/../{TestProjectName};{ClosestSUTProjectFolder}/{BuildConfiguration}-{TestProjectName}-{SolutionName}/{PathToBin};../Y;{X}\{BuildConfiguration}\..\Y;;;;;;" );
+
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/UnconfWithDefault"
+                                                         && x.Description == "D2"
+                                                         && x.ConfiguredValue == null
+                                                         && x.CurrentValue == "the default value" );
+
+            config.DeclaredValues.Should().Contain( x => x.Key.Path == "Test/UnconfWithEditableValue"
+                                                         && x.Description == "D3"
+                                                         && x.ConfiguredValue == null
+                                                         && x.CurrentValue == "I can change!" );
+
+            config.DeclaredValues.Should().Contain( renamed );
+            config.DeclaredValues.Should().Contain( pathsAreOptionals );
+        }
+
+        [TestCase( "ConfigurationResolvedFirst" )]
+        [TestCase( "BasicTestHelperResolvedFirst" )]
+        public void configuration_value_as_paths( string mode )
+        {
+
+            IBasicTestHelper b;
+            TestHelperConfiguration config;
+
+            {
+                var resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
+                if( mode == "BasicTestHelperResolvedFirst" )
+                {
+                    b = resolver.Resolve<IBasicTestHelper>();
+                    config = resolver.Resolve<TestHelperConfiguration>();
+                }
+                else
+                {
+                    config = resolver.Resolve<TestHelperConfiguration>();
+                    b = resolver.Resolve<IBasicTestHelper>();
+                }
+            }
+
+            b.SolutionName.Should().Be( "CK-Testing" );
+            b.TestProjectName.Should().Be( "CK.Testing.Tests" );
+            b.ClosestSUTProjectFolder.Path.Should().EndWith( "CK-Testing/CK.Testing" );
+
+            var paths = config.DeclareMultiPaths( "Test/MultiPaths", "The description of MultiPaths.", null ).Value.ToList();
+            paths.Should().HaveCount( 6 );
+
+            paths[0].Should().Be( new NormalizedPath( Path.GetDirectoryName( b.SolutionFolder ) ), "{SolutionFolder}.." );
+
+            paths[1].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "XXXXX" ).AppendPart( b.BuildConfiguration ), "{TestProjectFolder}/../XXXXX/{BuildConfiguration}" );
+
+            paths[2].Should().Be( b.TestProjectFolder.AppendPart( b.TestProjectName ), "X/../{TestProjectName}" );
+
+            var expectedPlacehoders = $"{b.BuildConfiguration}-{b.TestProjectName}-{b.SolutionName}";
+            paths[3].Should().Be( b.ClosestSUTProjectFolder.AppendPart( expectedPlacehoders ).Combine( b.PathToBin ),
+                "{ClosestSUTProjectFolder}/{BuildConfiguration}-{TestProjectName}-{SolutionName}/{PathToBin}" );
+
+            paths[4].Should().Be( b.TestProjectFolder.RemoveLastPart().AppendPart( "Y" ), "../Y" );
+
             // No .. resolved when { appears.
-            paths[4].Should().Be( $"{{X}}/{b.BuildConfiguration}/../Y", "Since a { exists, the .. are not resolved. {X}/{BuildConfiguration}/../Y" );
-            paths[4].ResolveDots().Should().Be( $"{{X}}/Y" );
+            paths[5].Should().Be( $"{{X}}/{b.BuildConfiguration}/../Y", "Since a { exists, the .. are not resolved. {X}/{BuildConfiguration}/../Y" );
+            paths[5].ResolveDots().Should().Be( $"{{X}}/Y" );
         }
 
         [Test]
         public void resolving_one_simple_mixin_as_singleton()
         {
-            ITestHelperResolver resolver = TestHelperResolver.Create();
+            ITestHelperResolver resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
             int eventCount = 0;
             var a = resolver.Resolve<IA>();
             a.ADone += ( e, arg ) => ++eventCount;
@@ -259,7 +333,7 @@ namespace CK.Testing.Tests
         [Test]
         public void resolving_one_core_as_singleton()
         {
-            ITestHelperResolver resolver = TestHelperResolver.Create();
+            ITestHelperResolver resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
             int eventCount = 0;
             var a = resolver.Resolve<IACore>();
             a.ADone += ( e, arg ) => ++eventCount;
@@ -289,7 +363,7 @@ namespace CK.Testing.Tests
         [TestCase( false )]
         public void accessing_mixins_as_singleton( bool revert )
         {
-            var r = TestHelperResolver.Create();
+            var r = TestHelperResolver.Create( new TestHelperConfiguration() );
 
             IBasicTestHelper basic;
             IA a;

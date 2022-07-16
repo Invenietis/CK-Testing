@@ -61,10 +61,9 @@ namespace CK.Testing
                         .Select( ( i, num ) => tB.DefineField( $"_impl{num}", i, FieldAttributes.Private | FieldAttributes.InitOnly ) )
                         .ToArray();
 
-                ConstructorBuilder ctor = tB.DefineConstructor(
-                        MethodAttributes.Public,
-                        CallingConventions.Standard,
-                        interfaces );
+                ConstructorBuilder ctor = tB.DefineConstructor( MethodAttributes.Public,
+                                                                CallingConventions.Standard,
+                                                                interfaces );
                 // ctor
                 {
                     var g = ctor.GetILGenerator();

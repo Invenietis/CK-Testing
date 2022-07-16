@@ -20,7 +20,6 @@ namespace SqlHelperTests
         [Test]
         public void toggle_console_output()
         {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             TestHelper.Monitor.Info( $"Before Toggle n°{++_consoleToggleCount}" );
             TestHelper.LogToConsole = !TestHelper.LogToConsole;
             TestHelper.Monitor.Info( $"After Toggle n°{_consoleToggleCount}" );
@@ -39,7 +38,6 @@ namespace SqlHelperTests
         [Explicit]
         public void ensure_database( string reset )
         {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             TestHelper.EnsureDatabase( reset: reset == "reset" );
         }
 
@@ -88,7 +86,6 @@ namespace SqlHelperTests
         [Explicit]
         public void backup_create()
         {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             Assert.That( TestHelper.Backup.CreateBackup() != null, "Backup should be possible." );
         }
 
@@ -106,7 +103,6 @@ namespace SqlHelperTests
         [Explicit]
         public void backup_restore( string what )
         {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             if( !int.TryParse( what, out var index ) )
             {
                 index = what[0] == 'X' ? Int32.MaxValue : 0;
@@ -122,7 +118,6 @@ namespace SqlHelperTests
         [Explicit]
         public void backup_list()
         {
-            Assume.That( TestHelper.IsExplicitAllowed, "Press Ctrl key to allow this test to run." );
             var all = TestHelper.Backup.GetAllBackups();
             using( TestHelper.Monitor.OpenInfo( $"There is {all.Count} backups available in '{TestHelper.Backup.BackupFolder}'." ) )
             {

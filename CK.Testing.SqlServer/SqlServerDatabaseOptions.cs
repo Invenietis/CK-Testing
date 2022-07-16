@@ -25,7 +25,7 @@ namespace CK.Testing
         }
 
         /// <summary>
-        /// Copy contructor.
+        /// Copy constructor.
         /// </summary>
         /// <param name="o">Read only options.</param>
         public SqlServerDatabaseOptions( ISqlServerDatabaseOptions o )
@@ -43,8 +43,8 @@ namespace CK.Testing
 
         /// <summary>
         /// Gets or sets the database collation.
-        /// Defaults to 'Latin1_General_100_BIN2'.
-        /// Use the 'Random' string while creating a database to use another random collation.
+        /// Defaults to <c>"Latin1_General_100_BIN2"</c>.
+        /// Use the <c>"Random"</c> while creating a database to use another random collation.
         /// </summary>
         public string Collation { get; set; }
 

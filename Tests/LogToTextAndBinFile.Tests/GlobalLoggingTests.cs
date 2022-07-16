@@ -55,7 +55,7 @@ namespace GlobalLogs.Tests
             var w = new StringWriter();
             DumpProperties( w, "> ", TestHelper );
             var text = w.ToString();
-            text.Should().Contain( "LogToBinFile = True" );
+            text.Should().Contain( "LogToCKMon = True" );
             TestHelper.Monitor.Info( text );
         }
 
