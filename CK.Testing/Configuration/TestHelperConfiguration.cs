@@ -362,7 +362,9 @@ namespace CK.Testing
 
         void ApplyFilesConfig( NormalizedPath folder )
         {
-            if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count )
+            if( folder.Parts.Count > BasicTestHelper._solutionFolder.Parts.Count
+                && folder.Parts.Count > 1 // We dont want to run ApplyConfig on empty path.
+            )
             {
                 ApplyFilesConfig( folder.RemoveLastPart() );
             }
