@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace CK.Testing.Tests
 {
+
     // A is like Monitor.
     public interface IACore : ITestHelperResolvedCallback
     {
