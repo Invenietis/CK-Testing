@@ -18,7 +18,7 @@ namespace CK.Testing
 
         static BasicTestHelper()
         {
-            if( _initializationError != null ) _initializationError.Throw();
+            EnsureInitialized();
         }
 
         internal BasicTestHelper( TestHelperConfiguration config )
