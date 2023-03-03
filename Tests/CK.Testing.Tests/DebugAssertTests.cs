@@ -21,7 +21,7 @@ namespace CK.Testing.Tests
             //
             // In "normal" use a TestHelper has been required, this initialization has already been done.
             //
-            StaticBasicTestHelper.Touch();
+            StaticBasicTestHelper.EnsureInitialized();
             Assume.That( BasicTestHelper.TestHelper.BuildConfiguration == "Debug" );
             try
             {

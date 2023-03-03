@@ -114,13 +114,17 @@ namespace CK.Testing
         }
 
         /// <summary>
-        /// Empty method that triggers the type initializer: this ensures that the
-        /// basic static members and hooks are initialized.
+        /// Triggers this type initializer and re-throws any initialization error
+        /// that may have occurred.
+        /// <para>
+        /// This ensures that the basic static members and hooks are initialized.
         /// This is almost always useless to call this explicitly since as soon as any TestHelper
         /// object is implied, this core type initializer is called.
+        /// </para>
         /// </summary>
-        public static void Touch()
+        public static void EnsureInitialized()
         {
+            if( _initializationError != null ) _initializationError.Throw();
         }
     }
 }

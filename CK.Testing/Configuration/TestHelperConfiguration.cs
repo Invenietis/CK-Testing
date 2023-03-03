@@ -30,6 +30,7 @@ namespace CK.Testing
         /// </summary>
         public TestHelperConfiguration()
         {
+            StaticBasicTestHelper.EnsureInitialized();
             _config = new Dictionary<NormalizedPath, Value>();
             _unconfiguredValues = new List<IValue>();
             ApplyFilesConfig( BasicTestHelper._binFolder );
