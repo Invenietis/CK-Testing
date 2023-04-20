@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
-    <PackageReference Include="CK.Monitoring" Version="18.0.3--0011-develop" />
-    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="18.0.1--0019-develop" />
+    <PackageReference Include="CK.Monitoring" Version="18.0.3--0012-develop" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="18.0.1--0021-develop" />
   </ItemGroup>
 </Project>
