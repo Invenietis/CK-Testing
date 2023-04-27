@@ -98,7 +98,7 @@ namespace CK.Testing
                     Trace.Listeners.Remove( "CK.Testing.SafeTraceListener" );
                 }
             } );
-            _monitor = new ActivityMonitor( "MonitorTestHelper", ActivityMonitorOptions.WithParallel );
+            _monitor = new ActivityMonitor( "MonitorTestHelper" );
             _console = new ActivityMonitorConsoleClient();
             LogToConsole = _config.DeclareBoolean( "Monitor/LogToConsole",
                                                    false,
