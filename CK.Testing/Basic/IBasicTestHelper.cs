@@ -1,6 +1,7 @@
 using CK.Core;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace CK.Testing
 {
@@ -94,5 +95,21 @@ namespace CK.Testing
         /// <param name="s">Path of the source file, automatically sets by the compiler.</param>
         /// <param name="l">Line number in the source file, automatically sets by the compiler.</param>
         void OnlyOnce( Action a, [CallerFilePath]string? s = null, [CallerLineNumber] int l = 0 );
+
+        /// <summary>
+        /// Writes a <typeparamref name="T"/> instance, reads it back and writes the result, ensuring that
+        /// the two json string are equals. Throws a <see cref="CKException"/> if the texts differ.
+        /// </summary>
+        /// <typeparam name="T">The type of the instance to check.</typeparam>
+        /// <param name="o">The instance.</param>
+        /// <param name="write">Writer function. This is called twice unless the first write or the read fails.</param>
+        /// <param name="read">Reader function is called once.</param>
+        /// <param name="jsonText">Optional hook that provides the Json text.</param>
+        /// <returns>A clone of <paramref name="o"/>.</returns>
+        T JsonIdempotenceCheck<T>( T o,
+                                   Action<Utf8JsonWriter, T> write,
+                                   Utf8JsonReaderDelegate<T> read,
+                                   Action<string>? jsonText = null );
+
     }
 }

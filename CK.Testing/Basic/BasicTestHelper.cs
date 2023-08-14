@@ -1,10 +1,14 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text;
 using System.Threading;
 using CK.Core;
+using Microsoft.IO;
 
 namespace CK.Testing
 {
@@ -106,14 +110,54 @@ namespace CK.Testing
             if( shouldRun ) a();
         }
 
-        /// <summary>
-        /// Enumerates the <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/> candidate paths, starting with the best one.
-        /// This is public to ease tests and because it may be useful.
-        /// </summary>
-        /// <param name="solutionFolder">The root folder: nothing happen above this one.</param>
-        /// <param name="testProjectFolder">The test project that must be in <paramref name="solutionFolder"/> and contains at least one "Tests" part.</param>
-        /// <returns>The closest SUT path in order of preference.</returns>
-        public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
+        T IBasicTestHelper.JsonIdempotenceCheck<T>( T o,
+                                                    Action<Utf8JsonWriter, T> write,
+                                                    Utf8JsonReaderDelegate<T> read,
+                                                    Action<string>? jsonText )
+        {
+            using( var m = (RecyclableMemoryStream)Util.RecyclableStreamManager.GetStream() )
+            using( Utf8JsonWriter w = new Utf8JsonWriter( (IBufferWriter<byte>)m ) )
+            {
+                write( w, o );
+                w.Flush();
+                string? text1 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
+                jsonText?.Invoke( text1 );
+                var reader = new Utf8JsonReader( m.GetReadOnlySequence() );
+                var oBack = read( ref reader );
+                if( oBack == null )
+                {
+                    Throw.CKException( $"A null has been read back from '{text1}' for a non null instance of '{typeof( T ).ToCSharpName()}'." );
+                }
+                string? text2 = null;
+                m.Position = 0;
+                using( var w2 = new Utf8JsonWriter( (IBufferWriter<byte>)m ) )
+                {
+                    write( w2, oBack );
+                    w2.Flush();
+                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
+                }
+                if( text1 != text2 )
+                {
+                    Throw.CKException( $"""
+                            Json idempotence failure between first write:
+                            {text1}
+
+                            And second write of the read back {typeof( T ).ToCSharpName()} instance:
+                            {text2}
+
+                            """ );
+                }
+                return oBack;
+            }
+
+            /// <summary>
+            /// Enumerates the <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/> candidate paths, starting with the best one.
+            /// This is public to ease tests and because it may be useful.
+            /// </summary>
+            /// <param name="solutionFolder">The root folder: nothing happen above this one.</param>
+            /// <param name="testProjectFolder">The test project that must be in <paramref name="solutionFolder"/> and contains at least one "Tests" part.</param>
+            /// <returns>The closest SUT path in order of preference.</returns>
+            public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
         {
             Throw.CheckArgument( testProjectFolder.StartsWith( solutionFolder ) );
 
