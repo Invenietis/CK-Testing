@@ -149,15 +149,16 @@ namespace CK.Testing
                 }
                 return oBack;
             }
+        }
 
-            /// <summary>
-            /// Enumerates the <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/> candidate paths, starting with the best one.
-            /// This is public to ease tests and because it may be useful.
-            /// </summary>
-            /// <param name="solutionFolder">The root folder: nothing happen above this one.</param>
-            /// <param name="testProjectFolder">The test project that must be in <paramref name="solutionFolder"/> and contains at least one "Tests" part.</param>
-            /// <returns>The closest SUT path in order of preference.</returns>
-            public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
+        /// <summary>
+        /// Enumerates the <see cref="IBasicTestHelper.ClosestSUTProjectFolder"/> candidate paths, starting with the best one.
+        /// This is public to ease tests and because it may be useful.
+        /// </summary>
+        /// <param name="solutionFolder">The root folder: nothing happen above this one.</param>
+        /// <param name="testProjectFolder">The test project that must be in <paramref name="solutionFolder"/> and contains at least one "Tests" part.</param>
+        /// <returns>The closest SUT path in order of preference.</returns>
+        public static IEnumerable<NormalizedPath> GetClosestSUTProjectCandidatePaths( NormalizedPath solutionFolder, NormalizedPath testProjectFolder )
         {
             Throw.CheckArgument( testProjectFolder.StartsWith( solutionFolder ) );
 
