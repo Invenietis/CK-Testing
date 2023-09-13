@@ -1,4 +1,5 @@
 using CK.Core;
+using CK.Core.Json;
 using System;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -104,12 +105,33 @@ namespace CK.Testing
         /// <param name="o">The instance.</param>
         /// <param name="write">Writer function. This is called twice unless the first write or the read fails.</param>
         /// <param name="read">Reader function is called once.</param>
+        /// <param name="readerContext">Optional reader context. Defaults to <see cref="IUtf8JsonReaderContext.Empty"/>.</param>
         /// <param name="jsonText">Optional hook that provides the Json text.</param>
         /// <returns>A clone of <paramref name="o"/>.</returns>
         T JsonIdempotenceCheck<T>( T o,
                                    Action<Utf8JsonWriter, T> write,
                                    Utf8JsonReaderDelegate<T> read,
+                                   IUtf8JsonReaderContext? readerContext = null,
                                    Action<string>? jsonText = null );
+
+        /// <summary>
+        /// Writes a <typeparamref name="T"/> instance, reads it back and writes the result, ensuring that
+        /// the two json string are equals. Throws a <see cref="CKException"/> if the texts differ.
+        /// </summary>
+        /// <typeparam name="T">The type of the instance to check.</typeparam>
+        /// <typeparam name="TReadContext">The read context.</typeparam>
+        /// <param name="o">The instance.</param>
+        /// <param name="write">Writer function. This is called twice unless the first write or the read fails.</param>
+        /// <param name="read">Reader function is called once.</param>
+        /// <param name="readerContext">Reader context.</param>
+        /// <param name="jsonText">Optional hook that provides the Json text.</param>
+        /// <returns>A clone of <paramref name="o"/>.</returns>
+        T JsonIdempotenceCheck<T,TReadContext>( T o,
+                                   Action<Utf8JsonWriter, T> write,
+                                   Utf8JsonReaderDelegate<T> read,
+                                   TReadContext readerContext,
+                                   Action<string>? jsonText = null )
+            where TReadContext : class, IUtf8JsonReaderContext;
 
     }
 }
