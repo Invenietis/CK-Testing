@@ -176,7 +176,7 @@ namespace CK.Testing
 
         T JsonIdempotenceCheck<T,TReadContext>( T o,
                                                 Action<Utf8JsonWriter, T> write,
-                                                Utf8JsonReaderDelegate<T> read,
+                                                Utf8JsonReaderDelegate<T,TReadContext> read,
                                                 TReadContext readerContext,
                                                 Action<string>? jsonText )
             where TReadContext : IUtf8JsonReaderContext

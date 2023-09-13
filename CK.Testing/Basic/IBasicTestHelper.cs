@@ -128,7 +128,7 @@ namespace CK.Testing
         /// <returns>A clone of <paramref name="o"/>.</returns>
         T JsonIdempotenceCheck<T,TReadContext>( T o,
                                    Action<Utf8JsonWriter, T> write,
-                                   Utf8JsonReaderDelegate<T> read,
+                                   Utf8JsonReaderDelegate<T, TReadContext> read,
                                    TReadContext readerContext,
                                    Action<string>? jsonText = null )
             where TReadContext : class, IUtf8JsonReaderContext;
