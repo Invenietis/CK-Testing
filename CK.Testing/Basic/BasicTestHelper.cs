@@ -143,7 +143,7 @@ namespace CK.Testing
                                                 Utf8JsonReaderDelegate<T,TReadContext> read,
                                                 TReadContext readerContext,
                                                 Action<string>? jsonText )
-            where TReadContext : IUtf8JsonReaderContext
+            where TReadContext : class, IUtf8JsonReaderContext
         {
             using( var m = (RecyclableMemoryStream)Util.RecyclableStreamManager.GetStream() )
             using( Utf8JsonWriter w = new Utf8JsonWriter( (IBufferWriter<byte>)m ) )
