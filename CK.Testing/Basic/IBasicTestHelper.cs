@@ -1,7 +1,10 @@
 using CK.Core;
 using CK.Core.Json;
+using Microsoft.IO;
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 
 namespace CK.Testing
@@ -126,11 +129,11 @@ namespace CK.Testing
         /// <param name="readerContext">Reader context.</param>
         /// <param name="jsonText">Optional hook that provides the Json text.</param>
         /// <returns>A clone of <paramref name="o"/>.</returns>
-        T JsonIdempotenceCheck<T,TReadContext>( T o,
-                                   Action<Utf8JsonWriter, T> write,
-                                   Utf8JsonReaderDelegate<T, TReadContext> read,
-                                   TReadContext readerContext,
-                                   Action<string>? jsonText = null )
+        T JsonIdempotenceCheck<T, TReadContext>( T o,
+                                                 Action<Utf8JsonWriter, T> write,
+                                                 Utf8JsonReaderDelegate<T, TReadContext> read,
+                                                 TReadContext readerContext,
+                                                 Action<string>? jsonText = null )
             where TReadContext : class, IUtf8JsonReaderContext;
 
     }

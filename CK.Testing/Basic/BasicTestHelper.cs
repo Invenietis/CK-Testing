@@ -10,6 +10,7 @@ using System.Threading;
 using CK.Core;
 using Microsoft.IO;
 using CK.Core.Json;
+using System.Runtime.CompilerServices;
 
 namespace CK.Testing
 {
@@ -117,60 +118,23 @@ namespace CK.Testing
                                             IUtf8JsonReaderContext? readerContext,
                                             Action<string>? jsonText )
         {
-            return JsonIdempotenceCheck<T,IUtf8JsonReaderContext>( o, write, read, readerContext ?? IUtf8JsonReaderContext.Empty, jsonText );
+            readerContext ??= IUtf8JsonReaderContext.Empty;
+             // This is safe: a Utf8JsonReaderDelegate<T> is a Utf8JsonReaderDelegate<T,IUtf8JsonReaderContext>.
+            return JsonIdempotenceCheck( o,
+                                         write,
+                                         Unsafe.As<Utf8JsonReaderDelegate<T, IUtf8JsonReaderContext>>( read ),
+                                         readerContext ?? IUtf8JsonReaderContext.Empty,
+                                         jsonText );
         }
 
-
-        T IBasicTestHelperAAAAAAAAJsonIdempotenceCheck<T>( T o,
-                                                    Action<Utf8JsonWriter, T> write,
-                                                    Utf8JsonReaderDelegate<T> read,
-                                                    IUtf8JsonReaderContext? readerContext,
-                                                    Action<string>? jsonText )
-        {
-            using( var m = (RecyclableMemoryStream)Util.RecyclableStreamManager.GetStream() )
-            using( Utf8JsonWriter w = new Utf8JsonWriter( (IBufferWriter<byte>)m ) )
-            {
-                write( w, o );
-                w.Flush();
-                string? text1 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
-                jsonText?.Invoke( text1 );
-                var reader = new Utf8JsonReader( m.GetReadOnlySequence() );
-                var oBack = read( ref reader, readerContext ?? IUtf8JsonReaderContext.Empty );
-                if( oBack == null )
-                {
-                    Throw.CKException( $"A null has been read back from '{text1}' for a non null instance of '{typeof( T ).ToCSharpName()}'." );
-                }
-                string? text2 = null;
-                m.Position = 0;
-                using( var w2 = new Utf8JsonWriter( (IBufferWriter<byte>)m ) )
-                {
-                    write( w2, oBack );
-                    w2.Flush();
-                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
-                }
-                if( text1 != text2 )
-                {
-                    Throw.CKException( $"""
-                            Json idempotence failure between first write:
-                            {text1}
-
-                            And second write of the read back {typeof( T ).ToCSharpName()} instance:
-                            {text2}
-
-                            """ );
-                }
-                return oBack;
-            }
-        }
 
         T IBasicTestHelper.JsonIdempotenceCheck<T, TReadContext>( T o,
-                                        Action<Utf8JsonWriter, T> write,
-                                        Utf8JsonReaderDelegate<T> read,
-                                        TReadContext readerContext,
-                                        Action<string>? jsonText )
+                                                                  Action<Utf8JsonWriter, T> write,
+                                                                  Utf8JsonReaderDelegate<T,TReadContext> read,
+                                                                  TReadContext readerContext,
+                                                                  Action<string>? jsonText )
         {
             return JsonIdempotenceCheck<T, TReadContext>( o, write, read, readerContext, jsonText );
-
         }
 
 
@@ -189,6 +153,8 @@ namespace CK.Testing
                 string? text1 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
                 jsonText?.Invoke( text1 );
                 var reader = new Utf8JsonReader( m.GetReadOnlySequence() );
+                Throw.DebugAssert( reader.TokenType == JsonTokenType.None );
+                reader.ReadWithMoreData( readerContext );
                 var oBack = read( ref reader, readerContext );
                 if( oBack == null )
                 {
