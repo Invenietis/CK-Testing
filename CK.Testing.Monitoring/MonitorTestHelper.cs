@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using CK.Core;
 using CK.Monitoring;
 using CK.Monitoring.Handlers;
@@ -18,7 +20,7 @@ namespace CK.Testing
     /// Provides default implementation of <see cref="IMonitorTestHelperCore"/>
     /// and easy to use accessor to the <see cref="IMonitorTestHelper"/> mixin.
     /// </summary>
-    public class MonitorTestHelper : IMonitorTestHelperCore
+    public sealed class MonitorTestHelper : IMonitorTestHelperCore
     {
         const int _maxCurrentLogFolderCount = 5;
         const int _maxArchivedLogFolderCount = 20;
@@ -279,6 +281,49 @@ namespace CK.Testing
         void ITestHelperResolvedCallback.OnTestHelperGraphResolved( object finalMixin )
         {
             DrainAssemblyLoadConflicts( _monitor );
+        }
+
+
+        sealed class Resumer
+        {
+            internal readonly TaskCompletionSource _tcs;
+            readonly Timer _timer;
+            readonly Func<bool, bool> _resume;
+            bool _reentrant;
+
+            internal Resumer( Func<bool, bool> resumeF )
+            {
+                _timer = new Timer( OnTimer, null, 1000, 1000 );
+                _tcs = new TaskCompletionSource( TaskCreationOptions.RunContinuationsAsynchronously );
+                _resume = resumeF;
+            }
+
+            void OnTimer( object? _ )
+            {
+                if( _reentrant ) return;
+                _reentrant = true;
+                if( _resume( false ) )
+                {
+                    _tcs.SetResult();
+                    _timer.Dispose();
+                }
+                _reentrant = false;
+            }
+        }
+
+        Task IMonitorTestHelperCore.SuspendAsync( Func<bool, bool> resume,
+                                                  string? testName,
+                                                  int lineNumber,
+                                                  string? fileName )
+        {
+            Throw.CheckNotNullArgument( resume );
+            if( !Debugger.IsAttached )
+            {
+                _monitor.Warn( $"TestHelper.SuspendAsync called from '{testName}' method while no debugger is attached. Ignoring it.", lineNumber, fileName );
+                return Task.CompletedTask;
+            }
+            _monitor.Info( $"TestHelper.SuspendAsync called from '{testName}' method.", lineNumber, fileName );
+            return new Resumer( resume )._tcs.Task;
         }
 
         /// <summary>
