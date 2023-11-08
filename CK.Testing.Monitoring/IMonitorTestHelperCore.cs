@@ -34,7 +34,7 @@ namespace CK.Testing.Monitoring
         /// Gets whether all activities will be logged to <see cref="IBasicTestHelper.LogFolder"/>/Text folders.
         /// Configurable by "Monitor/LogToText" = "false".
         /// <para>
-        /// This defaults to false.
+        /// This defaults to true.
         /// </para>
         /// </summary>
         bool LogToText { get; }

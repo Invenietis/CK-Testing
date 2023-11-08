@@ -85,7 +85,8 @@ namespace CK.Testing.SqlServer
                                .Where( m => m.Success )
                                .Select( m => (m.Groups[1].Value,
                                               new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
-                                                            int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) )) )
+                                                            int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ),
+                                                            DateTimeKind.Utc )) )
                                .GroupBy( m => m.Value )
                                .SelectMany( g => g.OrderByDescending( p => p.Item2 ).Select( ( p, idx ) => new Backup( p.Value, p.Item2, idx ) ) )
                                .ToArray()
@@ -105,7 +106,8 @@ namespace CK.Testing.SqlServer
                                .Select( f => MatchFileName( f ) )
                                .Where( m => m.Success && m.Groups[1].Value == dbName )
                                .Select( m => new DateTime( int.Parse( m.Groups[2].Value ), int.Parse( m.Groups[3].Value ), int.Parse( m.Groups[4].Value ),
-                                                           int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ) ) )
+                                                           int.Parse( m.Groups[5].Value ), int.Parse( m.Groups[6].Value ), int.Parse( m.Groups[7].Value ),
+                                                           DateTimeKind.Utc ) )
                                .OrderByDescending( d => d )
                                .Select( ( p, idx ) => new Backup( dbName, p, idx ) )
                                .ToArray()

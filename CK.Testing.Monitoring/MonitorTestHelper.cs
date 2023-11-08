@@ -52,10 +52,11 @@ namespace CK.Testing
                                                       "Monitor/LogToBinFiles" ).Value;
 
                 _logToText = _config.DeclareBoolean( "Monitor/LogToText",
-                                                      false,
+                                                      true,
                                                       $"Emits text logs to {_basic.LogFolder}/Text folder.",
                                                       null,
-                                                      "Monitor/LogToTextFile", "Monitor/LogToTextFiles" ).Value;
+                                                      "Monitor/LogToTextFile",
+                                                      "Monitor/LogToTextFiles" ).Value;
 
                 // LogLevel defaults to Debug while testing.
                 string logLevel = _config.Declare( "Monitor/LogLevel",
