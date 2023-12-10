@@ -6,7 +6,7 @@
     <LangVersion>11</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.Core" Version="18.0.0" />
+    <PackageReference Include="CK.Core" Version="19.0.0" />
     <PackageReference Include="CK.Reflection" Version="9.0.2" />
     <PackageReference Include="CK.WeakAssemblyNameResolver" Version="0.5.2" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
