@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <IsPackable>False</IsPackable>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CK.Testing\CK.Testing.csproj" />

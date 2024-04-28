@@ -1,16 +1,15 @@
+using CK.Core;
+using CK.Core.Json;
+using Microsoft.IO;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text;
-using System.Threading;
-using CK.Core;
-using Microsoft.IO;
-using CK.Core.Json;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 
 namespace CK.Testing
 {
@@ -166,7 +165,9 @@ namespace CK.Testing
                 {
                     write( w2, oBack );
                     w2.Flush();
-                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
+                    // GetReadOnlySequence() will get the end of the previously written buffer.
+                    // Slice is required.
+                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence().Slice( 0, m.Position ) );
                 }
                 if( text1 != text2 )
                 {
