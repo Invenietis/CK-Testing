@@ -2,9 +2,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CK.Testing
 {
@@ -46,8 +43,8 @@ namespace CK.Testing
         /// provide a value when the key is removed.
         /// </summary>
         /// <param name="key">The configuration key.</param>
-        /// <returns>The value that van be null if the key doesn't exist or is associated to null.</returns>
-        public string this[string key]
+        /// <returns>The value that can be null if the key doesn't exist or is associated to null.</returns>
+        public string? this[string key]
         {
             get
             {

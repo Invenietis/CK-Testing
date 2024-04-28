@@ -109,13 +109,15 @@ namespace CK.Testing
         /// <param name="write">Writer function. This is called twice unless the first write or the read fails.</param>
         /// <param name="read">Reader function is called once.</param>
         /// <param name="readerContext">Optional reader context. Defaults to <see cref="IUtf8JsonReaderContext.Empty"/>.</param>
-        /// <param name="jsonText">Optional hook that provides the Json text.</param>
+        /// <param name="jsonText1">Optional hook that provides the Json text.</param>
+        /// <param name="jsonText2">Optional hook that provides the second Json text. This is set before throwing if it differs from <paramref name="jsonText1"/>.</param>
         /// <returns>A clone of <paramref name="o"/>.</returns>
         T JsonIdempotenceCheck<T>( T o,
                                    Action<Utf8JsonWriter, T> write,
                                    Utf8JsonReaderDelegate<T> read,
                                    IUtf8JsonReaderContext? readerContext = null,
-                                   Action<string>? jsonText = null );
+                                   Action<string>? jsonText1 = null,
+                                   Action<string>? jsonText2 = null );
 
         /// <summary>
         /// Writes a <typeparamref name="T"/> instance, reads it back and writes the result, ensuring that
@@ -127,13 +129,15 @@ namespace CK.Testing
         /// <param name="write">Writer function. This is called twice unless the first write or the read fails.</param>
         /// <param name="read">Reader function is called once.</param>
         /// <param name="readerContext">Reader context.</param>
-        /// <param name="jsonText">Optional hook that provides the Json text.</param>
+        /// <param name="jsonText1">Optional hook that provides the first Json text.</param>
+        /// <param name="jsonText2">Optional hook that provides the second Json text. This is set before throwing if it differs from <paramref name="jsonText1"/>.</param>
         /// <returns>A clone of <paramref name="o"/>.</returns>
         T JsonIdempotenceCheck<T, TReadContext>( T o,
                                                  Action<Utf8JsonWriter, T> write,
                                                  Utf8JsonReaderDelegate<T, TReadContext> read,
                                                  TReadContext readerContext,
-                                                 Action<string>? jsonText = null )
+                                                 Action<string>? jsonText1 = null,
+                                                 Action<string>? jsonText2 = null )
             where TReadContext : class, IUtf8JsonReaderContext;
 
     }

@@ -15,7 +15,8 @@ namespace CK.Testing.Tests
             var h = resolver.Resolve<IBasicTestHelper>();
             h.JsonIdempotenceCheck( "long initial write.", Writer, Reader ).Should().Be( "long initial write." );
 
-            FluentActions.Invoking( () => h.JsonIdempotenceCheck( "long initial write.", Writer, BuggyReader ) )
+            string? text1 = null, text2 = null;
+            FluentActions.Invoking( () => h.JsonIdempotenceCheck( "long initial write.", Writer, BuggyReader, jsonText1: t => text1 = t, jsonText2: t => text2 = t) )
                 .Should().Throw<CKException>()
                 .WithMessage( """
                     Json idempotence failure between first write:
@@ -25,6 +26,8 @@ namespace CK.Testing.Tests
                     {"P":"long in"}
 
                     """ );
+            text1.Should().Be( """{"P":"long initial write."}""" );
+            text2.Should().Be( """{"P":"long in"}""" );
         }
 
         static void Writer( Utf8JsonWriter writer, string s )
@@ -42,7 +45,7 @@ namespace CK.Testing.Tests
             var s = r.GetString();
             r.Read();
             r.Read();
-            return s;
+            return s!;
         }
 
         static string BuggyReader( ref Utf8JsonReader r, IUtf8JsonReaderContext context )
