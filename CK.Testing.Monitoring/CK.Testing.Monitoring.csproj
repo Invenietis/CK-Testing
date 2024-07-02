@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <Description>Contains Monitoring Test Helper mixin.</Description>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
