@@ -127,7 +127,7 @@ namespace CK.Testing
         {
             Debug.Assert( basePath.EndsWith( FileUtil.DirectorySeparatorString ) );
             // Note: The comparer is a reverse comparer. The most RECENT timed folder is the FIRST.
-            GetTimedFolders( basePath, out SortedDictionary<DateTime, string> timedFolders, out string archivePath, false );
+            GetTimedFolders( basePath, out SortedDictionary<DateTime, string> timedFolders, out string? archivePath, false );
             if( timedFolders.Count > maxCurrentLogFolderCount )
             {
                 int retryCount = 5;
@@ -167,7 +167,7 @@ namespace CK.Testing
             }
         }
 
-        static void GetTimedFolders( string folder, out SortedDictionary<DateTime, string> timedFolders, out string archivePath, bool allowNameSuffix )
+        static void GetTimedFolders( string folder, out SortedDictionary<DateTime, string> timedFolders, out string? archivePath, bool allowNameSuffix )
         {
             timedFolders = new SortedDictionary<DateTime, string>( Comparer<DateTime>.Create( ( x, y ) => y.CompareTo( x ) ) );
             archivePath = null;
@@ -187,7 +187,7 @@ namespace CK.Testing
             }
         }
 
-        void OnCleanupFolder( object sender, CleanupFolderEventArgs e )
+        void OnCleanupFolder( object? sender, CleanupFolderEventArgs e )
         {
             _monitor.Info( $"Folder '{e.Folder}' has been cleaned up." );
         }
@@ -274,7 +274,7 @@ namespace CK.Testing
 
         T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
         {
-            T result = default;
+            T result = default!;
             DoWithWeakAssemblyResolver( () => result = action() );
             return result;
         }

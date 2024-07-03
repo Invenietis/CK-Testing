@@ -1,16 +1,15 @@
+using CK.Core;
+using CK.Core.Json;
+using Microsoft.IO;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text;
-using System.Threading;
-using CK.Core;
-using Microsoft.IO;
-using CK.Core.Json;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 
 namespace CK.Testing
 {
@@ -116,7 +115,8 @@ namespace CK.Testing
                                             Action<Utf8JsonWriter, T> write,
                                             Utf8JsonReaderDelegate<T> read,
                                             IUtf8JsonReaderContext? readerContext,
-                                            Action<string>? jsonText )
+                                            Action<string>? jsonText1,
+                                            Action<string>? jsonText2 )
         {
             readerContext ??= IUtf8JsonReaderContext.Empty;
              // This is safe: a Utf8JsonReaderDelegate<T> is a Utf8JsonReaderDelegate<T,IUtf8JsonReaderContext>.
@@ -124,7 +124,8 @@ namespace CK.Testing
                                          write,
                                          Unsafe.As<Utf8JsonReaderDelegate<T, IUtf8JsonReaderContext>>( read ),
                                          readerContext ?? IUtf8JsonReaderContext.Empty,
-                                         jsonText );
+                                         jsonText1,
+                                         jsonText2 );
         }
 
 
@@ -132,9 +133,10 @@ namespace CK.Testing
                                                                   Action<Utf8JsonWriter, T> write,
                                                                   Utf8JsonReaderDelegate<T,TReadContext> read,
                                                                   TReadContext readerContext,
-                                                                  Action<string>? jsonText )
+                                                                  Action<string>? jsonText1,
+                                                                  Action<string>? jsonText2 )
         {
-            return JsonIdempotenceCheck<T, TReadContext>( o, write, read, readerContext, jsonText );
+            return JsonIdempotenceCheck<T, TReadContext>( o, write, read, readerContext, jsonText1, jsonText2 );
         }
 
 
@@ -142,7 +144,8 @@ namespace CK.Testing
                                                 Action<Utf8JsonWriter, T> write,
                                                 Utf8JsonReaderDelegate<T,TReadContext> read,
                                                 TReadContext readerContext,
-                                                Action<string>? jsonText )
+                                                Action<string>? jsonText1,
+                                                Action<string>? jsonText2 )
             where TReadContext : class, IUtf8JsonReaderContext
         {
             using( var m = (RecyclableMemoryStream)Util.RecyclableStreamManager.GetStream() )
@@ -151,7 +154,7 @@ namespace CK.Testing
                 write( w, o );
                 w.Flush();
                 string? text1 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
-                jsonText?.Invoke( text1 );
+                jsonText1?.Invoke( text1 );
                 var reader = new Utf8JsonReader( m.GetReadOnlySequence() );
                 Throw.DebugAssert( reader.TokenType == JsonTokenType.None );
                 reader.ReadWithMoreData( readerContext );
@@ -166,8 +169,11 @@ namespace CK.Testing
                 {
                     write( w2, oBack );
                     w2.Flush();
-                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence() );
+                    // GetReadOnlySequence() will get the end of the previously written buffer.
+                    // Slice is required.
+                    text2 = Encoding.UTF8.GetString( m.GetReadOnlySequence().Slice( 0, m.Position ) );
                 }
+                jsonText2?.Invoke( text2 );
                 if( text1 != text2 )
                 {
                     Throw.CKException( $"""

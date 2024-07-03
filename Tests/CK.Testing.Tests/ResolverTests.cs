@@ -28,9 +28,9 @@ namespace CK.Testing.Tests
         readonly IBasicTestHelper _basic;
         int _callCount;
         bool _cbCalled;
-        object _resolvedObject;
+        object? _resolvedObject;
 
-        event EventHandler _aDone;
+        event EventHandler? _aDone;
 
         internal A( IBasicTestHelper basic )
         {
@@ -43,7 +43,7 @@ namespace CK.Testing.Tests
 
         public bool ResolvedCallbackCalled => _cbCalled;
 
-        public object ResolvedObject => _resolvedObject;
+        public object ResolvedObject => _resolvedObject!;
 
         void IACore.DoA()
         {
@@ -60,7 +60,7 @@ namespace CK.Testing.Tests
             _resolvedObject = resolvedObject;
         }
 
-        event EventHandler IACore.ADone
+        event EventHandler? IACore.ADone
         {
             add => _aDone += value;
             remove => _aDone -= value;
