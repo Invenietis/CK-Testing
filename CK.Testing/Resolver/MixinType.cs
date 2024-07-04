@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using System.Linq;
-using CK.Reflection;
 using System.Diagnostics;
 
 namespace CK.Testing
@@ -125,7 +124,7 @@ namespace CK.Testing
                 MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.Final,
                 CallingConventions.HasThis );
 
-            parameters = ReflectionHelper.CreateParametersType( m.GetParameters() );
+            parameters = CreateParametersType( m.GetParameters() );
             // If it is a Generic method definition (since we are working with an interface, 
             // it can not be a Generic closed nor opened method).
             if( m.IsGenericMethodDefinition )
@@ -159,6 +158,14 @@ namespace CK.Testing
             var attr = new CustomAttributeBuilder( ctor, Array.Empty<object>() );
             mB.SetCustomAttribute( attr );
             return mB;
+
+            static Type[] CreateParametersType( ParameterInfo[] parametersInfo )
+            {
+                int len = parametersInfo.Length;
+                Type[] parameters = new Type[len];
+                while( --len >= 0 ) parameters[len] = parametersInfo[len].ParameterType;
+                return parameters;
+            }
         }
 
 
