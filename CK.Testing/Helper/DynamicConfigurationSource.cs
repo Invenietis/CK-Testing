@@ -11,7 +11,7 @@ namespace CK.Testing
     /// triggers a configuration reload.
     /// Use <see cref="StartBatch()"/> to apply multiple updates at once.
     /// </summary>
-    public class DynamicConfigurationSource : ConfigurationProvider, IConfigurationSource, IEnumerable<KeyValuePair<string, string>>
+    public class DynamicConfigurationSource : ConfigurationProvider, IConfigurationSource, IEnumerable<KeyValuePair<string, string?>>
     {
         readonly IDisposable _batch;
         int _batchCOunt;
@@ -109,7 +109,7 @@ namespace CK.Testing
         /// Returns all the keys and values configurations.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => Data.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() => Data.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => Data.GetEnumerator();
     }

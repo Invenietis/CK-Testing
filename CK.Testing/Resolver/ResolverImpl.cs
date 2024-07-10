@@ -14,7 +14,6 @@ namespace CK.Testing
     {
         readonly TestHelperConfiguration _config;
         readonly SimpleServiceContainer _container;
-        readonly IReadOnlyList<Type> _preLoadedTypes;
 
         class Context
         {
@@ -125,29 +124,7 @@ namespace CK.Testing
             _container = new SimpleServiceContainer();
             _container.Add( config );
             _config = config;
-
-            const string description = @"Semicolon separated list of assembly names to load and from which all IMixinTestHelper implementations will be resolved.";
-
-            var (c,names) = config.DeclareMultiStrings( "TestHelper/PreLoadedAssemblies", description, null );
-            if( names.Any() )
-            {
-                using( WeakAssemblyNameResolver.TemporaryInstall() )
-                {
-                    var types = new List<Type>();
-                    foreach( var n in names )
-                    {
-                        var a = Assembly.Load( n );
-                        types.AddRange( a.GetExportedTypes().Where( t => t.IsInterface && typeof( IMixinTestHelper ).IsAssignableFrom( t ) ) );
-                    }
-                    _preLoadedTypes = types;
-                    var ctx = new Context( _container );
-                    foreach( var preLoad in _preLoadedTypes ) Resolve( ctx, preLoad );
-                }
-            }
-            else _preLoadedTypes = Type.EmptyTypes;
         }
-
-        public IReadOnlyList<Type> PreLoadedTypes => _preLoadedTypes;
 
         public object Resolve( Type t )
         {
@@ -250,19 +227,10 @@ namespace CK.Testing
             for( int i = 0; i < longestCtor.Parameters.Length; ++i )
             {
                 var p = longestCtor.Parameters[i];
-                bool shouldBePreloaded = p.Name == "isMissingFromPreloaded" && p.ParameterType == typeof(bool);
-                if( shouldBePreloaded )
-                {
-                    longestCtor.Values[i] = !_preLoadedTypes.Any( preloaded => preloaded.IsAssignableFrom( t )
-                                                                               || (MapType( preloaded, false )?.IsAssignableFrom( t ) ?? false) );
-                }
-                else
-                {
-                    // We generated the Type dynamically... but:
-                    // https://github.com/dotnet/corefx/issues/17943
-                    // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
-                    longestCtor.Values[i] = Resolve( ctx, p.ParameterType );
-                }
+                // We generated the Type dynamically... but:
+                // https://github.com/dotnet/corefx/issues/17943
+                // longestCtor.Values[i] = Resolve( container, p.ParameterType, !p.HasDefaultValue ) ?? p.DefaultValue;
+                longestCtor.Values[i] = Resolve( ctx, p.ParameterType );
             }
             return longestCtor.Ctor.Invoke( longestCtor.Values );
         }

@@ -2,11 +2,8 @@ using CK.Core;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static CK.Testing.SqlServerTestHelper;
 
 namespace SqlHelperTests
@@ -47,23 +44,15 @@ namespace SqlHelperTests
         {
             TestHelper.EnsureDatabase( reset: false );
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
         [Test]
         public void Execute_create_script_on_Database_and_Drop()
         {
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.EnsureDatabase( reset: true );
             TestHelper.ExecuteScripts( File.ReadAllText( TestHelper.TestProjectFolder.AppendPart( "Model.Sql" ) ) );
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests = null;
             TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
-            TestHelper.DropDatabase();
-            CK.Testing.StupidTestHelper.StaticLastDatabaseCreatedOrDroppedNameToTestPreLoadedAssembliesFromSqlHelperTests.Should().Be( TestHelper.DefaultDatabaseOptions.DatabaseName );
         }
 
         [Test]

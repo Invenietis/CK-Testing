@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CK.Testing.Stupid
 {
@@ -16,7 +14,7 @@ namespace CK.Testing.Stupid
         /// This helper subscribes to the <see cref="SqlServer.ISqlServerTestHelperCore.OnDatabaseCreatedOrDropped"/>
         /// and when this event fires, captures the database name (and also calls <see cref="StupidMethod"/>).
         /// </summary>
-        string LastDatabaseCreatedOrDroppedName { get; }
+        string? LastDatabaseCreatedOrDroppedName { get; }
 
         /// <summary>
         /// Gets the total number of calls to <see cref="StupidMethod"/>.
