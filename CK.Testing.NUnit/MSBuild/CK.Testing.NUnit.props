@@ -1,0 +1,33 @@
+<Project>
+
+  <!--
+
+  This will generate the [assembly: CK.Testing.NUnit.TestHelperMonitorSupport] in the $(IntermediateOutputPath)CK.Testing.NUnit.AutoAttributes.g.cs file.
+  This attrbute will make each NUnit test automatically logged in the TestHelper.Monitor.
+  
+  Any other CK.Testing.AnotherMagic package that wants to add a similar NUnit extensions assembly attribute must 
+  writes a "MSBuild/CK.Testing.AnotherMagic.props" file that appends the commas separated full name of the attribute(s) to this property:
+
+  <Project>
+    <PropertyGroup>
+      <CKTestingNUnit>$(CKTestingNUnit), CK.Testing.AnotherMagic.BringSomeSupport</CKTestingNUnit>
+    </PropertyGroup>
+  </Project>
+
+  And packages it in its csproj:
+
+  <ItemGroup>
+    <Content Include="MSBuild/CK.Testing.AnotherMagic.props">
+      <Pack>true</Pack>
+      <PackagePath>buildTransitive\CK.Testing.AnotherMagic.props</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  And thats all.
+  
+  -->
+  <PropertyGroup>
+    <CKTestingNUnit>CK.Testing.NUnit.TestHelperMonitorSupport</CKTestingNUnit>
+  </PropertyGroup>
+
+</Project>

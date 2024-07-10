@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogToTextAndBinFile.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlHelper.Tests", "Tests\SqlHelper.Tests\SqlHelper.Tests.csproj", "{B9F0D13A-B97F-4C94-80DF-A674DCAEB16E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.Testing.NUnit", "CK.Testing.NUnit\CK.Testing.NUnit.csproj", "{8D6BD482-3F6E-41CA-A077-BC21B1623A74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{B9F0D13A-B97F-4C94-80DF-A674DCAEB16E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9F0D13A-B97F-4C94-80DF-A674DCAEB16E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9F0D13A-B97F-4C94-80DF-A674DCAEB16E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D6BD482-3F6E-41CA-A077-BC21B1623A74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D6BD482-3F6E-41CA-A077-BC21B1623A74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D6BD482-3F6E-41CA-A077-BC21B1623A74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D6BD482-3F6E-41CA-A077-BC21B1623A74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CK.Testing.Monitoring\CK.Testing.Monitoring.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MSBuild/CK.Testing.NUnit.props">
+      <Pack>true</Pack>
+      <PackagePath>buildTransitive\CK.Testing.NUnit.props</PackagePath>
+    </Content>
+    <Content Include="MSBuild/CK.Testing.NUnit.targets">
+      <Pack>true</Pack>
+      <PackagePath>buildTransitive\CK.Testing.NUnit.targets</PackagePath>
+    </Content>
+  </ItemGroup>
+
+
+</Project>
