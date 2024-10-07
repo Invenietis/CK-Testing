@@ -6,43 +6,42 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace CK.Testing
-{
-    /// <summary>
-    /// Entry point: this exposes the <see cref="Default"/> resolver.
-    /// </summary>
-    public static class TestHelperResolver
-    {
-        static readonly object _lock = new object();
-        static ITestHelperResolver? _resolver;
+namespace CK.Testing;
 
-        /// <summary>
-        /// Gets the default <see cref="ITestHelperResolver"/> to use.
-        /// This resolver is bound to <see cref="TestHelperConfiguration.Default"/>.
-        /// </summary>
-        public static ITestHelperResolver Default
+/// <summary>
+/// Entry point: this exposes the <see cref="Default"/> resolver.
+/// </summary>
+public static class TestHelperResolver
+{
+    static readonly object _lock = new object();
+    static ITestHelperResolver? _resolver;
+
+    /// <summary>
+    /// Gets the default <see cref="ITestHelperResolver"/> to use.
+    /// This resolver is bound to <see cref="TestHelperConfiguration.Default"/>.
+    /// </summary>
+    public static ITestHelperResolver Default
+    {
+        get
         {
-            get
+            if( _resolver == null )
             {
-                if( _resolver == null )
+                lock( _lock )
                 {
-                    lock( _lock )
+                    if( _resolver == null )
                     {
-                        if( _resolver == null )
-                        {
-                            _resolver = ResolverImpl.Create();
-                        }
+                        _resolver = ResolverImpl.Create();
                     }
                 }
-                return _resolver;
             }
+            return _resolver;
         }
-
-        /// <summary>
-        /// Creates a new <see cref="ITestHelperResolver"/> bound to a specific configuration.
-        /// </summary>
-        /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
-        /// <returns>A new resolver.</returns>
-        public static ITestHelperResolver Create( TestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
     }
+
+    /// <summary>
+    /// Creates a new <see cref="ITestHelperResolver"/> bound to a specific configuration.
+    /// </summary>
+    /// <param name="config">An optional configuration: when null the <see cref="TestHelperConfiguration.Default"/> is used.</param>
+    /// <returns>A new resolver.</returns>
+    public static ITestHelperResolver Create( TestHelperConfiguration? config = null ) => ResolverImpl.Create( config );
 }
