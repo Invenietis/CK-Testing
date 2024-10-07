@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 
 using static CK.Testing.MonitorTestHelper;
+using System.Threading.Tasks;
 
 namespace GlobalLogs.Tests;
 
@@ -15,14 +16,15 @@ namespace GlobalLogs.Tests;
 public class GlobalLoggingTests
 {
     [Test]
-    public void ckmon_files_and_text_files_are_produced()
+    public async Task ckmon_files_and_text_files_are_produced_Async()
     {
         var secret = Guid.NewGuid().ToString();
         var binSecret = Encoding.UTF8.GetBytes( secret );
 
         TestHelper.Monitor.Info( $"This will appear in ckmon, text files and the console: {secret}" );
-        GrandOutput.Default.Should().NotBeNull();
-        GrandOutput.Default.Dispose();
+        Throw.DebugAssert( GrandOutput.Default != null );
+        await GrandOutput.Default.DisposeAsync();
+
         Directory.EnumerateFiles( TestHelper.LogFolder, "*.log", SearchOption.AllDirectories )
                     .Select( f => File.ReadAllText( f ) )
                     .Count( text => text.Contains( secret ) )
@@ -36,7 +38,7 @@ public class GlobalLoggingTests
                 while( input.MoveNext() )
                 {
                     if( input.Current.LogType != LogEntryType.CloseGroup
-                        && input.Current.Text.Contains( secret ) )
+                        && input.Current.Text != null && input.Current.Text.Contains( secret ) )
                     {
                         ++count;
                     }
@@ -59,7 +61,7 @@ public class GlobalLoggingTests
         TestHelper.Monitor.Info( text );
     }
 
-    void DumpProperties( TextWriter w, string prefix, object o )
+    static void DumpProperties( TextWriter w, string prefix, object o )
     {
         foreach( var p in o.GetType().GetProperties() )
         {
@@ -70,8 +72,7 @@ public class GlobalLoggingTests
             else if( typeof( System.Collections.IEnumerable ).IsAssignableFrom( p.PropertyType ) )
             {
                 w.Write( $"{prefix}{p.Name} = " );
-                var items = p.GetValue( o ) as System.Collections.IEnumerable;
-                if( items == null ) w.WriteLine( "<null>" );
+                if( p.GetValue( o ) is not System.Collections.IEnumerable items ) w.WriteLine( "<null>" );
                 else
                 {
                     var wPrefix = new String( ' ', prefix.Length + p.Name.Length + 3 );

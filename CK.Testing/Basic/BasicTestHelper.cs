@@ -136,16 +136,15 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
                                                               Action<string>? jsonText1,
                                                               Action<string>? jsonText2 )
     {
-        return JsonIdempotenceCheck<T, TReadContext>( o, write, read, readerContext, jsonText1, jsonText2 );
+        return JsonIdempotenceCheck( o, write, read, readerContext, jsonText1, jsonText2 );
     }
 
-
-    T JsonIdempotenceCheck<T, TReadContext>( T o,
-                                            Action<Utf8JsonWriter, T> write,
-                                            Utf8JsonReaderDelegate<T, TReadContext> read,
-                                            TReadContext readerContext,
-                                            Action<string>? jsonText1,
-                                            Action<string>? jsonText2 )
+    static T JsonIdempotenceCheck<T, TReadContext>( T o,
+                                                    Action<Utf8JsonWriter, T> write,
+                                                    Utf8JsonReaderDelegate<T, TReadContext> read,
+                                                    TReadContext readerContext,
+                                                    Action<string>? jsonText1,
+                                                    Action<string>? jsonText2 )
         where TReadContext : class, IUtf8JsonReaderContext
     {
         using( var m = (RecyclableMemoryStream)Util.RecyclableStreamManager.GetStream() )
@@ -177,7 +176,7 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
             if( text1 != text2 )
             {
                 Throw.CKException( $"""
-                        Json idempotence failure between first write:
+                            Json idempotence failure between first write:
                             {text1}
 
                             And second write of the read back {typeof( T ).ToCSharpName()} instance:
