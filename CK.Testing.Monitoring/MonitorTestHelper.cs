@@ -32,9 +32,6 @@ public sealed class MonitorTestHelper : IMonitorTestHelperCore
     static bool _logToCKMon;
     static bool _logToText;
 
-    static readonly CKTrait _loadConflictTag = ActivityMonitor.Tags.Register( "AssemblyLoadConflict" );
-    static int _loadConflictCount = 0;
-
     internal MonitorTestHelper( TestHelperConfiguration config, IBasicTestHelper basic )
     {
         _config = config;
@@ -236,52 +233,8 @@ public sealed class MonitorTestHelper : IMonitorTestHelperCore
         return Util.CreateDisposableAction( () => LogToConsole = prev );
     }
 
-    void IMonitorTestHelperCore.WithWeakAssemblyResolver( Action action ) => DoWithWeakAssemblyResolver( action );
-
-    static void DrainAssemblyLoadConflicts( IActivityMonitor m )
-    {
-        AssemblyLoadConflict[] currents = WeakAssemblyNameResolver.GetAssemblyConflicts();
-        int prev = Interlocked.Exchange( ref _loadConflictCount, currents.Length );
-        int delta = currents.Length - prev;
-        if( delta > 0 )
-        {
-            using( m.OpenWarn( $"{delta} assembly load conflicts occurred:" ) )
-            {
-                while( prev < currents.Length ) m.Warn( _loadConflictTag, currents[prev++].ToString() );
-            }
-        }
-    }
-
-    void DoWithWeakAssemblyResolver( Action action )
-    {
-        try
-        {
-            using( WeakAssemblyNameResolver.TemporaryInstall() )
-            {
-                action();
-            }
-        }
-        catch( Exception ex )
-        {
-            _monitor.Error( ex );
-            throw;
-        }
-        finally
-        {
-            DrainAssemblyLoadConflicts( _monitor );
-        }
-    }
-
-    T Monitoring.IMonitorTestHelperCore.WithWeakAssemblyResolver<T>( Func<T> action )
-    {
-        T result = default!;
-        DoWithWeakAssemblyResolver( () => result = action() );
-        return result;
-    }
-
     void ITestHelperResolvedCallback.OnTestHelperGraphResolved( object finalMixin )
     {
-        DrainAssemblyLoadConflicts( _monitor );
     }
 
 

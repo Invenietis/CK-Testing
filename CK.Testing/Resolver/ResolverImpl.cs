@@ -129,13 +129,10 @@ class ResolverImpl : ITestHelperResolver
     public object Resolve( Type t )
     {
         Throw.CheckNotNullArgument( t );
-        using( WeakAssemblyNameResolver.TemporaryInstall() )
-        {
-            Context ctx = new Context( _container );
-            var r = Resolve( ctx, t );
-            if( r == null ) Throw.Exception( $"Unable to resolve type '{t.AssemblyQualifiedName}'." );
-            return r;
-        }
+        Context ctx = new Context( _container );
+        var r = Resolve( ctx, t );
+        if( r == null ) Throw.Exception( $"Unable to resolve type '{t.AssemblyQualifiedName}'." );
+        return r;
     }
 
     object? Resolve( Context ctx, Type t )
@@ -237,9 +234,6 @@ class ResolverImpl : ITestHelperResolver
 
     public static ITestHelperResolver Create( TestHelperConfiguration? config = null )
     {
-        using( WeakAssemblyNameResolver.TemporaryInstall() )
-        {
-            return new ResolverImpl( config ?? TestHelperConfiguration.Default );
-        }
+        return new ResolverImpl( config ?? TestHelperConfiguration.Default );
     }
 }

@@ -47,20 +47,6 @@ public interface IMonitorTestHelperCore : ITestHelperResolvedCallback
     IDisposable TemporaryEnsureConsoleMonitor();
 
     /// <summary>
-    /// Runs code inside a standard "weak assembly resolver" and dumps the eventual conflicts.
-    /// </summary>
-    /// <param name="action">The action. Must not be null.</param>
-    void WithWeakAssemblyResolver( Action action );
-
-    /// <summary>
-    /// Runs code inside a standard "weak assembly resolver" and dumps the eventual conflicts.
-    /// This can be used to provide a async lambda (a Task will be returned that must be awaited).
-    /// </summary>
-    /// <param name="action">The action. Must not be null.</param>
-    /// <returns>The result.</returns>
-    T WithWeakAssemblyResolver<T>( Func<T> action );
-
-    /// <summary>
     /// Asynchronously blocks until true is returned from the callback (the callback is called every second).
     /// This can be used only when <see cref="Debugger.IsAttached"/> is true: this is ignored otherwise. 
     /// <para>
