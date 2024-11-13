@@ -2,6 +2,8 @@ using CK.Core;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using System;
+using System.Collections.Generic;
 using static CK.Testing.MonitorTestHelper;
 
 

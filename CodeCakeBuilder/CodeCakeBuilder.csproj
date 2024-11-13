@@ -9,7 +9,7 @@
     <Nullable>annotations</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.Core" Version="20.0.0" />
+    <PackageReference Include="CK.Core" Version="20.0.1" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
