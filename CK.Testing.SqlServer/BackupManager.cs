@@ -196,7 +196,7 @@ namespace CK.Testing.SqlServer
             }
             using( Helper.Monitor.OpenInfo( msg ) )
             {
-                _helper.DoEnsureDatabase( null, false ); 
+                _helper.DoEnsureDatabase( null, false );
                 var script = $@"use [master]; alter database [{dbName}] set single_user with rollback immediate;
 restore database [{dbName}] from disk = N'{BackupFolder.AppendPart( backup.FileName )}' with file = 1,  nounload, replace;
 alter database [{dbName}] set multi_user;";

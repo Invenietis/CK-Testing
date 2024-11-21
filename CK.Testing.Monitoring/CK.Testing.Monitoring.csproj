@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <Description>Contains Monitoring Test Helper mixin.</Description>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.Testing\CK.Testing.csproj" />
-    <PackageReference Include="CK.Monitoring" Version="21.0.0" />
-    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="21.0.0" />
+    <PackageReference Include="CK.Monitoring" Version="22.0.0" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="22.0.0" />
   </ItemGroup>
 </Project>

@@ -136,7 +136,7 @@ namespace CK.Testing
 
         SqlConnection ISqlServerTestHelperCore.CreateOpenedConnection( string? databaseName ) => DoCreateOpenedConnection( databaseName );
 
-        Task<SqlConnection> ISqlServerTestHelperCore.CreateOpenedConnectionAsync(string? databaseName) => DoCreateOpenedConnectionAsync( databaseName );
+        Task<SqlConnection> ISqlServerTestHelperCore.CreateOpenedConnectionAsync( string? databaseName ) => DoCreateOpenedConnectionAsync( databaseName );
 
         void ISqlServerTestHelperCore.DropDatabase( string? databaseName, bool closeExistingConnections )
         {
@@ -171,7 +171,7 @@ namespace CK.Testing
         SqlServerDatabaseOptions? DoGetDatabaseOptions( string? dbName )
         {
             if( dbName == null ) return new SqlServerDatabaseOptions( DoGetDefaultDatabaseOptions() );
-            const string info = "select compatibility_level, IsNull( collation_name, convert(sysname,SERVERPROPERTY('Collation'))) from sys.databases where name=@N;"; 
+            const string info = "select compatibility_level, IsNull( collation_name, convert(sysname,SERVERPROPERTY('Collation'))) from sys.databases where name=@N;";
             using( var oCon = new SqlConnection( EnsureMasterConnection().ToString() ) )
             using( var cmd = new SqlCommand( info, oCon ) )
             {
