@@ -202,7 +202,6 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
 
         string? targetName = null;
         if( testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 6 );
-        else if( testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 5 );
         if( !String.IsNullOrEmpty( targetName ) )
         {
             var cache = new List<NormalizedPath>();
@@ -273,7 +272,7 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
 
         subPaths.Add( targetName );
         yield return head.AppendPart( targetName );
-        while( head.Parts.Count >= rootCount )
+        while( head.Parts.Count > rootCount )
         {
             foreach( var s in WithSubPaths( startFolder, skipDirectParentFolder, subPaths, ref head ) ) yield return s;
         }
