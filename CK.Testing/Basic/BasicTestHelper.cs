@@ -218,7 +218,12 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
             // Note: the list's length depends on the number of parts (the depth of the testProjectFolder).
             foreach( var c in cache )
             {
-                yield return c.RemoveLastPart().AppendPart( targetName );
+                // Because of the .SUT suffix, we may have prefixes that are on the test project folder.
+                var candidate = c.RemoveLastPart().AppendPart( targetName );
+                if( !testProjectFolder.StartsWith( candidate ) )
+                {
+                    yield return c.RemoveLastPart().AppendPart( targetName );
+                }
             }
         }
     }

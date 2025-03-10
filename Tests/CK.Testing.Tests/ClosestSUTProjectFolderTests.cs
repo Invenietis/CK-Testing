@@ -36,11 +36,34 @@ public class ClosestSUTProjectFolderTests
     }
 
     [Test]
-    public void a_parent_folder_cannot_be_the_SUT()
+    public void a_parent_folder_cannot_be_the_SUT_1()
     {
         var directories = new[]
         {
             "X:/S/P/Tests/P.Tests",
+            "X:/S"
+        };
+        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( new NormalizedPath() );
+    }
+
+    [Test]
+    public void a_parent_folder_cannot_be_the_SUT_2()
+    {
+        var directories = new[]
+        {
+            "X:/S/P/Tests/P.Tests",
+            "X:/S/P"
+        };
+        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( new NormalizedPath() );
+    }
+
+    [Test]
+    public void a_parent_folder_cannot_be_the_SUT_3()
+    {
+        var directories = new[]
+        {
+            "X:/S/P/Tests/P.Tests",
+            "X:/S/P/Tests"
         };
         FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( new NormalizedPath() );
     }
