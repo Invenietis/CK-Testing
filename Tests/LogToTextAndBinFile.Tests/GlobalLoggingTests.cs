@@ -2,13 +2,13 @@ using System;
 using NUnit.Framework;
 using CK.Core;
 using CK.Monitoring;
-using FluentAssertions;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 using static CK.Testing.MonitorTestHelper;
 using System.Threading.Tasks;
+using Shouldly;
 
 namespace GlobalLogs.Tests;
 
@@ -28,7 +28,7 @@ public class GlobalLoggingTests
         Directory.EnumerateFiles( TestHelper.LogFolder, "*.log", SearchOption.AllDirectories )
                     .Select( f => File.ReadAllText( f ) )
                     .Count( text => text.Contains( secret ) )
-                    .Should().Be( 1 );
+                    .ShouldBe( 1 );
         // ckmon files are now gzipped by default.
         int count = 0;
         foreach( var fName in Directory.EnumerateFiles( TestHelper.LogFolder, "*.ckmon", SearchOption.AllDirectories ) )
@@ -45,7 +45,7 @@ public class GlobalLoggingTests
                 }
             }
         }
-        count.Should().Be( 1 );
+        count.ShouldBe( 1 );
     }
 
     [Test]
@@ -54,7 +54,7 @@ public class GlobalLoggingTests
         var w = new StringWriter();
         DumpProperties( w, "> ", TestHelper );
         var text = w.ToString();
-        text.Should().Contain( "LogToCKMon = True" );
+        text.ShouldContain( "LogToCKMon = True" );
         TestHelper.Monitor.Info( text );
     }
 

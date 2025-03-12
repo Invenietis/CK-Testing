@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using CK.Core;
 
 namespace CK.Testing;

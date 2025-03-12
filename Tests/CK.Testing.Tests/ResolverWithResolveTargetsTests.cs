@@ -1,9 +1,5 @@
-using CK.Core;
 using FluentAssertions;
 using NUnit.Framework;
-using System;
-using System.IO;
-using System.Linq;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 

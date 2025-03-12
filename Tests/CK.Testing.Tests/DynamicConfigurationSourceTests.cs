@@ -1,5 +1,5 @@
-using FluentAssertions;
 using NUnit.Framework;
+using Shouldly;
 using System.Linq;
 
 namespace CK.Testing.Tests;
@@ -11,21 +11,21 @@ public class DynamicConfigurationSourceTests
     public void simple_changes()
     {
         var c = new DynamicConfigurationSource();
-        c.Count().Should().Be( 0 );
+        c.Count().ShouldBe( 0 );
         var t = c.GetReloadToken();
-        t.HasChanged.Should().BeFalse();
+        t.HasChanged.ShouldBeFalse();
 
         c["Hop"] = "hip";
-        t.HasChanged.Should().BeTrue();
+        t.HasChanged.ShouldBeTrue();
 
         t = c.GetReloadToken();
-        t.HasChanged.Should().BeFalse();
+        t.HasChanged.ShouldBeFalse();
 
         c["Hop"] = "hip";
-        t.HasChanged.Should().BeFalse();
+        t.HasChanged.ShouldBeFalse();
 
         c["Hop"] = "hup";
-        t.HasChanged.Should().BeTrue();
+        t.HasChanged.ShouldBeTrue();
     }
 
     [Test]
@@ -33,20 +33,20 @@ public class DynamicConfigurationSourceTests
     {
         var c = new DynamicConfigurationSource();
         var t = c.GetReloadToken();
-        t.HasChanged.Should().BeFalse();
+        t.HasChanged.ShouldBeFalse();
 
         using( c.StartBatch() )
         {
             c["Hop1"] = "hip";
             c["Hop2"] = "hip";
-            t.HasChanged.Should().BeFalse();
+            t.HasChanged.ShouldBeFalse();
             using( c.StartBatch() )
             {
-                c.Remove( "Hop2" ).Should().BeTrue();
-                c.Remove( "Hop2" ).Should().BeFalse();
+                c.Remove( "Hop2" ).ShouldBeTrue();
+                c.Remove( "Hop2" ).ShouldBeFalse();
             }
-            t.HasChanged.Should().BeFalse();
+            t.HasChanged.ShouldBeFalse();
         }
-        t.HasChanged.Should().BeTrue();
+        t.HasChanged.ShouldBeTrue();
     }
 }

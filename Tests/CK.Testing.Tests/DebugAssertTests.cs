@@ -1,9 +1,7 @@
-using FluentAssertions;
 using NUnit.Framework;
+using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace CK.Testing.Tests;
 
@@ -31,8 +29,8 @@ public class DebugAssertTests
         catch( Exception ex )
         {
             // Everything is fine!
-            ex.Should().NotBeNull();
-            ex.Message.Should().StartWith( "Assertion Failed: " );
+            ex.ShouldNotBeNull();
+            ex.Message.ShouldStartWith( "Assertion Failed: " );
         }
     }
 }

@@ -1,6 +1,7 @@
 using CK.Core;
 using FluentAssertions;
 using NUnit.Framework;
+using Shouldly;
 using System.Text.Json;
 
 namespace CK.Testing.Tests;
@@ -13,7 +14,7 @@ public class JsonIdempotenceTests
     {
         ITestHelperResolver resolver = TestHelperResolver.Create( new TestHelperConfiguration() );
         var h = resolver.Resolve<IBasicTestHelper>();
-        h.JsonIdempotenceCheck( "long initial write.", Writer, Reader ).Should().Be( "long initial write." );
+        h.JsonIdempotenceCheck( "long initial write.", Writer, Reader ).ShouldBe( "long initial write." );
 
         string? text1 = null, text2 = null;
         FluentActions.Invoking( () => h.JsonIdempotenceCheck( "long initial write.", Writer, BuggyReader, jsonText1: t => text1 = t, jsonText2: t => text2 = t ) )
@@ -26,8 +27,8 @@ public class JsonIdempotenceTests
                 {"P":"long in"}
 
                 """ );
-        text1.Should().Be( """{"P":"long initial write."}""" );
-        text2.Should().Be( """{"P":"long in"}""" );
+        text1.ShouldBe( """{"P":"long initial write."}""" );
+        text2.ShouldBe( """{"P":"long in"}""" );
     }
 
     static void Writer( Utf8JsonWriter writer, string s )
@@ -40,7 +41,7 @@ public class JsonIdempotenceTests
     static string Reader( ref Utf8JsonReader r, IUtf8JsonReaderContext context )
     {
         r.Read();
-        r.GetString().Should().Be( "P" );
+        r.GetString().ShouldBe( "P" );
         r.Read();
         var s = r.GetString();
         r.Read();
