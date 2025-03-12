@@ -1,7 +1,6 @@
 using CK.Core;
-using FluentAssertions;
-using NUnit.Framework;
 using Shouldly;
+using NUnit.Framework;
 using System.Text.Json;
 
 namespace CK.Testing.Tests;
@@ -17,9 +16,9 @@ public class JsonIdempotenceTests
         h.JsonIdempotenceCheck( "long initial write.", Writer, Reader ).ShouldBe( "long initial write." );
 
         string? text1 = null, text2 = null;
-        FluentActions.Invoking( () => h.JsonIdempotenceCheck( "long initial write.", Writer, BuggyReader, jsonText1: t => text1 = t, jsonText2: t => text2 = t ) )
-            .Should().Throw<CKException>()
-            .WithMessage( """
+        Util.Invokable( () => h.JsonIdempotenceCheck( "long initial write.", Writer, BuggyReader, jsonText1: t => text1 = t, jsonText2: t => text2 = t ) )
+            .ShouldThrow<CKException>()
+            .Message.ShouldBe( """
                 Json idempotence failure between first write:
                 {"P":"long initial write."}
 

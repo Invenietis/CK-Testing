@@ -1,5 +1,5 @@
 using CK.Core;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -60,11 +60,14 @@ public class DBLayerTests
     {
         TestHelper.Monitor.Info( $"Current User: {Environment.UserDomainName}/{Environment.UserName}" );
         var c = TestHelper.MasterConnectionString;
-        c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
+        c.ShouldContain( "master" );
+        c.ShouldContain( "Integrated Security" );
         var c2 = TestHelper.GetConnectionString( "Toto" );
-        c2.Should().Contain( "Toto" ).And.Contain( "Integrated Security" );
+        c2.ShouldContain( "Toto" );
+        c.ShouldContain( "Integrated Security" );
         c = TestHelper.MasterConnectionString;
-        c.Should().Contain( "master" ).And.Contain( "Integrated Security" );
+        c.ShouldContain( "master" );
+        c.ShouldContain( "Integrated Security" );
     }
 
     /// <summary>

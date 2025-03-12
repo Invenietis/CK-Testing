@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Description>Contains Test Helpers mixin infrastructure.</Description>
+    <Description>Contains Test Helpers mixin infrastructure. Shouldly is used for assertions.</Description>
     <LangVersion>11</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CK.Core" Version="21.1.1--0004-develop" />
-    <PackageReference Include="FluentAssertions" Version="6.12.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
