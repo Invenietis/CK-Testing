@@ -159,6 +159,7 @@ public static class CKShouldlyExtensions
     [MethodImpl( MethodImplOptions.NoInlining )]
     public static void ShouldBe<T>( this T actual, Expression<Func<T, bool>> elementPredicate, string? customMessage = null )
     {
+        Throw.CheckNotNullArgument( elementPredicate );
         var condition = elementPredicate.Compile();
         if( !condition(actual) )
             throw new ShouldAssertException( new ExpectedActualShouldlyMessage( elementPredicate.Body, actual, customMessage ).ToString() );
