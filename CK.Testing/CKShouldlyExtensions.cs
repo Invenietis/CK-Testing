@@ -1,11 +1,10 @@
 using CK.Core;
-using Shouldly;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace CK.Testing;
+namespace Shouldly;
 
 /// <summary>
 /// Extends Shouldly with useful helpers.
@@ -14,7 +13,7 @@ namespace CK.Testing;
 /// </para>
 /// </summary>
 [ShouldlyMethods]
-public static class ShouldlyExtensions
+public static class CKShouldlyExtensions
 {
     /// <summary>
     /// Fix https://github.com/shouldly/shouldly/issues/934.
