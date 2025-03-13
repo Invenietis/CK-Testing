@@ -1,6 +1,8 @@
 using CK.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -147,12 +149,32 @@ public static class CKShouldlyExtensions
         throw new ShouldAssertException( new ShouldlyThrowMessage( expectedExceptionType, customMessage: customMessage, shouldlyMethod! ).ToString() );
     }
 
+    /// <summary>
+    /// Predicate overload for ShouldBe. This is CK specific.
+    /// </summary>
+    /// <typeparam name="T">This type.</typeparam>
+    /// <param name="actual">This instance.</param>
+    /// <param name="elementPredicate">The predicate that muts be satisfied.</param>
+    /// <param name="customMessage">Optional message.</param>
+    [MethodImpl( MethodImplOptions.NoInlining )]
+    public static void ShouldBe<T>( this T actual, Expression<Func<T, bool>> elementPredicate, string? customMessage = null )
+    {
+        var condition = elementPredicate.Compile();
+        if( !condition(actual) )
+            throw new ShouldAssertException( new ExpectedActualShouldlyMessage( elementPredicate.Body, actual, customMessage ).ToString() );
+    }
+
     public static void ShouldBe( this NormalizedPath actual, NormalizedPath expected, string? customMessage = null )
     {
         actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
     }
 
     public static void ShouldBe( this short actual, short expected, string? customMessage = null )
+    {
+        actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+    }
+
+    public static void ShouldBe( this uint actual, uint expected, string? customMessage = null )
     {
         actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
     }
@@ -173,6 +195,11 @@ public static class CKShouldlyExtensions
     }
 
     public static void ShouldBe( this short? actual, short? expected, string? customMessage = null )
+    {
+        actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+    }
+
+    public static void ShouldBe( this uint? actual, uint? expected, string? customMessage = null )
     {
         actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
     }
