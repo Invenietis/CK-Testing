@@ -156,14 +156,46 @@ public static class CKShouldlyExtensions
     /// <param name="actual">This instance.</param>
     /// <param name="elementPredicate">The predicate that muts be satisfied.</param>
     /// <param name="customMessage">Optional message.</param>
+    /// <returns>This instance.</returns>
     [MethodImpl( MethodImplOptions.NoInlining )]
-    public static void ShouldBe<T>( this T actual, Expression<Func<T, bool>> elementPredicate, string? customMessage = null )
+    public static T ShouldBe<T>( this T actual, Expression<Func<T, bool>> elementPredicate, string? customMessage = null )
     {
         Throw.CheckNotNullArgument( elementPredicate );
         var condition = elementPredicate.Compile();
         if( !condition(actual) )
             throw new ShouldAssertException( new ExpectedActualShouldlyMessage( elementPredicate.Body, actual, customMessage ).ToString() );
+        return actual;
     }
+
+    /// <summary>
+    /// Apply an action to each item that should be one or more Shouldly expectation. This is CK specific.
+    /// </summary>
+    /// <typeparam name="T">Th type of the enumerable.</typeparam>
+    /// <param name="actual">This enumerable.</param>
+    /// <param name="action">The action to apply.</param>
+    /// <returns>This enumerable.</returns>
+    [MethodImpl( MethodImplOptions.NoInlining )]
+    public static IEnumerable<T> ShouldAll<T>( this IEnumerable<T> actual, Action<T> action )
+    {
+        Throw.CheckNotNullArgument( action );
+        int idx = 0;
+        try
+        {
+            foreach( var e in actual )
+            {
+                action( e );
+                ++idx;
+            }
+        }
+        catch( ShouldAssertException aEx )
+        {
+            var prefix = Environment.NewLine + "  | ";
+            var offsetMessage = string.Join( prefix, aEx.Message.Split( Environment.NewLine ) );
+            throw new ShouldAssertException( $"ShouldAll failed for item n°{idx}.{prefix}{offsetMessage}" );
+        }
+        return actual;
+    }
+
 
     public static void ShouldBe( this NormalizedPath actual, NormalizedPath expected, string? customMessage = null )
     {
