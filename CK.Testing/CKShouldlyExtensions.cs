@@ -250,5 +250,29 @@ namespace Shouldly
             return actual;
         }
 
+        public static short ShouldBe( this short actual, short expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
+        public static ushort ShouldBe( this ushort actual, ushort expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
+        public static sbyte ShouldBe( this sbyte actual, sbyte expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
+        public static byte ShouldBe( this byte actual, byte expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
     }
 }
