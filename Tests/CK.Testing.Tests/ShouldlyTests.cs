@@ -122,6 +122,13 @@ public class ShouldlyTests
             """ );
     }
 
+    [Test]
+    public void ShouldMatch_introduces_no_confilct_resolution()
+    {
+        "aa".ShouldMatch( "aa" );
+        "aa".ShouldMatch( s => s.Length == 2 );
+    }
+
     #region Genuine Shouldy tests (no override needed).
     static async Task<int> VTypeAsync( bool error )
     {
