@@ -104,6 +104,23 @@ public class ShouldlyTests
             """ );
     }
 
+    [Test]
+    public void ShouldMatch_display()
+    {
+        int v = 0;
+        Util.Invokable( () => v.ShouldMatch( i => i > 0, "Custom message." ) )
+            .ShouldThrow<ShouldAssertException>()
+            .Message.ShouldBe( """
+            Util.Invokable( v
+                should match
+            (i > 0)
+                but was
+            0
+
+            Additional Info:
+                Custom message.
+            """ );
+    }
 
     #region Genuine Shouldy tests (no override needed).
     static async Task<int> VTypeAsync( bool error )

@@ -3,6 +3,8 @@ using Shouldly;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,7 +20,9 @@ using System.Runtime.CompilerServices;
 /// </para>
 /// </summary>
 #pragma warning disable CA1050 // Declare types in namespaces
+[DebuggerStepThrough]
 [ShouldlyMethods]
+[EditorBrowsable( EditorBrowsableState.Never )]
 public static class CKShouldlyGlobalOverrideExtensions
 {
     /// <summary>
@@ -50,11 +54,10 @@ namespace Shouldly
 
     /// <summary>
     /// Extends Shouldly with useful helpers.
-    /// <para>
-    /// This is tested in CK-Core/Tests/CK.Core.Tests.
-    /// </para>
     /// </summary>
+    [DebuggerStepThrough]
     [ShouldlyMethods]
+    [EditorBrowsable( EditorBrowsableState.Never )]
     public static class CKShouldlyExtensions
     {
         /// <summary>
@@ -190,21 +193,21 @@ namespace Shouldly
         }
 
         /// <summary>
-        /// Predicate overload for ShouldBe.
+        /// Predicate match.
         /// This is CK specific.
         /// </summary>
         /// <typeparam name="T">This type.</typeparam>
         /// <param name="actual">This instance.</param>
-        /// <param name="elementPredicate">The predicate that muts be satisfied.</param>
+        /// <param name="predicate">The predicate that muts be satisfied.</param>
         /// <param name="customMessage">Optional message.</param>
         /// <returns>This instance.</returns>
         [MethodImpl( MethodImplOptions.NoInlining )]
-        public static T ShouldBe<T>( this T actual, Expression<Func<T, bool>> elementPredicate, string? customMessage = null )
+        public static T ShouldMatch<T>( this T actual, Expression<Func<T, bool>> predicate, string? customMessage = null )
         {
-            Throw.CheckNotNullArgument( elementPredicate );
-            var condition = elementPredicate.Compile();
+            Throw.CheckNotNullArgument( predicate );
+            var condition = predicate.Compile();
             if( !condition( actual ) )
-                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( elementPredicate.Body, actual, customMessage ).ToString() );
+                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( predicate.Body, actual, customMessage ).ToString() );
             return actual;
         }
 
