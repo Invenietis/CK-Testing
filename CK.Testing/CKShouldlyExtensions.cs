@@ -462,6 +462,24 @@ namespace Shouldly
             return actual;
         }
 
+        public static long ShouldBe( this long actual, long expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
+        public static ulong ShouldBe( this ulong actual, ulong expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
+        public static uint ShouldBe( this uint actual, uint expected, string? customMessage = null )
+        {
+            actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
+            return actual;
+        }
+
         public static short ShouldBe( this short actual, short expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
