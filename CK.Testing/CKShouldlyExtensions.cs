@@ -462,6 +462,34 @@ namespace Shouldly
             return actual;
         }
 
+        /// <summary>
+        /// Explicit overload that avoid to consider a string as a enumerable of characters.
+        /// </summary>
+        /// <param name="actual">This string.</param>
+        /// <param name="expected">The substring that must be found.</param>
+        /// <param name="customMessage">Optional message.</param>
+        /// <returns>This string.</returns>
+        public static string ShouldContain( this string actual, ReadOnlySpan<char> expected, string? customMessage = null )
+        {
+            if( !actual.AsSpan().Contains( expected, StringComparison.Ordinal ) )
+                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
+            return actual;
+        }
+
+        /// <summary>
+        /// Explicit overload that avoid to consider a string as a enumerable of characters.
+        /// </summary>
+        /// <param name="actual">This string.</param>
+        /// <param name="expected">The substring that must be found.</param>
+        /// <param name="customMessage">Optional message.</param>
+        /// <returns>This string.</returns>
+        public static string ShouldNotContain( this string actual, ReadOnlySpan<char> expected, string? customMessage = null )
+        {
+            if( actual.AsSpan().Contains( expected, StringComparison.Ordinal ) )
+                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
+            return actual;
+        }
+
         public static long ShouldBe( this long actual, long expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
