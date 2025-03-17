@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using CK.Core;
 
 namespace CK.Testing;
@@ -56,19 +54,18 @@ public partial class StaticBasicTestHelper
             {
                 Throw.InvalidOperationException( $"Initialization error: Unable to find parent folder named '{_allowedConfigurations.Concatenate( "' or '" )}' above '{_binFolder}'." );
             }
-            Debug.Assert( buildConfDir != null );
-            p = Path.GetDirectoryName( buildConfDir );
-            if( Path.GetFileName( p ) != "bin" )
+            Throw.DebugAssert( buildConfDir != null );
+            p = FindAbove( p, "bin" );
+            if( p == null )
             {
-                Throw.InvalidOperationException( $"Initialization error: Folder '{_buildConfiguration}' MUST be in 'bin' folder (above '{_binFolder}')." );
+                Throw.InvalidOperationException( $"Initialization error: Unable to find 'bin' folder above '{_binFolder}'." );
             }
-            Debug.Assert( p != null );
+            Throw.DebugAssert( p != null );
             p = Path.GetDirectoryName( p );
             if( string.IsNullOrEmpty( p ) )
             {
                 Throw.InvalidOperationException( $"The '{_binFolder}' must not be directly on the root." );
             }
-
             _testProjectFolder = p;
             p = Path.GetDirectoryName( p );
 

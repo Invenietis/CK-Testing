@@ -31,18 +31,24 @@ public class TestHelperMonitorSupportAttribute : Attribute, ITestAction
     void ITestAction.AfterTest( ITest test )
     {
         var result = TestExecutionContext.CurrentContext.CurrentResult;
-        var g = _groups.Pop();
-        if( result.ResultState.Status != TestStatus.Passed )
+        if( _groups.TryPop( out var g ) )
         {
-            g.ConcludeWith( () => result.ResultState.Status.ToString() );
-            var message = result.Message;
-            if( !string.IsNullOrWhiteSpace( message ) )
+            if( result.ResultState.Status != TestStatus.Passed )
             {
-                TestHelper.Monitor.OpenError( message );
-                if( result.StackTrace != null ) TestHelper.Monitor.Trace( result.StackTrace );
+                g.ConcludeWith( () => result.ResultState.Status.ToString() );
+                var message = result.Message;
+                if( !string.IsNullOrWhiteSpace( message ) )
+                {
+                    TestHelper.Monitor.OpenError( message );
+                    if( result.StackTrace != null ) TestHelper.Monitor.Trace( result.StackTrace );
+                }
             }
+            g.Dispose();
         }
-        g.Dispose();
+        else
+        {
+            TestHelper.Monitor.UnfilteredLog( LogLevel.Error | LogLevel.IsFiltered, null, $"AftreTest '{test.Name}': test stack is empty, BeforeTest call error.", null );
+        }
     }
 
     ActionTargets ITestAction.Targets => ActionTargets.Test | ActionTargets.Suite;

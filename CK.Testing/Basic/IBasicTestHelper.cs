@@ -1,10 +1,7 @@
 using CK.Core;
 using CK.Core.Json;
-using Microsoft.IO;
 using System;
-using System.Buffers;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 
 namespace CK.Testing;

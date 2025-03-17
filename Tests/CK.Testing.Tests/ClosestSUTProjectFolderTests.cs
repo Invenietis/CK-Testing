@@ -1,10 +1,8 @@
 using CK.Core;
-using FluentAssertions;
 using NUnit.Framework;
+using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace CK.Testing.Tests;
@@ -21,7 +19,7 @@ public class ClosestSUTProjectFolderTests
             "X:/S/Tests/P.Tests",
             "X:/S/Tests/P"
         };
-        FindClosestSUTProject( "X:/S/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/Tests/P" );
+        FindClosestSUTProject( "X:/S/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( "X:/S/Tests/P" );
     }
 
     [Test]
@@ -32,17 +30,40 @@ public class ClosestSUTProjectFolderTests
             "X:/S/Tests/P.Tests",
             "X:/S/P"
         };
-        FindClosestSUTProject( "X:/S/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/P" );
+        FindClosestSUTProject( "X:/S/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( "X:/S/P" );
     }
 
     [Test]
-    public void a_parent_folder_cannot_be_the_SUT()
+    public void a_parent_folder_cannot_be_the_SUT_1()
     {
         var directories = new[]
         {
             "X:/S/P/Tests/P.Tests",
+            "X:/S"
         };
-        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( new NormalizedPath() );
+        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( new NormalizedPath() );
+    }
+
+    [Test]
+    public void a_parent_folder_cannot_be_the_SUT_2()
+    {
+        var directories = new[]
+        {
+            "X:/S/P/Tests/P.Tests",
+            "X:/S/P"
+        };
+        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( new NormalizedPath() );
+    }
+
+    [Test]
+    public void a_parent_folder_cannot_be_the_SUT_3()
+    {
+        var directories = new[]
+        {
+            "X:/S/P/Tests/P.Tests",
+            "X:/S/P/Tests"
+        };
+        FindClosestSUTProject( "X:/S/P/Tests/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( new NormalizedPath() );
     }
 
     [Test]
@@ -53,7 +74,7 @@ public class ClosestSUTProjectFolderTests
             "X:/S/Tests/Sub/P.Tests",
             "X:/S/P"
         };
-        FindClosestSUTProject( "X:/S/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/P" );
+        FindClosestSUTProject( "X:/S/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( "X:/S/P" );
     }
 
     [Test]
@@ -66,7 +87,7 @@ public class ClosestSUTProjectFolderTests
             // Won't find this one:
             "X:/S/Sub/P"
         };
-        FindClosestSUTProject( "X:/S/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/P" );
+        FindClosestSUTProject( "X:/S/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( "X:/S/P" );
     }
 
     [Test]
@@ -81,7 +102,7 @@ public class ClosestSUTProjectFolderTests
                 "X:/S/Tests/Sub/P",
                 "X:/S/Tests/P"
             };
-        FindClosestSUTProject( "X:/S/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/Tests/Lot/P" );
+        FindClosestSUTProject( "X:/S/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).ShouldBe( "X:/S/Tests/Lot/P" );
     }
 
     [Test]
@@ -98,7 +119,7 @@ public class ClosestSUTProjectFolderTests
             "X:/S/A/B/E/P"
         };
         FindClosestSUTProject( "X:/S/A/B/C/D/E/F/G/P.Tests", p => directories.AsSpan().Contains( p ) )
-            .Should().Be( "X:/S/A/B/P" );
+            .ShouldBe( "X:/S/A/B/P" );
     }
 
 
@@ -116,7 +137,8 @@ public class ClosestSUTProjectFolderTests
             "X:/S/Tests/Sub/P",
             "X:/S/Tests/P"
         };
-        FindClosestSUTProject( "X:/S/Any/Tests/Somewhere/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/P.SUT" );
+        FindClosestSUTProject( "X:/S/Any/Tests/Somewhere/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) )
+            .ShouldBe( "X:/S/P.SUT" );
     }
 
     [Test]
@@ -133,7 +155,8 @@ public class ClosestSUTProjectFolderTests
             "X:/S/Tests/Sub/P",
             "X:/S/Tests/P"
         };
-        FindClosestSUTProject( "X:/S/Any/Tests/Somewhere/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) ).Should().Be( "X:/S/Tests/Somewhere/Tests/Lot/Tests/Sub/P.SUT" );
+        FindClosestSUTProject( "X:/S/Any/Tests/Somewhere/Tests/Lot/Tests/Sub/P.Tests", p => directories.AsSpan().Contains( p ) )
+            .ShouldBe( "X:/S/Tests/Somewhere/Tests/Lot/Tests/Sub/P.SUT" );
     }
 
     static NormalizedPath FindClosestSUTProject( NormalizedPath testProjectFolder, Func<NormalizedPath, bool> exists )

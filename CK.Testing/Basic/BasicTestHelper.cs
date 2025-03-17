@@ -202,7 +202,6 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
 
         string? targetName = null;
         if( testProjectFolder.LastPart.EndsWith( ".Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 6 );
-        else if( testProjectFolder.LastPart.EndsWith( "Tests" ) ) targetName = testProjectFolder.LastPart.Substring( 0, testProjectFolder.LastPart.Length - 5 );
         if( !String.IsNullOrEmpty( targetName ) )
         {
             var cache = new List<NormalizedPath>();
@@ -219,7 +218,12 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
             // Note: the list's length depends on the number of parts (the depth of the testProjectFolder).
             foreach( var c in cache )
             {
-                yield return c.RemoveLastPart().AppendPart( targetName );
+                // Because of the .SUT suffix, we may have prefixes that are on the test project folder.
+                var candidate = c.RemoveLastPart().AppendPart( targetName );
+                if( !testProjectFolder.StartsWith( candidate ) )
+                {
+                    yield return c.RemoveLastPart().AppendPart( targetName );
+                }
             }
         }
     }
@@ -273,7 +277,7 @@ public sealed class BasicTestHelper : StaticBasicTestHelper, IBasicTestHelper
 
         subPaths.Add( targetName );
         yield return head.AppendPart( targetName );
-        while( head.Parts.Count >= rootCount )
+        while( head.Parts.Count > rootCount )
         {
             foreach( var s in WithSubPaths( startFolder, skipDirectParentFolder, subPaths, ref head ) ) yield return s;
         }

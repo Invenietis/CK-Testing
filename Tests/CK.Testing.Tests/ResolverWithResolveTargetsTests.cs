@@ -1,9 +1,5 @@
-using CK.Core;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
-using System;
-using System.IO;
-using System.Linq;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -99,11 +95,11 @@ public class ResolverWithResolveTargetsTests
     {
         var r = TestHelperResolver.Create( new TestHelperConfiguration() );
         var c = r.Resolve<RACore>();
-        c.Should().BeOfType<RACore>( "Obvious since we used the generic cast accessor." );
-        c.ResolvedForIRACore.Should().BeAssignableTo<IRA>( "The IRA mixin has been injected." );
+        c.ShouldBeOfType<RACore>( "Obvious since we used the generic cast accessor." );
+        c.ResolvedForIRACore.ShouldBeAssignableTo<IRA>( "The IRA mixin has been injected." );
 
         var mixinRequest = r.Resolve<IRA>();
-        mixinRequest.Should().BeSameAs( c.ResolvedForIRACore );
+        mixinRequest.ShouldBeSameAs( c.ResolvedForIRACore );
     }
 
     [Test]
@@ -111,10 +107,10 @@ public class ResolverWithResolveTargetsTests
     {
         var r = TestHelperResolver.Create( new TestHelperConfiguration() );
         var c = r.Resolve<RBCore>();
-        c.ResolvedForIRBCore.Should().BeAssignableTo<IRB>();
+        c.ResolvedForIRBCore.ShouldBeAssignableTo<IRB>();
 
         var ira = r.Resolve<IRA>();
-        ira.ResolvedForIRACore.Should().BeSameAs( c.ResolvedForIRBCore );
+        ira.ResolvedForIRACore.ShouldBeSameAs( c.ResolvedForIRBCore );
     }
 
     [Test]
@@ -122,8 +118,8 @@ public class ResolverWithResolveTargetsTests
     {
         var r = TestHelperResolver.Create( new TestHelperConfiguration() );
         var c = r.Resolve<IRCCore>();
-        c.Should().BeAssignableTo<IRC>();
-        c.ResolvedForIRCCore.Should().BeSameAs( c );
+        c.ShouldBeAssignableTo<IRC>();
+        c.ResolvedForIRCCore.ShouldBeSameAs( c );
     }
 
 }

@@ -1,6 +1,3 @@
-using CK.Core;
-using System;
-
 namespace CK.Testing;
 
 /// <summary>

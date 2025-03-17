@@ -1,7 +1,5 @@
-using CK.Core;
 using CK.Testing.Stupid;
 using System;
-using System.Linq;
 
 namespace CK.Testing;
 
