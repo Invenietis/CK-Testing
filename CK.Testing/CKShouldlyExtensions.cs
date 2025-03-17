@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// This class is exceptionnaly defined in the global namespace. As such, Roslyn selects its methonds
@@ -44,6 +45,135 @@ public static class CKShouldlyGlobalOverrideExtensions
     {
         return CKShouldlyExtensions.ThrowInternal( actual, customMessage, exceptionType, exactType: false );
     }
+
+    /// <summary>
+    /// Explicit overload that avoid to consider a string as a enumerable of characters and support
+    /// default <see cref="StringComparison.Ordinal"/>.  
+    /// </summary>
+    /// <param name="actual">This string.</param>
+    /// <param name="expected">The substring that must be found.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldContain( this string actual, ReadOnlySpan<char> expected, string? customMessage = null )
+    {
+        return ShouldContain( actual, expected, StringComparison.Ordinal, customMessage );
+    }
+
+    /// <summary>
+    /// Explicit overload that avoid to consider a string as a enumerable of characters and support
+    /// standard <see cref="StringComparison"/> (instead of <see cref="Case"/>).  
+    /// </summary>
+    /// <param name="actual">This string.</param>
+    /// <param name="expected">The substring that must be found.</param>
+    /// <param name="comparisonType">Specifies the type of comparison.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldContain( this string actual, ReadOnlySpan<char> expected, StringComparison comparisonType, string? customMessage = null )
+    {
+        if( !actual.AsSpan().Contains( expected, comparisonType ) )
+            throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
+        return actual;
+    }
+
+    /// <summary>
+    /// Explicit overload that avoid to consider a string as a enumerable of characters and support
+    /// default <see cref="StringComparison.Ordinal"/>.  
+    /// </summary>
+    /// <param name="actual">This string.</param>
+    /// <param name="expected">The substring that must be found.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldNotContain( this string actual,
+                                           ReadOnlySpan<char> expected,
+                                           string? customMessage = null )
+    {
+        return ShouldNotContain( actual, expected, StringComparison.Ordinal, customMessage );
+    }
+
+    /// <summary>
+    /// Explicit overload that avoid to consider a string as a enumerable of characters and support
+    /// standard <see cref="StringComparison"/> (instead of <see cref="Case"/>).  
+    /// </summary>
+    /// <param name="actual">This string.</param>
+    /// <param name="expected">The substring that must be found.</param>
+    /// <param name="comparisonType">Specifies the type of comparison.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldNotContain( this string actual,
+                                           ReadOnlySpan<char> expected,
+                                           StringComparison comparisonType,
+                                           string? customMessage = null )
+    {
+        if( actual.AsSpan().Contains( expected, comparisonType ) )
+            throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
+        return actual;
+    }
+
+    /// <summary>
+    /// Override ShouldMatch to support Regex syntax on the string with the default options:
+    /// <see cref="RegexOptions.Singleline"/> | <see cref="RegexOptions.ExplicitCapture"/> | <see cref="RegexOptions.CultureInvariant"/>.
+    /// </summary>
+    /// <param name="actual">This string to match.</param>
+    /// <param name="pattern">The expected pattern.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldMatch( this string actual,
+                                      [StringSyntax( "Regex" )] string pattern,
+                                      string? customMessage = null )
+    {
+        return ShouldMatch( actual, pattern, RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, customMessage );
+    }
+
+
+    /// <summary>
+    /// Override ShouldMatch to support Regex syntax on the string and <paramref name="options"/>.
+    /// </summary>
+    /// <param name="actual">This string to match.</param>
+    /// <param name="pattern">The expected pattern.</param>
+    /// <param name="options">The options.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldMatch( this string actual,
+                                      [StringSyntax( "Regex" )] string pattern,
+                                      RegexOptions options,
+                                      string? customMessage = null )
+    {
+        actual.AssertAwesomely( v => Regex.IsMatch( actual, pattern, options ), actual, pattern, customMessage );
+        return actual;
+    }
+
+    /// <summary>
+    /// Override ShouldNotMatch to support Regex syntax on the string with the default options:
+    /// <see cref="RegexOptions.Singleline"/> | <see cref="RegexOptions.ExplicitCapture"/> | <see cref="RegexOptions.CultureInvariant"/>.
+    /// </summary>
+    /// <param name="actual">This string to match.</param>
+    /// <param name="pattern">The expected pattern.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldNotMatch( this string actual,
+                                         [StringSyntax( "Regex" )] string pattern,
+                                         string? customMessage = null )
+    {
+        return ShouldNotMatch( actual, pattern, RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant, customMessage );
+    }
+
+    /// <summary>
+    /// Override ShouldNotMatch to support Regex syntax on the string and <paramref name="options"/>.
+    /// </summary>
+    /// <param name="actual">This string to match.</param>
+    /// <param name="pattern">The expected pattern.</param>
+    /// <param name="options">The options.</param>
+    /// <param name="customMessage">Optional message.</param>
+    /// <returns>This string.</returns>
+    public static string ShouldNotMatch( this string actual,
+                                         [StringSyntax( "Regex" )] string pattern,
+                                         RegexOptions options,
+                                         string? customMessage = null )
+    {
+        actual.AssertAwesomely( v => !Regex.IsMatch( actual, pattern, options ), actual, pattern, customMessage );
+        return actual;
+    }
+
 
     #region Override of IEnumerable to return the enumerable (when it makes sense).
 
@@ -316,7 +446,6 @@ namespace Shouldly
         /// that takes a <c>Func&lt;object?&gt</c> parameter (that is the cause of the issue).  
         /// </remarks>
         /// <param name="actual">The action code that should throw.</param>
-        /// <param name="exceptionType">The exact expected exception type.</param>
         /// <param name="customMessage">Optional message.</param>
         /// <returns>The exception instance.</returns>
         public static TException ShouldThrowExactly<TException>( this Delegate actual, string? customMessage = null )
@@ -463,69 +592,54 @@ namespace Shouldly
         }
 
         /// <summary>
-        /// Explicit overload that avoid to consider a string as a enumerable of characters.
+        /// Explicit overload to allow implicit conversion from integer.
         /// </summary>
-        /// <param name="actual">This string.</param>
-        /// <param name="expected">The substring that must be found.</param>
+        /// <param name="actual">This value.</param>
+        /// <param name="expected">Expected value.</param>
         /// <param name="customMessage">Optional message.</param>
-        /// <returns>This string.</returns>
-        public static string ShouldContain( this string actual, ReadOnlySpan<char> expected, string? customMessage = null )
-        {
-            if( !actual.AsSpan().Contains( expected, StringComparison.Ordinal ) )
-                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
-            return actual;
-        }
-
-        /// <summary>
-        /// Explicit overload that avoid to consider a string as a enumerable of characters.
-        /// </summary>
-        /// <param name="actual">This string.</param>
-        /// <param name="expected">The substring that must be found.</param>
-        /// <param name="customMessage">Optional message.</param>
-        /// <returns>This string.</returns>
-        public static string ShouldNotContain( this string actual, ReadOnlySpan<char> expected, string? customMessage = null )
-        {
-            if( actual.AsSpan().Contains( expected, StringComparison.Ordinal ) )
-                throw new ShouldAssertException( new ExpectedActualShouldlyMessage( new string( expected ), actual, customMessage ).ToString() );
-            return actual;
-        }
-
+        /// <returns>This value.</returns>
         public static long ShouldBe( this long actual, long expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static ulong ShouldBe( this ulong actual, ulong expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static uint ShouldBe( this uint actual, uint expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static short ShouldBe( this short actual, short expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static ushort ShouldBe( this ushort actual, ushort expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static sbyte ShouldBe( this sbyte actual, sbyte expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
             return actual;
         }
 
+        /// <inheritdoc cref="ShouldBe(long, long, string?)"/>
         public static byte ShouldBe( this byte actual, byte expected, string? customMessage = null )
         {
             actual.AssertAwesomely( actual => actual == expected, actual, expected, customMessage );
